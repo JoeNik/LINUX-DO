@@ -70,6 +70,9 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
   /// 是否正在节流
   bool _isThrottling = false;
 
+  // 当前帖子索引
+  final currentPostIndex = 0.obs;
+
   @override
 
   void onInit() {
@@ -126,15 +129,12 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
   }
 
   void _onScroll() {
-
-
     if (_isThrottling) return;
     _isThrottling = true;
 
     Future.delayed(const Duration(milliseconds: 550), () {
       _isThrottling = false;
     });
-
 
     final positions = itemPositionsListener.itemPositions.value.toList();
     if (positions.isEmpty) return;
@@ -156,9 +156,33 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
     _visiblePostNumbers.value = visiblePosts;
 
     // 保存最后阅读的帖子编号
-    if (visiblePosts.isNotEmpty) {
-      StorageManager.setData(_topicPostKey, visiblePosts.reduce(max));
-    }
+    // if (visiblePosts.isNotEmpty) {
+    //   StorageManager.setData(_topicPostKey, visiblePosts.reduce(max));
+      
+    //   // 找出视图中最中间的帖子
+    //   var maxVisibleItem = positions.first;
+    //   var maxVisibleFraction = 0.0;
+      
+    //   for (var position in positions) {
+    //     final visibleFraction = (1.0 - position.itemLeadingEdge)
+    //         .clamp(0.0, 1.0) * 
+    //         position.itemTrailingEdge
+    //         .clamp(0.0, 1.0);
+            
+    //     if (visibleFraction > maxVisibleFraction) {
+    //       maxVisibleFraction = visibleFraction;
+    //       maxVisibleItem = position;
+    //     }
+    //   }
+      
+    //   // 获取对应的帖子编号
+    //   if (maxVisibleItem.index >= 1 && maxVisibleItem.index - 1 < replyTree.length) {
+    //     final node = replyTree[maxVisibleItem.index - 1];
+    //     if (node.post.postNumber != null) {
+    //       currentPostIndex.value = node.post.postNumber! - 1;
+    //     }
+    //   }
+    // }
 
     // 滚动停止时更新阅读时间
     _debouncedUpdateTiming();
@@ -324,19 +348,26 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
     }
   }
 
-  Future<void> fetchTopicDetail() async {
+  Future<void> fetchTopicDetail({int? postNumber}) async {
     try {
       isLoading.value = true;
       clearError();
 
-      // 获取上次浏览的位置
-      final lastPostNumber = StorageManager.getInt(_topicPostKey);
-      final page = lastPostNumber != null ? "/$lastPostNumber" : "/1";
+      // 使用传入的楼层号，如果没有则使用上次浏览的位置
+      final targetPostNumber = postNumber ?? StorageManager.getInt(_topicPostKey);
+      final page = targetPostNumber != null ? "/$targetPostNumber" : "/1";
 
       final response = await apiService.getTopicDetail(
         topicId.value.toString(),
         page: page,
       );
+
+      // 如果是加载指定楼层，先清空当前数据 不然会出现数据里有20层楼接下来就是90层楼 诡异
+      if (postNumber != null) {
+        topic.value = null;
+        replyTree.clear();
+        loadedPostIds.clear();
+      }
 
       // 记录已加载的post ids
       final posts = response.postStream?.posts ?? [];
@@ -355,15 +386,16 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
         hasPrevious.value = firstLoadedPostIndex > 0;
       }
 
-      // 设置初始滚动位置
-      if (posts.isNotEmpty && lastPostNumber != null) {
-        // 查找上次浏览的帖子在列表中的位置
+      // 设置滚动位置
+      if (posts.isNotEmpty && targetPostNumber != null) {
+        // 查找目标帖子在列表中的位置
         final index =
-            posts.indexWhere((post) => post.postNumber == lastPostNumber);
+            posts.indexWhere((post) => post.postNumber == targetPostNumber);
         if (index != -1) {
           initialScrollIndex.value = index + 1; // +1考虑顶部的加载指示器
           // 延迟执行滚动，确保列表已经构建完成
           Future.delayed(const Duration(milliseconds: 100), () {
+            currentPostIndex.value = targetPostNumber;
             itemScrollController.jumpTo(index: initialScrollIndex.value);
           });
         }
@@ -680,6 +712,18 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
         );
       }
     });
+  }
+
+  // 滚动到指定帖子
+  void scrollToPost(int index) {
+    if (topic.value == null) return;
+    
+    currentPostIndex.value = index;
+    itemScrollController.scrollTo(
+      index: index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 }
 

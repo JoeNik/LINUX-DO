@@ -7,7 +7,7 @@ import 'package:linux_do/widgets/dis_button.dart';
 import 'package:linux_do/widgets/state_view.dart';
 import '../../../const/app_const.dart';
 import '../../../const/app_spacing.dart';
-import '../../../utils/tag.dart';
+import '../../../const/app_theme.dart';
 import '../../../widgets/cached_image.dart';
 import '../../../widgets/dis_loading.dart';
 import 'topic_detail_controller.dart';
@@ -17,6 +17,7 @@ import 'widgets/page_heder.dart';
 import 'widgets/post_content.dart';
 import 'widgets/post_header.dart';
 import 'widgets/post_footer.dart';
+import 'widgets/posts_selector.dart';
 
 class TopicDetailPage extends GetView<TopicDetailController> {
   const TopicDetailPage({super.key});
@@ -24,40 +25,72 @@ class TopicDetailPage extends GetView<TopicDetailController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        scrolledUnderElevation: 0.0,
-        centerTitle: false,
-        leading: IconButton(
-          icon: Icon(
-            CupertinoIcons.chevron_left_circle,
-            size: 24.w,
-          ),
-          onPressed: () => Get.back(),
-        ),
-        title: _buildHeader(context),
-        actions: [
-          IconButton(
-            icon: Obx(() => Icon(
-                  controller.isFooderVisible.value
-                      ? CupertinoIcons.chevron_up_circle
-                      : CupertinoIcons.chevron_down_circle,
-                )),
-            onPressed: () {
-              controller.isFooderVisible.toggle();
-            },
-          )
+      appBar: _buildAppBar(context),
+      body: Stack(
+        children: [
+          Obx(() {
+            return StateView(
+              state: controller.getViewState(),
+              errorMessage: controller.errorMessage.value,
+              onRetry: controller.refreshTopicDetail,
+              shimmerView: const ShimmerDetails(),
+              child: _contentWidget(context),
+            );
+          }),
+          // 新增楼层选择器
+          Obx(() {
+            final postsCount = controller.topic.value?.postsCount ?? 0;
+            // 如果帖子数量小于50或者正在回复
+            if (postsCount < 50) {
+              return const SizedBox();
+            }
+            
+            return AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              right: controller.isReplying.value ? -50.w : 16.w,
+              bottom: MediaQuery.of(context).padding.bottom + 16.w,
+              child: PostsSelector(
+                postsCount: postsCount,
+                currentIndex: controller.currentPostIndex.value.clamp(0, postsCount - 1),
+                onIndexChanged: (index) {
+                  if (!controller.isLoading.value) {
+                    controller.scrollToPost(index);
+                  }
+                },
+              ),
+            );
+          }),
         ],
       ),
-      body: Obx(() {
-        return StateView(
-          state: controller.getViewState(),
-          errorMessage: controller.errorMessage.value,
-          onRetry: controller.refreshTopicDetail,
-          shimmerView: ShimmerDetails(),
-          child: _contentWidget(context),
-        );
-      }),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+      scrolledUnderElevation: 0.0,
+      centerTitle: false,
+      leading: IconButton(
+        icon: Icon(
+          CupertinoIcons.chevron_left_circle,
+          size: 24.w,
+        ),
+        onPressed: () => Get.back(),
+      ),
+      title: _buildHeader(context),
+      actions: [
+        IconButton(
+          icon: Obx(() => Icon(
+                controller.isFooderVisible.value
+                    ? CupertinoIcons.chevron_up_circle
+                    : CupertinoIcons.chevron_down_circle,
+              )),
+          onPressed: () {
+            controller.isFooderVisible.toggle();
+          },
+        )
+      ],
     );
   }
 
@@ -71,7 +104,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
 
     return Stack(
       children: [
-        Positioned(
+        Positioned.fill(
           child: Obx(() => ScrollablePositionedList.builder(
                 key: PageStorageKey('topic_detail_${topic.id}'),
                 itemScrollController: controller.itemScrollController,
@@ -85,7 +118,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                 itemBuilder: (context, index) {
                   // 头部加载指示器
                   if (index == 0) {
-                    return Obx(() => controller.hasPrevious.value
+                    return Obx(() => controller.hasPrevious.value && !controller.isLoading.value
                         ? Container(
                             padding: EdgeInsets.symmetric(vertical: 10.h),
                             alignment: Alignment.center,
@@ -95,7 +128,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
 
                   // 底部加载指示器
                   if (index == controller.replyTree.length + 1) {
-                    return Obx(() => controller.hasMore.value
+                    return Obx(() => controller.hasMore.value && !controller.isLoading.value
                         ? Container(
                             padding: EdgeInsets.symmetric(vertical: 10.h),
                             alignment: Alignment.center,
@@ -104,6 +137,10 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                   }
 
                   // 帖子内容
+                  if (controller.isLoading.value || index - 1 >= controller.replyTree.length) {
+                    return const SizedBox();
+                  }
+                  
                   final node = controller.replyTree[index - 1];
                   return _buildPostItem(context, node);
                 },
@@ -133,23 +170,53 @@ class TopicDetailPage extends GetView<TopicDetailController> {
 
   Widget _buildPostItem(BuildContext context, PostNode node) {
     return Card(
-      elevation: node.post.replyToPostNumber == null ? 2.2 : 0,
+      elevation: node.post.replyToPostNumber == null ? 0.7 : 0,
       margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: EdgeInsets.all(12.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                PostHeader(post: node.post),
-                12.vGap,
-                PostContent(node: node),
-                12.vGap,
-                PostFooter(post: node.post),
-              ],
-            ),
+          Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(12.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    6.vGap,
+                    PostHeader(post: node.post),
+                    2.vGap,
+                    PostContent(node: node),
+                    2.vGap,
+                    PostFooter(post: node.post),
+                  ],
+                ),
+              ),
+
+              // 只有不是回复的帖子才显示楼层
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor.withValues(alpha:  0.1),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(12.w),
+                      bottomLeft: Radius.circular(12.w),
+                    ),
+                  ),
+                  child: Text(
+                    '#${node.post.postNumber}',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 10.w,
+                      fontFamily: AppFontFamily.dinPro,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -281,7 +348,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
         ),
         boxShadow: [
           BoxShadow(
-            color: theme.shadowColor.withValues(alpha: 0.1),
+            color: theme.shadowColor.withValues(alpha: 0.9),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),

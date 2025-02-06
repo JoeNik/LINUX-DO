@@ -185,7 +185,7 @@ class StateView extends GetView {
 }
 
 class ShimmerDetails extends GetView {
-
+  const ShimmerDetails({super.key});
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

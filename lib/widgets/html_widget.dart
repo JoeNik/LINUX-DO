@@ -149,12 +149,19 @@ class HtmlWidget extends StatelessWidget {
           builder: (extensionContext) {
             final src = extensionContext.attributes['src'];
                         if (src == null) return const SizedBox();
+
+                        // 检查是否是回复中用户头像
+                        if (src.contains('user_avatar/linux.do')) {
+                          return CachedImage(imageUrl: src, width: 32.w, height: 32.w,circle: true,);
+                        }
                         
                         // 检查是否是表情,目前暂时用这样的方式来简单处理
             final isEmoji = extensionContext.classes.contains('emoji');
                         final isEmojiPath = src.contains('/uploads/default/original/3X/') || 
                                           src.contains('/images/emoji/twitter/') ||
                                           src.contains('/images/emoji/apple/');
+
+                                        
                         
                         if (isEmoji || isEmojiPath) {
                           return Image.network(

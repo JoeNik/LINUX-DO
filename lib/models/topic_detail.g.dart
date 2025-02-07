@@ -38,6 +38,9 @@ TopicDetail _$TopicDetailFromJson(Map<String, dynamic> json) => TopicDetail(
           ? null
           : Detail.fromJson(json['details'] as Map<String, dynamic>),
       participantsCount: (json['participants_count'] as num?)?.toInt(),
+      bookmarks: (json['bookmarks'] as List<dynamic>?)
+          ?.map((e) => Bookmarks.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$TopicDetailToJson(TopicDetail instance) =>
@@ -69,6 +72,7 @@ Map<String, dynamic> _$TopicDetailToJson(TopicDetail instance) =>
       'categoryName': instance.categoryName,
       'details': instance.details,
       'participants_count': instance.participantsCount,
+      'bookmarks': instance.bookmarks,
     };
 
 PostStream _$PostStreamFromJson(Map<String, dynamic> json) => PostStream(
@@ -274,4 +278,22 @@ Map<String, dynamic> _$CreateByToJson(CreateBy instance) => <String, dynamic>{
       'username': instance.username,
       'avatar_template': instance.avatarTemplate,
       'animated_avatar': instance.animatedAvatar,
+    };
+
+Bookmarks _$BookmarksFromJson(Map<String, dynamic> json) => Bookmarks(
+      (json['id'] as num?)?.toInt(),
+      json['name'] as String?,
+      json['reminder_at'] as String?,
+      (json['auto_delete_preference'] as num?)?.toInt(),
+      (json['bookmarkable_id'] as num?)?.toInt(),
+      json['bookmarkable_type'] as String?,
+    );
+
+Map<String, dynamic> _$BookmarksToJson(Bookmarks instance) => <String, dynamic>{
+      'auto_delete_preference': instance.autoDeletePreference,
+      'bookmarkable_id': instance.bookmarkableId,
+      'bookmarkable_type': instance.bookmarkableType,
+      'id': instance.id,
+      'name': instance.name,
+      'reminder_at': instance.reminderAt,
     };

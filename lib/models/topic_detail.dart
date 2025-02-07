@@ -50,6 +50,9 @@ class TopicDetail {
   final Detail? details;
   @JsonKey(name: 'participants_count')
   final int? participantsCount;
+  @JsonKey(name: 'bookmarks')
+  final List<Bookmarks>? bookmarks;
+
 
 
   TopicDetail({
@@ -80,8 +83,10 @@ class TopicDetail {
     this.categoryName,
     this.details,
     this.participantsCount,
+    this.bookmarks,
   });
   
+
 
   factory TopicDetail.fromJson(Map<String, dynamic> json) =>
       _$TopicDetailFromJson(json);
@@ -429,4 +434,30 @@ class CreateBy {
   factory CreateBy.fromJson(Map<String, dynamic> json) =>
       _$CreateByFromJson(json);
   Map<String, dynamic> toJson() => _$CreateByToJson(this);
+}
+
+
+@JsonSerializable()
+class Bookmarks {
+  @JsonKey(name: 'auto_delete_preference')
+  final int? autoDeletePreference;
+  @JsonKey(name: 'bookmarkable_id')
+  final int? bookmarkableId;
+  @JsonKey(name: 'bookmarkable_type')
+  final String? bookmarkableType;
+  final int? id;
+  final String? name;
+  @JsonKey(name: 'reminder_at')
+  final String? reminderAt;
+
+
+
+  Bookmarks(this.id, this.name, this.reminderAt, 
+     this.autoDeletePreference,
+     this.bookmarkableId,
+     this.bookmarkableType,
+  );
+
+  factory Bookmarks.fromJson(Map<String, dynamic> json) => _$BookmarksFromJson(json);
+  Map<String, dynamic> toJson() => _$BookmarksToJson(this);
 }

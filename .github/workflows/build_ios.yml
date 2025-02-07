@@ -29,6 +29,12 @@ jobs:
           chmod +x ./build_unsigned_ipa.sh
           ./build_unsigned_ipa.sh
 
+      - name: Upload unsigned IPA as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: unsigned-ipa
+          path: ./build/ios/unsigned_ipa/unsigned_app.ipa
+
       - name: Upload unsigned IPA to GitHub Release
         run: |
           # 设置 Release 的版本名和标签

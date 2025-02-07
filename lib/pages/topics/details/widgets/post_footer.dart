@@ -23,6 +23,10 @@ class PostFooter extends StatelessWidget {
         _LikeButton(post: post),
         16.hGap,
         _ReplyButton(post: post),
+        16.hGap,
+        _CopyButton(post: post),
+        16.hGap,
+        _BookmarkButton(post: post),
       ],
     );
   }
@@ -103,3 +107,45 @@ class _ReplyButton extends StatelessWidget {
     );
   }
 } 
+
+/// 复制按钮组件
+class _CopyButton extends StatelessWidget {
+   final controller = Get.find<TopicDetailController>();
+   final Post post;
+
+   _CopyButton({required this.post});
+   
+  
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => controller.copyPost(post),
+      child: Row(
+        children: [
+          Icon(CupertinoIcons.square_on_square, size: 16.w, color: Theme.of(context).hintColor),
+        ],
+      ),
+    );
+  }
+}
+
+
+/// 书签按钮组件
+class _BookmarkButton extends StatelessWidget {
+  final controller = Get.find<TopicDetailController>();
+  final Post post;
+
+  _BookmarkButton({required this.post});
+  
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => controller.toggleBookmark(post),
+      child: Row(
+        children: [
+          Icon(CupertinoIcons.bookmark, size: 16.w, color: Theme.of(context).hintColor),
+        ],
+      ),
+    );
+  }
+}

@@ -215,6 +215,7 @@ class _Posts {
   String get replySuccess => '回复成功';
   String get replyFailed => '回复失败';
   String get searchTopic => '搜索话题';
+  String get copySuccess => '复制成功';
 }
 
 /// 发帖相关常量

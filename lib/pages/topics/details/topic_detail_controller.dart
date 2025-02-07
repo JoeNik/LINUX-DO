@@ -1,6 +1,9 @@
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/controller/base_controller.dart';
+import 'package:linux_do/net/http_config.dart';
+import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:flutter/widgets.dart';
 import '../../../models/topic_detail.dart';
@@ -10,10 +13,10 @@ import '../../../utils/mixins/toast_mixin.dart';
 import '../../../utils/storage_manager.dart';
 import '../../../routes/app_pages.dart';
 import 'dart:async';
-import 'dart:math';
 import 'dart:convert';
 
-class TopicDetailController extends BaseController with WidgetsBindingObserver {
+class TopicDetailController extends BaseController
+    with WidgetsBindingObserver, Concatenated {
   final topicId = 0.obs;
   final topic = Rx<TopicDetail?>(null);
   final hasMore = true.obs;
@@ -74,7 +77,6 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
   final currentPostIndex = 0.obs;
 
   @override
-
   void onInit() {
     super.onInit();
     topicId.value = Get.arguments as int;
@@ -158,23 +160,23 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
     // 保存最后阅读的帖子编号
     // if (visiblePosts.isNotEmpty) {
     //   StorageManager.setData(_topicPostKey, visiblePosts.reduce(max));
-      
+
     //   // 找出视图中最中间的帖子
     //   var maxVisibleItem = positions.first;
     //   var maxVisibleFraction = 0.0;
-      
+
     //   for (var position in positions) {
     //     final visibleFraction = (1.0 - position.itemLeadingEdge)
-    //         .clamp(0.0, 1.0) * 
+    //         .clamp(0.0, 1.0) *
     //         position.itemTrailingEdge
     //         .clamp(0.0, 1.0);
-            
+
     //     if (visibleFraction > maxVisibleFraction) {
     //       maxVisibleFraction = visibleFraction;
     //       maxVisibleItem = position;
     //     }
     //   }
-      
+
     //   // 获取对应的帖子编号
     //   if (maxVisibleItem.index >= 1 && maxVisibleItem.index - 1 < replyTree.length) {
     //     final node = replyTree[maxVisibleItem.index - 1];
@@ -191,9 +193,9 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
     if (positions.isNotEmpty) {
       // 检查是否需要向上加载
       final firstVisibleItem = positions.first;
-      if (firstVisibleItem.itemLeadingEdge <= 0.1 && 
-          firstVisibleItem.index <= 3 && 
-          !isLoadingPrevious.value && 
+      if (firstVisibleItem.itemLeadingEdge <= 0.1 &&
+          firstVisibleItem.index <= 3 &&
+          !isLoadingPrevious.value &&
           hasPrevious.value) {
         l.d('触发向上加载: ${firstVisibleItem.index}');
         loadPrevious();
@@ -271,7 +273,8 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
       }
 
       // 计算第一个已加载的帖子在stream中的位置
-      final firstLoadedPostIndex = currentStream.indexOf(currentPosts.first.id ?? 0);
+      final firstLoadedPostIndex =
+          currentStream.indexOf(currentPosts.first.id ?? 0);
 
       if (firstLoadedPostIndex <= 0) {
         l.d('没有更早的帖子了');
@@ -354,7 +357,8 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
       clearError();
 
       // 使用传入的楼层号，如果没有则使用上次浏览的位置
-      final targetPostNumber = postNumber ?? StorageManager.getInt(_topicPostKey);
+      final targetPostNumber =
+          postNumber ?? StorageManager.getInt(_topicPostKey);
       final page = targetPostNumber != null ? "/$targetPostNumber" : "/1";
 
       final response = await apiService.getTopicDetail(
@@ -400,12 +404,13 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
           });
         }
       }
-    } catch (e) {
-      l.e('获取帖子详情失败: $e');
+    } catch (e, s) {
+      l.e('获取帖子详情失败: $e -  \n$s');
       setError('获取帖子详情失败');
     } finally {
       isLoading.value = false;
     }
+
   }
 
   /// 加载更多
@@ -529,7 +534,7 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
       // 先更新UI状态
       final postNumber = post.postNumber!;
       final isLiked = likedPosts[postNumber] ?? false;
-      
+
       // 更新点赞状态
       likedPosts[postNumber] = !isLiked;
 
@@ -539,16 +544,17 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
 
       // 调用API
       final response = await apiService.togglePostLike(post.id.toString());
-      
+
       // 根据API响应更新状态
       // 从 actions_summary 中找到点赞动作（id=2）的状态
       final likeAction = response.actionsSummary?.firstWhere(
         (action) => action.id == 2,
         orElse: () => ActionSummary(id: 2, canAct: true),
       );
-      
+
       // 更新点赞状态和数量
-      likedPosts[postNumber] = !(likeAction?.canAct ?? true); // 如果 can_act 为 false，说明已经点赞
+      likedPosts[postNumber] =
+          !(likeAction?.canAct ?? true); // 如果 can_act 为 false，说明已经点赞
       postScores[postNumber] = response.score?.toInt() ?? 0;
 
       l.d('${isLiked ? "取消点赞" : "点赞"} #$postNumber');
@@ -556,11 +562,11 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
       // 发生错误时恢复原状态
       final postNumber = post.postNumber!;
       final isLiked = likedPosts[postNumber] ?? false;
-      
+
       likedPosts[postNumber] = !isLiked;
       final currentScore = postScores[postNumber] ?? 0;
       postScores[postNumber] = currentScore + (isLiked ? 1 : -1);
-      
+
       l.e('点赞失败: $e');
     }
   }
@@ -717,7 +723,7 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
   // 滚动到指定帖子
   void scrollToPost(int index) {
     if (topic.value == null) return;
-    
+
     currentPostIndex.value = index;
     itemScrollController.scrollTo(
       index: index,
@@ -725,7 +731,41 @@ class TopicDetailController extends BaseController with WidgetsBindingObserver {
       curve: Curves.easeInOut,
     );
   }
+
+  void copyPost(Post post) {
+    Clipboard.setData(ClipboardData(
+        text: '${HttpConfig.baseUrl}${post.postUrl ?? ''}?u=$userName'));
+    showSuccess(AppConst.posts.copySuccess);
+  }
+
+  // 添加/删除书签
+  Future<void> toggleBookmark(Post post) async {
+    showWarning('开发中');
+    // if (post.id == null) return;
+
+
+    // /// 偷个懒感觉无需校验success
+    // try {
+    //   if (post.bookmarked ?? false) {
+    //     await apiService.deleteBookmark(post.id.toString());
+    //   } else {
+    //     l.d('添加书签: ${topic.value?.bookmarks?.first.toJson()}');
+    //     await apiService.addBookmark(
+    //       autoDeletePreference: topic.value?.bookmarks?.first.autoDeletePreference,
+    //       bookmarkableId: topic.value?.bookmarks?.first.bookmarkableId,
+    //       bookmarkableType: topic.value?.bookmarks?.first.bookmarkableType,
+
+
+    //       reminderAt: topic.value?.bookmarks?[0].reminderAt,
+    //     );
+
+    //   }
+    // } catch (e, s) {
+    //   l.e('添加/删除书签失败: $e -  \n$s');
+    // }
+  }
 }
+
 
 // 帖子节点类
 

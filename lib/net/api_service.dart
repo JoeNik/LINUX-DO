@@ -301,4 +301,17 @@ abstract class ApiService {
     @Query('page') int? page,
     @Query('month') int? month,
   ]);
+
+  /// 添加书签
+  @POST('bookmarks.json')
+  Future<dynamic> addBookmark(
+    {@Field('auto_delete_preference') int? autoDeletePreference,
+    @Field('bookmarkable_id') int? bookmarkableId,
+    @Field('bookmarkable_type') String? bookmarkableType = 'Post',
+    @Field('reminder_at') String? reminderAt,
+});
+
+  /// 删除书签
+  @DELETE('bookmarks/{topic_id}.json')
+  Future<dynamic> deleteBookmark(@Path('topic_id') String topicId);
 }

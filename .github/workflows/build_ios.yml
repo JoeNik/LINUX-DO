@@ -11,6 +11,11 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v2
 
+      - name: List files in the directory
+        run: |
+          echo "Current directory contents:"
+          ls -al
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:

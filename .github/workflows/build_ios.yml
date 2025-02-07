@@ -21,7 +21,7 @@ jobs:
 
       - name: Run iOS Build Script
         run: |
-          chmod +x ../../build_unsigned_ipa.sh
-          ../../build_unsigned_ipa.sh
+          chmod +x ../build_unsigned_ipa.sh
+          ../build_unsigned_ipa.sh
         env:
           CI: true

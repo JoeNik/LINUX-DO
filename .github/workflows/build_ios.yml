@@ -1,0 +1,27 @@
+name: Flutter iOS Build
+
+on:
+  workflow_dispatch:  # 允许手动触发工作流
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.2'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run iOS Build Script
+        run: |
+          chmod +x ../../build_unsigned_ipa.sh
+          ../../build_unsigned_ipa.sh
+        env:
+          CI: true

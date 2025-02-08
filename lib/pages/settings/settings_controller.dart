@@ -7,6 +7,7 @@ import 'package:linux_do/controller/global_controller.dart';
 import 'package:linux_do/const/app_const.dart';
 
 import '../../utils/log.dart';
+import '../../widgets/dis_color_picker.dart';
 import '../web_page.dart';
 
 class SettingsController extends GetxController {
@@ -87,5 +88,16 @@ class SettingsController extends GetxController {
     await StorageManager.remove(AppConst.identifier.csrfToken);
     Get.find<GlobalController>().setIsLogin(false);
     Get.offAllNamed(Routes.LOGIN);
+  }
+
+
+  void showColorPicker() {
+    DisColorPicker.show(
+      selectedColor: primaryMaterial, // 当前选中的颜色
+      onColorSelected: (color) {
+        // 处理颜色选择
+        Get.changeTheme(ThemeData(primaryColor: color));
+      },  
+    );
   }
 } 

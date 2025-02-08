@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/controller/base_controller.dart';
@@ -6,6 +7,9 @@ import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:slide_switcher/slide_switcher.dart';
+import 'package:linux_do/const/app_spacing.dart';
 import '../../../models/topic_detail.dart';
 import '../../../net/api_service.dart';
 import '../../../utils/log.dart';
@@ -52,6 +56,8 @@ class TopicDetailController extends BaseController
   // 存储点赞状态的Map
   final likedPosts = <int, bool>{}.obs;
   final postScores = <int, int>{}.obs;
+  // 存储书签状态的Map
+  final bookmarkedPosts = <int, bool>{}.obs;
 
   // 回复相关
   final replyContent = ''.obs;
@@ -410,7 +416,6 @@ class TopicDetailController extends BaseController
     } finally {
       isLoading.value = false;
     }
-
   }
 
   /// 加载更多
@@ -527,47 +532,44 @@ class TopicDetailController extends BaseController
   }
 
   // 点赞/取消点赞
-  void toggleLike(Post post) async {
-    if (post.id == null || post.postNumber == null) return;
-
+  Future<void> toggleLike(Post post) async {
     try {
-      // 先更新UI状态
       final postNumber = post.postNumber!;
       final isLiked = likedPosts[postNumber] ?? false;
 
-      // 更新点赞状态
+      // 先更新UI状态
       likedPosts[postNumber] = !isLiked;
-
-      // 更新点赞数
       final currentScore = postScores[postNumber] ?? 0;
       postScores[postNumber] = currentScore + (isLiked ? -1 : 1);
 
       // 调用API
       final response = await apiService.togglePostLike(post.id.toString());
 
-      // 根据API响应更新状态
-      // 从 actions_summary 中找到点赞动作（id=2）的状态
-      final likeAction = response.actionsSummary?.firstWhere(
-        (action) => action.id == 2,
-        orElse: () => ActionSummary(id: 2, canAct: true),
-      );
+      // 根据API响应更新最终状态
+      final actionsSummary = response.actionsSummary;
+      if (actionsSummary != null && actionsSummary.isNotEmpty) {
+        // 在 actionsSummary 中找到 id=2 的点赞动作
+        final likeAction = actionsSummary.firstWhere(
+          (action) => action['id'] == 2,
+          orElse: () => {'can_act': true, 'count': 0},
+        );
 
-      // 更新点赞状态和数量
-      likedPosts[postNumber] =
-          !(likeAction?.canAct ?? true); // 如果 can_act 为 false，说明已经点赞
-      postScores[postNumber] = response.score?.toInt() ?? 0;
+        // 这里非常奇怪 服务器的数据好像没更新~
+        // final canAct = likeAction['can_act'] ?? true;
+        // likedPosts[postNumber] = !canAct; // 如果 can_act 为 false，说明已经点赞
+        // postScores[postNumber] = likeAction['count'] ?? 0;
+      }
 
-      l.d('${isLiked ? "取消点赞" : "点赞"} #$postNumber');
-    } catch (e) {
+      l.d('点赞状态更新: postNumber=$postNumber, count=${postScores[postNumber]}');
+    } catch (e, s) {
+      l.e('点赞失败: $e -  \n$s');
+
       // 发生错误时恢复原状态
       final postNumber = post.postNumber!;
       final isLiked = likedPosts[postNumber] ?? false;
-
       likedPosts[postNumber] = !isLiked;
       final currentScore = postScores[postNumber] ?? 0;
       postScores[postNumber] = currentScore + (isLiked ? 1 : -1);
-
-      l.e('点赞失败: $e');
     }
   }
 
@@ -591,6 +593,8 @@ class TopicDetailController extends BaseController
           postScores[post.postNumber!] = post.reactionUsersCount ?? 0;
           // 使用 currentUserReaction 判断是否已点赞
           likedPosts[post.postNumber!] = post.currentUserReaction != null;
+          // 初始化书签状态
+          bookmarkedPosts[post.postNumber!] = post.bookmarked ?? false;
         }
       }
     }
@@ -738,34 +742,72 @@ class TopicDetailController extends BaseController
     showSuccess(AppConst.posts.copySuccess);
   }
 
+  // 举报帖子
+  void reportPost(Post post, String reason, [String? customDesc]) async {
+    try {
+      // await apiService.flagPost(
+      //   post.id.toString(),
+      //   _getFlagTypeId(reason),
+      //   false,
+      //   customDesc ?? '',
+      //   false,
+      // );
+      Get.back(); // 关闭弹窗
+      showError(AppConst.posts.reportSuccess);
+    } catch (e, s) {
+      l.e('举报失败: $e -  \n$s');
+      showError(AppConst.posts.reportFailed);
+    }
+
+  }
+
+  // 获取举报类型ID
+  int _getFlagTypeId(String flagType) {
+    switch (flagType) {
+      case 'off_topic':
+        return 3;
+      case 'inappropriate':
+        return 4;
+      case 'spam':
+        return 8;
+      case 'notify_moderators':
+        return 7;
+      default:
+        return 7; // 默认为通知版主
+    }
+  }
+
+  
+
   // 添加/删除书签
   Future<void> toggleBookmark(Post post) async {
-    showWarning('开发中');
-    // if (post.id == null) return;
+    if (post.id == null || post.postNumber == null) return;
 
+    // 保存原始状态
+    final originalBookmarked = bookmarkedPosts[post.postNumber!] ?? false;
 
-    // /// 偷个懒感觉无需校验success
-    // try {
-    //   if (post.bookmarked ?? false) {
-    //     await apiService.deleteBookmark(post.id.toString());
-    //   } else {
-    //     l.d('添加书签: ${topic.value?.bookmarks?.first.toJson()}');
-    //     await apiService.addBookmark(
-    //       autoDeletePreference: topic.value?.bookmarks?.first.autoDeletePreference,
-    //       bookmarkableId: topic.value?.bookmarks?.first.bookmarkableId,
-    //       bookmarkableType: topic.value?.bookmarks?.first.bookmarkableType,
+    try {
+      // 立即更新本地状态
+      bookmarkedPosts[post.postNumber!] = !originalBookmarked;
+      post.bookmarked = !originalBookmarked;
 
+      if (originalBookmarked) {
+        await apiService.deleteBookmark(post.bookmarkId.toString());
+      } else {
+        await apiService.addBookmark(
+          bookmarkableId: post.id,
+        );
+      }
 
-    //       reminderAt: topic.value?.bookmarks?[0].reminderAt,
-    //     );
-
-    //   }
-    // } catch (e, s) {
-    //   l.e('添加/删除书签失败: $e -  \n$s');
-    // }
+      l.d('书签状态更新成功: ${post.id} - ${post.bookmarked}');
+    } catch (e, s) {
+      // 发生错误,恢复原始状态
+      bookmarkedPosts[post.postNumber!] = originalBookmarked;
+      post.bookmarked = originalBookmarked;
+      l.e('添加/删除书签失败: $e -  \n$s');
+    }
   }
 }
-
 
 // 帖子节点类
 

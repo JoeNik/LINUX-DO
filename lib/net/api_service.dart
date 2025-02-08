@@ -340,7 +340,7 @@ abstract class ApiService {
   /// 添加书签
   @POST('bookmarks.json')
   Future<dynamic> addBookmark({
-    @Field('auto_delete_preference') int? autoDeletePreference,
+    @Field('auto_delete_preference') int? autoDeletePreference = 3,
     @Field('bookmarkable_id') int? bookmarkableId,
     @Field('bookmarkable_type') String? bookmarkableType = 'Post',
     @Field('reminder_at') String? reminderAt,
@@ -353,4 +353,12 @@ abstract class ApiService {
   /// 关于我们数据
   @GET('about.json')
   Future<AboutResponse> getAbout();
+
+  // 举报帖子
+  // @POST('post_actions')
+  // Future<dynamic> flagPost(
+  //   @Field('id') String postId,
+  // );
+
+  
 }

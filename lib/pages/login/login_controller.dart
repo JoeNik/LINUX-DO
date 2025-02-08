@@ -45,6 +45,10 @@ class LoginController extends BaseController {
     }
   }
 
+  void loginTips() {
+    showError('请先使用WEB授权登录');
+  }
+
   Future<void> login() async {
     await _apiService.getTopics('latest');
 

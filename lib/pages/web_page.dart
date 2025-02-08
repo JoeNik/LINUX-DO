@@ -188,7 +188,7 @@ class _WebPageState extends State<WebPage> {
       appBar: AppBar(
         title: Text(
           AppConst.login.webTitle,
-          style: TextStyle(fontSize: AppSizes.fontMedium),
+          style: TextStyle(fontSize: AppSizes.fontNormal),
         ),
         leading: IconButton(
           icon: const Icon(Icons.close),

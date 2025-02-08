@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/widgets/dis_button.dart';
-import 'package:linux_do/widgets/state_view.dart';
 import '../../../const/app_const.dart';
 import '../../../const/app_spacing.dart';
 import '../../../const/app_theme.dart';
@@ -25,17 +24,14 @@ class TopicDetailPage extends GetView<TopicDetailController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: _buildAppBar(context),
       body: Stack(
         children: [
           Obx(() {
-            return StateView(
-              state: controller.getViewState(),
-              errorMessage: controller.errorMessage.value,
-              onRetry: controller.refreshTopicDetail,
-              shimmerView: const ShimmerDetails(),
-              child: _contentWidget(context),
-            );
+            final topic = controller.topic.value;
+            if (topic == null) return const SizedBox();
+            return _buildContent(context, topic);
           }),
           // 新增楼层选择器
           Obx(() {
@@ -98,13 +94,11 @@ class TopicDetailPage extends GetView<TopicDetailController> {
     return PageHeader(controller: controller);
   }
 
-  Widget _contentWidget(BuildContext context) {
-    final topic = controller.topic.value;
-    if (topic == null) return Container();
-
+  Widget _buildContent(BuildContext context, TopicDetail topic) {
     return Stack(
       children: [
         Positioned.fill(
+          bottom: controller.isReplying.value ? 300.h : 0,
           child: Obx(() => ScrollablePositionedList.builder(
                 key: PageStorageKey('topic_detail_${topic.id}'),
                 itemScrollController: controller.itemScrollController,
@@ -156,14 +150,17 @@ class TopicDetailPage extends GetView<TopicDetailController> {
           ),
         ),
         // 回复输入框
-        Obx(() => AnimatedPositioned(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              bottom: controller.isReplying.value ? 0 : -300.h,
-              left: 0,
-              right: 0,
-              child: _buildReplyInput(context, topic),
-            )),
+        Obx(() {
+          final isReplying = controller.isReplying.value;
+          return AnimatedPositioned(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            bottom: isReplying ? 0 : -300.h,
+            left: 0,
+            right: 0,
+            child: _buildReplyInput(context, topic),
+          );
+        }),
       ],
     );
   }

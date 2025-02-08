@@ -52,6 +52,7 @@ class TopicDetail {
   final int? participantsCount;
   @JsonKey(name: 'bookmarks')
   final List<Bookmarks>? bookmarks;
+  final bool? bookmarked;
 
 
 
@@ -84,8 +85,10 @@ class TopicDetail {
     this.details,
     this.participantsCount,
     this.bookmarks,
+    this.bookmarked,
   });
   
+
 
 
   factory TopicDetail.fromJson(Map<String, dynamic> json) =>
@@ -146,7 +149,7 @@ class Post {
   final bool? canWiki;
   final String? userTitle;
   final bool? titleIsGroup;
-  final bool? bookmarked;
+  bool? bookmarked;
   final List<dynamic>? actionsSummary;
   final bool? moderator;
   final bool? admin;
@@ -180,6 +183,15 @@ class Post {
   final bool? acceptedAnswer;
   final bool? topicAcceptedAnswer;
   final bool? canVote;
+  final int? bookmarkAutoDeletePreference;
+  final int? bookmarkId;
+  final String? bookmarkableType;
+  final String? bookmarkReminderAt;
+  final String? bookmarkName;
+
+
+
+
 
   Post({
     this.id,
@@ -252,7 +264,13 @@ class Post {
     this.acceptedAnswer,
     this.topicAcceptedAnswer,
     this.canVote,
+    this.bookmarkAutoDeletePreference,
+    this.bookmarkId,
+    this.bookmarkableType,
+    this.bookmarkReminderAt,
+    this.bookmarkName,
   });
+
 
   String getAvatarUrl() {
     return '${HttpConfig.baseUrl}${avatarTemplate!.replaceAll("{size}", "62")}';
@@ -333,7 +351,13 @@ class Post {
     acceptedAnswer: json['accepted_answer'] as bool?,
     topicAcceptedAnswer: json['topic_accepted_answer'] as bool?,
     canVote: json['can_vote'] as bool?,
+    bookmarkAutoDeletePreference: json['bookmark_auto_delete_preference'] as int?,
+    bookmarkId: json['bookmark_id'] as int?,
+    bookmarkableType: json['bookmarkable_type'] as String?,
+    bookmarkReminderAt: json['bookmark_reminder_at'] as String?,
+    bookmarkName: json['bookmark_name'] as String?,
   );
+
 
   Map<String, dynamic> toJson() {
     return {
@@ -367,9 +391,14 @@ class Post {
       'posts_count': postsCount,
       'readers_count': readersCount,
       'moderator': moderator,
+      'bookmark_auto_delete_preference': bookmarkAutoDeletePreference,
+      'bookmark_id': bookmarkId,
+      'bookmarkable_type': bookmarkableType,
+      'bookmark_reminder_at': bookmarkReminderAt,
     };
   }
 }
+
 
 @JsonSerializable()
 class ActionSummary {

@@ -7,7 +7,7 @@ import 'package:linux_do/widgets/cached_image.dart';
 import 'package:linux_do/widgets/dis_refresh.dart';
 import 'package:linux_do/widgets/state_view.dart';
 import '../../../const/app_theme.dart';
-import '../../../utils/log.dart';
+import '../../../routes/app_pages.dart';
 import 'notification_controller.dart';
 
 class NotificationPage extends GetView<NotificationController> {
@@ -45,7 +45,11 @@ class _NotificationItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        if (notification.topicId != null) {
+          Get.toNamed(Routes.TOPIC_DETAIL, arguments: notification.topicId);
+        }
+      },
       child: Container(
         padding: EdgeInsets.all(10.w),
         decoration: BoxDecoration(

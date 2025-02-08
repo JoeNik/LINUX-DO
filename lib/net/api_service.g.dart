@@ -1686,7 +1686,7 @@ class _ApiService implements ApiService {
 
   @override
   Future<dynamic> addBookmark({
-    int? autoDeletePreference,
+    int? autoDeletePreference = 3,
     int? bookmarkableId,
     String? bookmarkableType = 'Post',
     String? reminderAt,

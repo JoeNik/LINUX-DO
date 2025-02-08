@@ -316,7 +316,7 @@ class LoginPage extends GetView<LoginController> {
                           text: AppConst.login.title,
                           type: ButtonType.primary,
                           size: ButtonSize.large,
-                          onPressed: controller.login,
+                          onPressed: controller.loginTips,
                           loading: controller.isLoading.value,
                         ),
                       ),

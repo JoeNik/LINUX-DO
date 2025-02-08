@@ -101,6 +101,14 @@ class SettingsPage extends GetView<SettingsController> {
             AppConst.settings.appearance,
             [
               _buildThemeDropdown(context),
+               _buildNavigationItem(
+                context,
+                AppConst.settings.themeCustom,
+                CupertinoIcons.paintbrush_fill,
+                onTap: () {
+                  // controller.showColorPicker();
+                },
+              ),
             ],
           ),
           16.vGap,
@@ -144,7 +152,7 @@ class SettingsPage extends GetView<SettingsController> {
 
   Widget _buildThemeDropdown(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(

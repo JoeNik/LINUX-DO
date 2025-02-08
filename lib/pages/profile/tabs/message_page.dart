@@ -8,6 +8,7 @@ import 'package:linux_do/models/message.dart';
 import 'package:linux_do/utils/expand/datetime_expand.dart';
 import 'package:linux_do/widgets/cached_image.dart';
 import 'package:linux_do/widgets/state_view.dart';
+import '../../../routes/app_pages.dart';
 import 'message_controller.dart';
 
 class MessagePage extends GetView<MessageController> {
@@ -55,7 +56,11 @@ class _MessageCard extends StatelessWidget {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(12.w),
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            if (message.id != null) {
+              Get.toNamed(Routes.TOPIC_DETAIL, arguments: message.id);
+            }
+          },
           borderRadius: BorderRadius.circular(12.w),
           child: Padding(
             padding: EdgeInsets.all(10.w),

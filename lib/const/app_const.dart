@@ -145,7 +145,7 @@ class _LoginConst {
   const _LoginConst();
 
   String get title => '登录';
-  String get webTitle => '使用网页授权登录';
+  String get webTitle => '网页授权登录(仅支持账密)';
   String get greetingPhrase => '欢迎来到';
   String get accountHint => '请输入账号';
   String get passwordHint => '请输入密码';
@@ -191,6 +191,7 @@ class _Settings {
   String get themeSystem => '跟随系统';
   String get themeLight => '浅色模式';
   String get themeDark => '深色模式';
+  String get themeCustom => '自定义主题';
   String get helpAndSupport => '帮助与支持';
   String get about => '关于 ${AppConst.siteName}';
   String get faq => '常见问题';
@@ -216,6 +217,47 @@ class _Posts {
   String get replyFailed => '回复失败';
   String get searchTopic => '搜索话题';
   String get copySuccess => '复制成功';
+  
+  // 举报相关
+  List<Map<String, String>> get reasons => [
+    {
+        'title': '偏离话题',
+        'desc': '此帖子与标题和第一个帖子定义的当前讨论无关，可能应该移到其他地方。',
+        'value': 'off_topic'
+      },
+      {
+        'title': '不当言论',
+        'desc': '这个帖子包含的内容会被一个有理性的人认为具有冒犯性、侮辱性、属于仇恨行为或违反我们的社区准则。',
+        'value': 'off_topic'
+      },
+      {
+        'title': '垃圾信息',
+        'desc': '此帖子是广告或者蓄意破坏讨论。帖子没有价值或者与当前话题无关。',
+        'value': 'inappropriate'
+      },
+      {
+        'title': '违规推广',
+        'desc': '我确认：此帖子系用户未遵守社区推广规则，进行违规推广。',
+        'value': 'spam'
+      },
+      {
+        'title': '非法',
+        'desc': '此帖子需要工作人员注意，因为我认为其中包含非法内容。',
+        'value': 'notify_moderators'
+      },
+      {
+        'title': '其他内容',
+        'desc': '由于上面未列出的另一个原因，此帖子需要管理人员注意。',
+        'value': 'notify_moderators'
+      },
+    ];
+
+  String get reportTitle => '举报内容';
+  String get reportButton => '举报帖子';
+  String get reportSuccess => '举报开发中';
+  String get reportFailed => '举报失败';
+
+  get reportHint => '让我们具体了解您关心的问题，并尽可能提供相关的链接和示例。';
 }
 
 /// 发帖相关常量

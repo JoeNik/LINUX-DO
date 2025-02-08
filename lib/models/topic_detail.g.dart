@@ -41,6 +41,7 @@ TopicDetail _$TopicDetailFromJson(Map<String, dynamic> json) => TopicDetail(
       bookmarks: (json['bookmarks'] as List<dynamic>?)
           ?.map((e) => Bookmarks.fromJson(e as Map<String, dynamic>))
           .toList(),
+      bookmarked: json['bookmarked'] as bool?,
     );
 
 Map<String, dynamic> _$TopicDetailToJson(TopicDetail instance) =>
@@ -73,6 +74,7 @@ Map<String, dynamic> _$TopicDetailToJson(TopicDetail instance) =>
       'details': instance.details,
       'participants_count': instance.participantsCount,
       'bookmarks': instance.bookmarks,
+      'bookmarked': instance.bookmarked,
     };
 
 PostStream _$PostStreamFromJson(Map<String, dynamic> json) => PostStream(
@@ -163,6 +165,12 @@ Post _$PostFromJson(Map<String, dynamic> json) => Post(
       acceptedAnswer: json['acceptedAnswer'] as bool?,
       topicAcceptedAnswer: json['topicAcceptedAnswer'] as bool?,
       canVote: json['canVote'] as bool?,
+      bookmarkAutoDeletePreference:
+          (json['bookmarkAutoDeletePreference'] as num?)?.toInt(),
+      bookmarkId: (json['bookmarkId'] as num?)?.toInt(),
+      bookmarkableType: json['bookmarkableType'] as String?,
+      bookmarkReminderAt: json['bookmarkReminderAt'] as String?,
+      bookmarkName: json['bookmarkName'] as String?,
     );
 
 Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
@@ -236,6 +244,11 @@ Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
       'acceptedAnswer': instance.acceptedAnswer,
       'topicAcceptedAnswer': instance.topicAcceptedAnswer,
       'canVote': instance.canVote,
+      'bookmarkAutoDeletePreference': instance.bookmarkAutoDeletePreference,
+      'bookmarkId': instance.bookmarkId,
+      'bookmarkableType': instance.bookmarkableType,
+      'bookmarkReminderAt': instance.bookmarkReminderAt,
+      'bookmarkName': instance.bookmarkName,
     };
 
 ActionSummary _$ActionSummaryFromJson(Map<String, dynamic> json) =>

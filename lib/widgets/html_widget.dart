@@ -159,6 +159,7 @@ class HtmlWidget extends StatelessWidget {
             final isEmoji = extensionContext.classes.contains('emoji');
                         final isEmojiPath = src.contains('/uploads/default/original/3X/') || 
                                           src.contains('/images/emoji/twitter/') ||
+                                          src.contains('plugins/discourse-narrative-bot/images') ||
                                           src.contains('/images/emoji/apple/');
 
                                         

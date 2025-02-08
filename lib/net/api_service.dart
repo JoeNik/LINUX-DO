@@ -1,8 +1,10 @@
 import 'package:dio/dio.dart' hide Headers, MultipartFile;
 import 'package:linux_do/models/docs.dart';
 import 'package:linux_do/models/leaderboard.dart';
+import 'package:linux_do/net/success_response.dart';
 import 'package:retrofit/retrofit.dart';
 import 'dart:convert';
+import '../models/about.dart';
 import '../models/activity_stream.dart';
 import '../models/birthday.dart';
 import '../models/create_post_response.dart';
@@ -10,6 +12,8 @@ import '../models/group.dart';
 import '../models/image_size.dart';
 import '../models/login.dart';
 import '../models/post_response.dart';
+import '../models/request/user_preferences_request.dart';
+import '../models/request/user_request.dart';
 import '../models/topic_detail.dart';
 import '../models/topic_model.dart';
 import '../models/upload_image_response.dart';
@@ -82,6 +86,37 @@ abstract class ApiService {
   /// 用户信息
   @GET('u/{current}.json')
   Future<UserResponse> getCurrentUser(@Path("current") String current);
+
+  /// 提交更新用户信息
+  @PUT('u/{current}.json')
+  Future<SuccessResponse<CurrentUser>> updateUser(
+      @Path("current") String current, @Body() UserRequest userRequest);
+
+  /// 搜索话题
+  @GET('search/query')
+  Future<SearchResult> searchTopic({
+    @Query('term') String term = 'status:public',
+    @Query('search_for_id') bool searchForId = true,
+    @Query('type_filter') String typeFilter = 'topic',
+    @Query('restrict_to_archetype') String restrictToArchetype = 'regular',
+  });
+
+  //关联话题
+  @GET('u/{username}/feature-topic')
+  Future<SuccessResponse<dynamic>> relatedTopics(
+      @Path('username') String username,
+      {@Query('topic_id') int? topicId});
+
+  /// 清除关联话题
+  @PUT('u/{username}/clear-featured-topic')
+  Future<SuccessResponse<dynamic>> clearRelatedTopics(
+      @Path('username') String username);
+
+  /// 提交更新用户资料
+  @PUT('u/{current}.json')
+  Future<SuccessResponse<CurrentUser>> updateUserPreferences(
+      @Path('current') String current,
+      @Body() UserPreferencesRequest userPreferencesRequest);
 
   /// 总结数据
   @GET('u/{current}/summary.json')
@@ -296,22 +331,26 @@ abstract class ApiService {
 
   /// 获取生日列表
   @GET('cakeday/birthdays')
-  Future<BirthdayResponse> getBirthdays(
-    [@Query('filter') String? filter,
+  Future<BirthdayResponse> getBirthdays([
+    @Query('filter') String? filter,
     @Query('page') int? page,
     @Query('month') int? month,
   ]);
 
   /// 添加书签
   @POST('bookmarks.json')
-  Future<dynamic> addBookmark(
-    {@Field('auto_delete_preference') int? autoDeletePreference,
+  Future<dynamic> addBookmark({
+    @Field('auto_delete_preference') int? autoDeletePreference,
     @Field('bookmarkable_id') int? bookmarkableId,
     @Field('bookmarkable_type') String? bookmarkableType = 'Post',
     @Field('reminder_at') String? reminderAt,
-});
+  });
 
   /// 删除书签
   @DELETE('bookmarks/{topic_id}.json')
   Future<dynamic> deleteBookmark(@Path('topic_id') String topicId);
+
+  /// 关于我们数据
+  @GET('about.json')
+  Future<AboutResponse> getAbout();
 }

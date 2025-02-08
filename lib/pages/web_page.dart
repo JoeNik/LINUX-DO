@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:io' as dart_io;
@@ -45,17 +48,24 @@ class _WebPageState extends State<WebPage> {
   bool isLoading = true;
   String? _error;
   late final CookieJar _cookieJar;
+  String _userAgent = '';
 
   @override
   void initState() {
     super.initState();
     _initCookieJar();
+    _initUserAgent();
   }
 
   @override
   void dispose() {
     _controller = null;
     super.dispose();
+  }
+
+  Future<void> _initUserAgent() async {
+    setState(() {});
+    _userAgent = await getUserAgent();
   }
 
   Future<void> _initCookieJar() async {
@@ -151,7 +161,6 @@ class _WebPageState extends State<WebPage> {
             Get.find<GlobalController>().fetchUserInfo();
             Get.back(result: true);
           });
-          
         }
       } else {
         // 如果没有获取到所需的 cookies，尝试请求相关接口
@@ -190,13 +199,10 @@ class _WebPageState extends State<WebPage> {
         children: [
           InAppWebView(
             initialUrlRequest: URLRequest(url: WebUri(HttpConfig.baseUrl)),
-            // ignore: deprecated_member_use
-            initialOptions: InAppWebViewGroupOptions(
-              // ignore: deprecated_member_use
-              crossPlatform: InAppWebViewOptions(
-                javaScriptEnabled: true,
-                useOnDownloadStart: true,
-              ),
+            initialSettings: InAppWebViewSettings(
+              javaScriptEnabled: true,
+              useOnDownloadStart: true,
+              userAgent: _userAgent,
             ),
             onWebViewCreated: (controller) {
               _controller = controller;
@@ -292,5 +298,26 @@ class _WebPageState extends State<WebPage> {
         ],
       ),
     );
+  }
+
+  Future<String> getUserAgent() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    String userAgent = '';
+
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      userAgent =
+          'Mozilla/5.0 (Linux; Android ${androidInfo.version.release}; ${androidInfo.model} Build/${androidInfo.version.sdkInt}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      userAgent =
+          'Mozilla/5.0 (iPhone; CPU iPhone OS ${iosInfo.systemVersion.replaceAll('_', ' ')} like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/537.36';
+    } else if (Platform.isMacOS) {
+      MacOsDeviceInfo macInfo = await deviceInfo.macOsInfo;
+      userAgent =
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X ${macInfo.osRelease}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+    }
+
+    return userAgent;
   }
 }

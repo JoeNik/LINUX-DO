@@ -3,10 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/utils/expand/datetime_expand.dart';
-import 'package:linux_do/widgets/cached_image.dart';
 
+import '../../../../const/app_colors.dart';
 import '../../../../models/topic_detail.dart';
-import '../../../../utils/log.dart';
+import '../../../../widgets/avatar_widget.dart';
 
 /// 帖子头部组件
 class PostHeader extends StatelessWidget {
@@ -42,12 +42,13 @@ class _UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CachedImage(
-      imageUrl: post.getAvatarUrl(),
-      width: 32.w,
-      height: 32.w,
+    return AvatarWidget(
+      avatarUrl: post.getAvatarUrl(),
+      size: 32.w,
       circle: !post.isWebMaster(),
-      borderRadius: BorderRadius.circular(4.w),
+      borderRadius: 4.w,
+      borderColor: AppColors.primary,
+      username: post.username ?? '',
     );
   }
 }

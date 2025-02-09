@@ -114,7 +114,7 @@ class DocsController extends BaseController {
   String? getNickName(Topic topic) {
     final latestPosterId = topic.getOriginalPosterId();
     if (latestPosterId == null) return null;
-    return _userCache.getUserName(latestPosterId);
+    return _userCache.getNickName(latestPosterId);
   }
 
   Future<void> doNotDisturb(int id) async {

@@ -13,8 +13,6 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart' as dio;
 import 'dart:math';
-import 'preview_post_page.dart';
-import 'preview_post_controller.dart';
 
 class CreatePostController extends BaseController {
   final ApiService _apiService = Get.find<ApiService>();
@@ -30,7 +28,7 @@ class CreatePostController extends BaseController {
   final isSubmitting = false.obs;
   // 标签列表
   final tags = <String>[].obs;
-  // 标签输入控制器
+  // 标签输入控制器 
   final tagController = TextEditingController();
   // 是否在预览模式
   final isPreview = false.obs;
@@ -73,9 +71,9 @@ class CreatePostController extends BaseController {
         // 根据权限等级计算可见的主题数量
         final totalTopics = category.topicCount;
         categoryStats[category.id] = {
-          1: totalTopics, // Lv1 可以看到所有主题
-          2: category.permission == 2 ? totalTopics : 0, // Lv2 只能看到权限等级=2的主题
-          3: category.permission == 3 ? totalTopics : 0, // Lv3 只能看到权限等级=3的主题
+          1: totalTopics ?? 0, // Lv1 可以看到所有主题
+          2: category.permission == 2 ? totalTopics ?? 0 : 0, // Lv2 只能看到权限等级=2的主题
+          3: category.permission == 3 ? totalTopics ?? 0 : 0, // Lv3 只能看到权限等级=3的主题
         };
       }
       /// 默认选中第一个分类
@@ -98,7 +96,7 @@ class CreatePostController extends BaseController {
   void updateSelectedCategory(Category category, [int? level]) {
     selectedCategory.value = category;
     String displayName = level == null
-        ? category.name
+        ? category.name ?? ''
         : '${category.name} (Lv $level)';
     selectedCategoryName.value = displayName;
     // 清空标签搜索结果

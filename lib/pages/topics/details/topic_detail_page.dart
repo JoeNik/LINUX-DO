@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:keframe/keframe.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/widgets/dis_button.dart';
@@ -40,7 +41,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
             if (postsCount < 50) {
               return const SizedBox();
             }
-            
+
             return AnimatedPositioned(
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeInOut,
@@ -48,7 +49,8 @@ class TopicDetailPage extends GetView<TopicDetailController> {
               bottom: MediaQuery.of(context).padding.bottom + 16.w,
               child: PostsSelector(
                 postsCount: postsCount,
-                currentIndex: controller.currentPostIndex.value.clamp(0, postsCount - 1),
+                currentIndex:
+                    controller.currentPostIndex.value.clamp(0, postsCount - 1),
                 onIndexChanged: (index) {
                   if (!controller.isLoading.value) {
                     controller.scrollToPost(index);
@@ -112,7 +114,8 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                 itemBuilder: (context, index) {
                   // 头部加载指示器
                   if (index == 0) {
-                    return Obx(() => controller.hasPrevious.value && !controller.isLoading.value
+                    return Obx(() => controller.hasPrevious.value &&
+                            !controller.isLoading.value
                         ? Container(
                             padding: EdgeInsets.symmetric(vertical: 10.h),
                             alignment: Alignment.center,
@@ -122,21 +125,23 @@ class TopicDetailPage extends GetView<TopicDetailController> {
 
                   // 底部加载指示器
                   if (index == controller.replyTree.length + 1) {
-                    return Obx(() => controller.hasMore.value && !controller.isLoading.value
-                        ? Container(
-                            padding: EdgeInsets.symmetric(vertical: 10.h),
-                            alignment: Alignment.center,
-                            child: DisRefreshLoading())
-                        : const SizedBox());
+                    return Obx(() =>
+                        controller.hasMore.value && !controller.isLoading.value
+                            ? Container(
+                                padding: EdgeInsets.symmetric(vertical: 10.h),
+                                alignment: Alignment.center,
+                                child: DisRefreshLoading())
+                            : const SizedBox());
                   }
 
                   // 帖子内容
-                  if (controller.isLoading.value || index - 1 >= controller.replyTree.length) {
+                  if (controller.isLoading.value ||
+                      index - 1 >= controller.replyTree.length) {
                     return const SizedBox();
                   }
-                  
+
                   final node = controller.replyTree[index - 1];
-                  return _buildPostItem(context, node);
+                  return _buildPostItem(context, node, index);
                 },
               )),
         ),
@@ -155,7 +160,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
           return AnimatedPositioned(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            bottom: isReplying ? 0 : -300.h,
+            bottom: isReplying ? 0 : -350.h,
             left: 0,
             right: 0,
             child: _buildReplyInput(context, topic),
@@ -165,57 +170,63 @@ class TopicDetailPage extends GetView<TopicDetailController> {
     );
   }
 
-  Widget _buildPostItem(BuildContext context, PostNode node) {
-    return Card(
-      elevation: node.post.replyToPostNumber == null ? 0.7 : 0,
-      margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(12.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    6.vGap,
-                    PostHeader(post: node.post),
-                    2.vGap,
-                    PostContent(node: node),
-                    2.vGap,
-                    PostFooter(post: node.post),
-                  ],
-                ),
-              ),
-
-              // 只有不是回复的帖子才显示楼层
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withValues(alpha:  0.1),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(12.w),
-                      bottomLeft: Radius.circular(12.w),
-                    ),
-                  ),
-                  child: Text(
-                    '#${node.post.postNumber}',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 10.w,
-                      fontFamily: AppFontFamily.dinPro,
-                      fontWeight: FontWeight.bold,
-                    ),
+  Widget _buildPostItem(BuildContext context, PostNode node, int index) {
+    return FrameSeparateWidget(
+      index: index,
+      placeHolder: Container(
+        height: 80.w,
+      ),
+      child: Card(
+        elevation: node.post.replyToPostNumber == null ? 0.7 : 0,
+        margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(12.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      6.vGap,
+                      PostHeader(post: node.post),
+                      2.vGap,
+                      PostContent(node: node),
+                      2.vGap,
+                      PostFooter(post: node.post),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
+                    decoration: BoxDecoration(
+                      color:
+                          Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(12.w),
+                        bottomLeft: Radius.circular(12.w),
+                      ),
+                    ),
+                    child: Text(
+                      '#${node.post.postNumber}',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 10.w,
+                        fontFamily: AppFontFamily.dinPro,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -277,7 +288,6 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-
                 Row(
                   children: [
                     if (topic.postsCount != null) ...[
@@ -303,7 +313,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                         color: Theme.of(context).hintColor,
                       ),
                       2.hGap,
-                        Text(
+                      Text(
                         '${topic.participantsCount}',
                         style: TextStyle(
                           fontSize: 10.sp,
@@ -319,7 +329,8 @@ class TopicDetailPage extends GetView<TopicDetailController> {
           SizedBox(
             child: IconButton(
               onPressed: () {
-                controller.startReply(topic.currentPostNumber, topic.title);
+                controller.startReply(topic.currentPostNumber, topic.title,
+                    topic.details?.createdBy?.username);
               },
               icon: Icon(CupertinoIcons.reply, size: 22.w),
             ),
@@ -370,7 +381,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
               return const SizedBox();
             }
             return Container(
-              margin: EdgeInsets.symmetric(horizontal: 16.w),
+              margin: EdgeInsets.symmetric(horizontal: 12.w),
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
                 color: theme.cardColor,
@@ -408,17 +419,30 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                       ),
                     ],
                   ),
-                  if (controller.replyPostTitle.value != null) ...[
+                  4.vGap,
+                  Text(
+                    controller.replyPostTitle.value ?? '',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: theme.textTheme.bodyMedium?.color,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: true,
+                  ),
+                  if (controller.replyPostUser.value != null) ...[
                     4.vGap,
                     Text(
-                      controller.replyPostTitle.value!
-                          .replaceAll(RegExp(r'<[^>]*>'), ''),
+                      controller.replyPostUser.value ?? '',
                       style: TextStyle(
-                        fontSize: 12.sp,
+                        fontSize: 10.sp,
                         color: theme.hintColor,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      softWrap: true,
                     ),
                   ],
                 ],
@@ -427,7 +451,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
           }),
           // 输入区域
           Padding(
-            padding: EdgeInsets.all(16.w),
+            padding: EdgeInsets.all(12.w),
             child: Column(
               children: [
                 Container(
@@ -443,6 +467,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                     ),
                   ),
                   child: TextField(
+                    controller: controller.contentController,
                     onChanged: (value) {
                       controller.replyContent.value = value;
                       controller.updateTypingTime();
@@ -460,11 +485,133 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                           fontSize: 13.sp,
                           color: theme.hintColor.withValues(alpha: 0.3),
                         ),
-                        contentPadding: EdgeInsets.all(16.w),
+                        contentPadding: EdgeInsets.all(10.w),
                         border: InputBorder.none,
                         isDense: true,
                         fillColor: AppColors.transparent),
                   ),
+                ),
+                16.vGap,
+
+                // 图片上传区域
+                Row(
+                  children: [
+                    // 添加图片按钮
+                    Obx(() => Container(
+                          width: 60.w,
+                          height: 60.w,
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: Theme.of(context).dividerColor),
+                            borderRadius: BorderRadius.circular(8.w),
+                          ),
+                          child: controller.isUploading.value
+                              ? Center(
+                                  child: DisRefreshLoading(
+                                    fontSize: 8.w,
+                                  ),
+                                )
+                              : Material(
+                                  color: AppColors.transparent,
+                                  child: InkWell(
+                                    onTap: controller.pickAndUploadImage,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          CupertinoIcons.photo,
+                                          size: 16.w,
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.color,
+                                        ),
+                                        5.vGap,
+                                        Text(
+                                          AppConst.createPost.addImage,
+                                          style: TextStyle(
+                                            fontSize: 10.w,
+                                            color: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium
+                                                ?.color,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                        )),
+                    16.hGap,
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 已上传图片列表
+                              Obx(() {
+                                if (controller.uploadedImages.isEmpty) {
+                                  return Container();
+                                }
+                                return SizedBox(
+                                  height: 60.w,
+                                  child: ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: controller.uploadedImages.length,
+                                    separatorBuilder: (context, index) =>
+                                        8.hGap,
+                                    itemBuilder: (context, index) {
+                                      final image =
+                                          controller.uploadedImages[index];
+                                      return Stack(
+                                        children: [
+                                          Container(
+                                            width: 60.w,
+                                            height: 60.w,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(8.w),
+                                              image: DecorationImage(
+                                                image: NetworkImage(image.url),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                          Positioned(
+                                            right: 4.w,
+                                            top: 4.w,
+                                            child: InkWell(
+                                              onTap: () =>
+                                                  controller.removeImage(image),
+                                              child: Container(
+                                                padding: EdgeInsets.all(4.w),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black
+                                                      .withValues(alpha: 0.5),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Icon(
+                                                  CupertinoIcons.xmark,
+                                                  size: 8.w,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                );
+                              }),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 16.vGap,
                 // 发送按钮
@@ -494,5 +641,3 @@ class TopicDetailPage extends GetView<TopicDetailController> {
     );
   }
 }
-
-

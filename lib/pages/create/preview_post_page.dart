@@ -82,7 +82,7 @@ class PreviewPostPage extends GetView<PreviewPostController> {
                               ),
                               4.hGap,
                               Text(
-                                controller.category.name,
+                                controller.category.name ?? '',
                                 style: TextStyle(
                                   fontSize: 12.w,
                                   color: Theme.of(context).primaryColor,

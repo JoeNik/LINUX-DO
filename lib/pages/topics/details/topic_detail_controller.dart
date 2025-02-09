@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/net/http_config.dart';
@@ -10,12 +13,17 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:slide_switcher/slide_switcher.dart';
 import 'package:linux_do/const/app_spacing.dart';
+import '../../../controller/global_controller.dart';
 import '../../../models/topic_detail.dart';
+import '../../../models/upload_image_response.dart';
 import '../../../net/api_service.dart';
 import '../../../utils/log.dart';
 import '../../../utils/mixins/toast_mixin.dart';
 import '../../../utils/storage_manager.dart';
 import '../../../routes/app_pages.dart';
+import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart' as dio;
+import 'dart:math';
 import 'dart:async';
 import 'dart:convert';
 
@@ -64,6 +72,7 @@ class TopicDetailController extends BaseController
   final isReplying = false.obs;
   final replyToPostNumber = Rx<int?>(null);
   final replyPostTitle = Rx<String?>(null);
+  final replyPostUser = Rx<String?>(null);
   final clientId = DateTime.now().millisecondsSinceEpoch.toString();
   Timer? _presenceTimer;
   Timer? _draftTimer;
@@ -82,6 +91,13 @@ class TopicDetailController extends BaseController
   // 当前帖子索引
   final currentPostIndex = 0.obs;
 
+    // 图片列表
+  final uploadedImages = <UploadImageResponse>[].obs;
+  // 正在上传图片
+  final isUploading = false.obs;
+  // 回复内容控制器
+  final contentController = TextEditingController();
+
   @override
   void onInit() {
     super.onInit();
@@ -98,7 +114,7 @@ class TopicDetailController extends BaseController
     ever(topic, (_) => _initPostScores());
 
     // 启动在线状态更新定时器
-    _startPresenceTimer();
+    // _startPresenceTimer();
 
     // 启动草稿保存定时器
     // 暂时不保存草稿
@@ -112,7 +128,7 @@ class TopicDetailController extends BaseController
     // 移除应用生命周期监听
     WidgetsBinding.instance.removeObserver(this);
     // 页面关闭前发送一次计时
-    _updateTopicTiming();
+    //_updateTopicTiming();
     _presenceTimer?.cancel();
     _draftTimer?.cancel();
     super.onClose();
@@ -122,17 +138,18 @@ class TopicDetailController extends BaseController
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       // 应用回到前台时更新
-      _updateTopicTiming();
+      //_updateTopicTiming();
     } else if (state == AppLifecycleState.paused) {
       // 应用进入后台前更新
-      _updateTopicTiming();
+      //_updateTopicTiming();
     }
+
   }
 
   void _debouncedUpdateTiming() {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(_debounceDelay, () {
-      _updateTopicTiming();
+    // _updateTopicTiming();
     });
   }
 
@@ -501,8 +518,8 @@ class TopicDetailController extends BaseController
     await fetchTopicDetail();
   }
 
-  void launchUrl(String url) {
-    if (url.isEmpty) return;
+  void launchUrl(String? url) {
+    if (url == null || url.isEmpty) return;
     Get.toNamed(Routes.WEBVIEW, arguments: url);
   }
 
@@ -601,13 +618,29 @@ class TopicDetailController extends BaseController
   }
 
   // 开始回复
-  void startReply([int? postNumber, String? title]) {
+  void startReply([int? postNumber, String? title, String? username]) {
     replyToPostNumber.value = postNumber;
-    replyPostTitle.value = title;
+    if (title != null && title.isNotEmpty) {
+      // 清理HTML标签并限制长度
+      final cleanTitle = title
+          .replaceAll(RegExp(r'<[^>]*>'), '')
+          .replaceAll(RegExp(r'\n+'), ' ')
+          .trim();
+      replyPostTitle.value = cleanTitle;
+    } else {
+      replyPostTitle.value = null;
+    }
+    // 处理用户名
+    if (username != null && username.isNotEmpty) {
+      replyPostUser.value = username;
+    } else {
+      replyPostUser.value = null;
+    }
     isReplying.value = true;
     _replyStartTime.value = DateTime.now().millisecondsSinceEpoch;
     _lastTypingTime.value = _replyStartTime.value;
   }
+
 
   // 取消回复
   void cancelReply() {
@@ -645,10 +678,8 @@ class TopicDetailController extends BaseController
         replyToPostNumber: replyToPostNumber.value,
       );
 
-      showSnackbar(
-          title: AppConst.commonTip,
-          message: AppConst.posts.replySuccess,
-          type: SnackbarType.success);
+      showSuccess(AppConst.posts.replySuccess);
+
 
       // 清空回复内容
       replyContent.value = '';
@@ -775,6 +806,88 @@ class TopicDetailController extends BaseController
       default:
         return 7; // 默认为通知版主
     }
+  }
+
+  // 选择并上传图片
+  Future<void> pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (pickedFile != null) {
+      isUploading.value = true;
+      try {
+        final file = File(pickedFile.path);
+        final bytes = await file.readAsBytes();
+        final originalFileName = pickedFile.path.split('/').last;
+        final shortFileName = _generateShortFileName(originalFileName);
+        final sha1Checksum = _calculateSha1(bytes);
+        
+        // 创建 FormData
+        final formData = dio.FormData.fromMap({
+          'upload_type': 'composer',
+          'pasted': false,
+          'name': shortFileName,
+          'type': 'image/${shortFileName.split('.').last}',
+          'sha1_checksum': sha1Checksum,
+          'file': await dio.MultipartFile.fromFile(
+            pickedFile.path,
+            filename: shortFileName,
+          ),
+        });
+        
+        final response = await apiService.uploadImage(
+          GlobalController.clientId,
+          formData,
+        );
+        
+        uploadedImages.add(response);
+        
+        // 将图片插入到内容中
+        final imageMarkdown = '\n![${response.originalFilename}|${response.width}x${response.height}](${response.shortUrl})\n';
+        final currentContent = contentController.text;
+        final cursorPosition = contentController.selection.baseOffset;
+        
+        if (cursorPosition >= 0) {
+          final newContent = currentContent.substring(0, cursorPosition) +
+              imageMarkdown +
+              currentContent.substring(cursorPosition);
+          contentController.text = newContent;
+          contentController.selection = TextSelection.collapsed(
+            offset: cursorPosition + imageMarkdown.length,
+          );
+        } else {
+          contentController.text += imageMarkdown;
+        }
+      } catch (e,s) {
+        showToast(AppConst.createPost.uploadFailed);
+        debugPrint('Error uploading image: $e -- $s');
+      } finally {
+        isUploading.value = false;
+      }
+    }
+  }
+
+  // 删除图片
+  void removeImage(UploadImageResponse image) {
+    uploadedImages.remove(image);
+    // 从内容中移除图片引用
+    final imagePattern = '\\!\\[${image.originalFilename}\\|${image.width}x${image.height}\\]\\(${image.shortUrl}\\)';
+    final regex = RegExp(imagePattern);
+    contentController.text = contentController.text.replaceAll(regex, '');
+  }
+
+
+  // 计算文件的SHA1
+  String _calculateSha1(List<int> bytes) {
+    return sha1.convert(bytes).toString();
+  }
+
+  // 生成短文件名
+  String _generateShortFileName(String originalFileName) {
+    final extension = originalFileName.split('.').last;
+    final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    final random = (1000 + Random().nextInt(9000)).toString();
+    return 'img_${timestamp}_$random.$extension';
   }
 
   

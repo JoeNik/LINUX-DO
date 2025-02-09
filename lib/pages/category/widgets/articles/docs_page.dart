@@ -46,7 +46,7 @@ class _DocsPageState extends State<DocsPage>
                     return TopicItem(
                       topic: topic,
                       avatarUrl: controller.getLatestPosterAvatar(topic),
-                      nickName: controller.getNickName(topic),
+                      username: controller.getNickName(topic),
                       onTap: () => controller.toTopicDetail(topic.id),
                       onDoNotDisturb: (topic) {
                         controller.doNotDisturb(topic.id);

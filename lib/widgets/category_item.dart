@@ -40,8 +40,8 @@ class CategoryItem extends StatelessWidget {
         _buildCategoryItem(
           icon: category.getLogoUrl(),
           textColor: categoryColor,
-          title: category.name,
-          count: category.topicCount,
+          title: category.name ?? '',
+          count: category.topicCount ?? 0,
           description: category.description,
           level: null,
           context: context,
@@ -51,7 +51,7 @@ class CategoryItem extends StatelessWidget {
         _buildCategoryItem(
           icon: category.getLogoUrl(),
           textColor: categoryColor,
-          title: category.name,
+          title: category.name ?? '',
           count: stats[1] ?? 0,
           description: '此处为 1级用户 可见空间。',
           level: 1,
@@ -62,7 +62,7 @@ class CategoryItem extends StatelessWidget {
         _buildCategoryItem(
           icon: category.getLogoUrl(),
           textColor: categoryColor,
-          title: category.name,
+          title: category.name ?? '',
           count: stats[2] ?? 0,
           description: '此处为 2级用户 可见空间。',
           level: 2,
@@ -73,7 +73,7 @@ class CategoryItem extends StatelessWidget {
         _buildCategoryItem(
           icon: category.getLogoUrl(),
           textColor: categoryColor,
-          title: category.name,
+          title: category.name ?? '',
           count: stats[3] ?? 0,
           description: '此处为 3级用户 可见空间。',
           level: 3,

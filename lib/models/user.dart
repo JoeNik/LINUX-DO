@@ -2,6 +2,8 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:linux_do/models/user_action.dart';
 import 'package:linux_do/models/user_status.dart';
 import 'package:linux_do/net/http_config.dart';
+
+import 'badge_detail.dart';
 part 'user.g.dart';
 
 @JsonSerializable()
@@ -9,7 +11,7 @@ class UserResponse {
   @JsonKey(name: 'user_badges')
   final List<UserBadge>? userBadges;
   @JsonKey(name: 'badges')
-  final List<Badge>? badges;
+  final List<BadgeDetail>? badges;
   @JsonKey(name: 'badge_types')
   final List<BadgeType>? badgeTypes;
   @JsonKey(name: 'users')
@@ -25,7 +27,8 @@ class UserResponse {
     this.user,
   });
 
-  factory UserResponse.fromJson(Map<String, dynamic> json) => _$UserResponseFromJson(json);
+  factory UserResponse.fromJson(Map<String, dynamic> json) =>
+      _$UserResponseFromJson(json);
   Map<String, dynamic> toJson() => _$UserResponseToJson(this);
 }
 
@@ -56,7 +59,8 @@ class UserBadge {
     required this.grantedById,
   });
 
-  factory UserBadge.fromJson(Map<String, dynamic> json) => _$UserBadgeFromJson(json);
+  factory UserBadge.fromJson(Map<String, dynamic> json) =>
+      _$UserBadgeFromJson(json);
   Map<String, dynamic> toJson() => _$UserBadgeToJson(this);
 }
 
@@ -133,7 +137,8 @@ class BadgeType {
     required this.sortOrder,
   });
 
-  factory BadgeType.fromJson(Map<String, dynamic> json) => _$BadgeTypeFromJson(json);
+  factory BadgeType.fromJson(Map<String, dynamic> json) =>
+      _$BadgeTypeFromJson(json);
   Map<String, dynamic> toJson() => _$BadgeTypeToJson(this);
 }
 
@@ -167,7 +172,8 @@ class UserInfo {
     this.animatedAvatar,
   });
 
-  factory UserInfo.fromJson(Map<String, dynamic> json) => _$UserInfoFromJson(json);
+  factory UserInfo.fromJson(Map<String, dynamic> json) =>
+      _$UserInfoFromJson(json);
   Map<String, dynamic> toJson() => _$UserInfoToJson(this);
 }
 
@@ -178,7 +184,7 @@ class CurrentUser {
   @JsonKey(name: 'username')
   final String username;
   @JsonKey(name: 'name')
-  final String name;
+  final String? name;
   @JsonKey(name: 'avatar_template')
   final String? avatarTemplate;
   @JsonKey(name: 'email')
@@ -193,6 +199,8 @@ class CurrentUser {
   final String? lastSeenAt;
   @JsonKey(name: 'created_at')
   final String? createdAt;
+  @JsonKey(name: 'cakedate')
+  final String? cakedate;
   @JsonKey(name: 'ignored')
   final bool ignored;
   @JsonKey(name: 'muted')
@@ -259,8 +267,6 @@ class CurrentUser {
   final bool secondFactorBackupEnabled;
   @JsonKey(name: 'associated_accounts')
   final List<Map<String, String>>? associatedAccounts;
-  @JsonKey(name: 'card_badge')
-  final String? cardBadge;
   @JsonKey(name: 'invited_by')
   final UserInfo? invitedBy;
   @JsonKey(name: 'groups')
@@ -271,11 +277,29 @@ class CurrentUser {
   final UserAction? userAction;
   @JsonKey(name: 'status')
   final UserStatus? status;
+  @JsonKey(name: 'total_followers')
+  final int? totalFollowers;
+  @JsonKey(name: 'total_following')
+  final int? totalFollowing;
+  @JsonKey(name: 'accepted_answers')
+  final int? acceptedAnswers;
+  @JsonKey(name: 'card_background_upload_url')
+  final String? cardBackgroundUploadUrl;
+  @JsonKey(name: 'card_badge')
+  final UserCardBadge? cardBadge;
+  @JsonKey(name: 'bio_excerpt')
+  final String? bioExcerpt;
+  @JsonKey(name: 'category_expert_endorsements')
+  final List<CategoryExpert>? endorseCategories;
+  @JsonKey(name: 'vote_count')
+  final int? voteCount;
+  @JsonKey(name: 'is_followed')
+  final bool? isFollowed;
 
   CurrentUser({
     required this.id,
     required this.username,
-    required this.name,
+    this.name,
     required this.avatarTemplate,
     required this.email,
     this.secondaryEmails,
@@ -322,12 +346,114 @@ class CurrentUser {
     this.groups,
     this.userAction,
     this.status,
+    this.totalFollowers,
+    this.totalFollowing,
+    this.acceptedAnswers,
+    this.cakedate,
+    this.cardBackgroundUploadUrl,
+    this.bioExcerpt,
+    this.endorseCategories,
+    this.voteCount,
+    this.isFollowed,
   });
 
-  factory CurrentUser.fromJson(Map<String, dynamic> json) => _$CurrentUserFromJson(json);
+  factory CurrentUser.fromJson(Map<String, dynamic> json) =>
+      _$CurrentUserFromJson(json);
   Map<String, dynamic> toJson() => _$CurrentUserToJson(this);
 
-  String getAvatar(int size){
+  String getAvatar(int size) {
     return '${HttpConfig.baseUrl}${avatarTemplate?.replaceAll('{size}', '$size')}';
   }
+
+  String? get backgroundUrl {
+    if (cardBackgroundUploadUrl != null) {
+      return '${HttpConfig.baseUrl}$cardBackgroundUploadUrl';
+    }
+    return null;
+  }
+}
+
+@JsonSerializable()
+class UserCardBadge {
+  @JsonKey(name: 'id')
+  final int id;
+  @JsonKey(name: 'description')
+  final String? description;
+  @JsonKey(name: 'grant_count')
+  final int? grantCount;
+  @JsonKey(name: 'allow_title')
+  final bool? allowTitle;
+  @JsonKey(name: 'multiple_grant')
+  final bool? multipleGrant;
+  @JsonKey(name: 'icon')
+  final String? icon;
+  @JsonKey(name: 'image_url')
+  final String? imageUrl;
+  @JsonKey(name: 'listable')
+  final bool? listable;
+  @JsonKey(name: 'enabled')
+  final bool? enabled;
+  @JsonKey(name: 'badge_grouping_id')
+  final int? badgeGroupId;
+  @JsonKey(name: 'system')
+  final bool? system;
+  @JsonKey(name: 'slug')
+  final String? slug;
+  @JsonKey(name: 'manually_grantable')
+  final bool? manuallyGrantable;
+  @JsonKey(name: 'show_in_post_header')
+  final bool? showInPostHeader;
+  @JsonKey(name: 'badge_type_id')
+  final int? badgeTypeId;
+
+  UserCardBadge({
+    required this.id,
+    this.description,
+    this.grantCount,
+    this.allowTitle,
+    this.multipleGrant,
+    this.icon,
+    this.imageUrl,
+    this.listable,
+    this.enabled,
+    this.badgeGroupId,
+    this.system,
+    this.slug,
+    this.manuallyGrantable,
+    this.showInPostHeader,
+    this.badgeTypeId,
+  });
+
+  factory UserCardBadge.fromJson(Map<String, dynamic> json) =>
+      _$UserCardBadgeFromJson(json);
+  Map<String, dynamic> toJson() => _$UserCardBadgeToJson(this);
+}
+
+@JsonSerializable()
+class CategoryExpert {
+  @JsonKey(name: 'id')
+  final int? id;
+  @JsonKey(name: 'user_id')
+  final int? userId;
+  @JsonKey(name: 'endorsed_user_id')
+  final int? endorsedUserId;
+  @JsonKey(name: 'category_id')
+  final int? categoryId;
+  @JsonKey(name: 'created_at')
+  final String? createdAt;
+  @JsonKey(name: 'updated_at')
+  final String? updatedAt;
+
+  CategoryExpert({
+    this.id,
+    this.userId,
+    this.endorsedUserId,
+    this.categoryId,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory CategoryExpert.fromJson(Map<String, dynamic> json) =>
+      _$CategoryExpertFromJson(json);
+  Map<String, dynamic> toJson() => _$CategoryExpertToJson(this);
 }

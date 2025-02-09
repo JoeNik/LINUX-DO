@@ -7,7 +7,7 @@ class UserCache {
   UserCache._internal();
 
   // 用户头像URL缓存
-  final Map<int, UserData> _avatarUrls = {};
+  final Map<int, String> _avatarUrls = {};
   
   // 用户信息缓存
   final Map<int, User> _users = {};
@@ -23,18 +23,18 @@ class UserCache {
     if (users == null) return;
     for (final user in users) {
       _users[user.id] = user;
-      _avatarUrls[user.id] = UserData(
-        userName: user.name != null && user.name!.isNotEmpty ? user.name! : user.username ?? '',
-        avatarUrl: '${HttpConfig.baseUrl}${user.avatarTemplate!.replaceAll("{size}", "62")}',
-      );
+      _avatarUrls[user.id] = '${HttpConfig.baseUrl}${user.avatarTemplate!.replaceAll("{size}", "62")}';
     }
   }
 
   // 获取用户头像URL
-  String? getAvatarUrl(int userId) => _avatarUrls[userId]?.avatarUrl ?? '';
+  String? getAvatarUrl(int userId) => _avatarUrls[userId] ?? '';
 
-  // 获取用户名
-  String? getUserName(int userId) => _avatarUrls[userId]?.userName ?? '';
+  // 获取用户昵称
+  String? getNickName(int userId) => _users[userId]?.name ?? '';
+
+  // 获取用户用户名
+  String? getUserName(int userId) => _users[userId]?.username ?? '';
 
   // 获取用户信息
   User? getUser(int userId) => _users[userId];
@@ -45,13 +45,3 @@ class UserCache {
   // 检查是否有缓存
   bool hasCache(int userId) => _avatarUrls.containsKey(userId);
 } 
-
-class UserData {
-  final userName;
-  final avatarUrl;
-
-  UserData({
-    required this.userName,
-    required this.avatarUrl,
-  });
-}

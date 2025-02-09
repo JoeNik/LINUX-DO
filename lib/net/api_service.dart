@@ -118,6 +118,30 @@ abstract class ApiService {
       @Path('current') String current,
       @Body() UserPreferencesRequest userPreferencesRequest);
 
+  /// 查询用户卡片数据
+  @GET('u/{username}/card.json')
+  Future<UserResponse> getUserCard(
+    @Path('username') String username, {
+    @Query('include_post_count_for') int? includePostCountFor,
+  });
+
+  /// 操作用户认可
+  @PUT('category-experts/endorse/{username}.json')
+  Future<dynamic> endorseUserCategory(@Path('username') String username,
+      @Field('categoryIds') List<int> categoryIds);
+
+  /// 关注用户
+  @PUT('follow/{username}.json')
+  Future<SuccessResponse<dynamic>> followUser(@Path('username') String username);
+
+  /// 取消关注用户
+  @DELETE('follow/{username}.json')
+  Future<SuccessResponse<dynamic>> unfollowUser(@Path('username') String username);
+
+  /// 查询用户分类信息
+  @GET('category-experts/endorsable-categories/{username}.json')
+  Future<CategoryList> getUserCategories(@Path('username') String username);
+
   /// 总结数据
   @GET('u/{current}/summary.json')
   Future<SummaryResponse> getUserSummary(@Path("current") String current);
@@ -359,6 +383,4 @@ abstract class ApiService {
   // Future<dynamic> flagPost(
   //   @Field('id') String postId,
   // );
-
-  
 }

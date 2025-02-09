@@ -40,7 +40,5 @@ class App {
     // Tag的颜色
     Tag.init();
 
-    // 测试
-    // UserCache().clear();
   }
 }

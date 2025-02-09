@@ -46,6 +46,7 @@ class _MyBookmarksPageState extends State<MyBookmarksPage>
                       topic: topic,
                       avatarUrl: controller.getLatestPosterAvatar(topic),
                       nickName: controller.getNickName(topic),
+                      username: controller.getUserName(topic),
                       onTap: () => controller.toTopicDetail(topic.id),
                       onDoNotDisturb: (topic) {
                         controller.doNotDisturb(topic.id);

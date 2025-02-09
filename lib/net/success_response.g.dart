@@ -11,7 +11,7 @@ SuccessResponse<T> _$SuccessResponseFromJson<T>(
   T Function(Object? json) fromJsonT,
 ) =>
     SuccessResponse<T>(
-      success: json['success'] as String,
+      success: json['success'] as String?,
       data: _$nullableGenericFromJson(json['data'], fromJsonT),
     );
 

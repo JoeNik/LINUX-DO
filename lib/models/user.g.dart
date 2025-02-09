@@ -11,7 +11,7 @@ UserResponse _$UserResponseFromJson(Map<String, dynamic> json) => UserResponse(
           ?.map((e) => UserBadge.fromJson(e as Map<String, dynamic>))
           .toList(),
       badges: (json['badges'] as List<dynamic>?)
-          ?.map((e) => Badge.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => BadgeDetail.fromJson(e as Map<String, dynamic>))
           .toList(),
       badgeTypes: (json['badge_types'] as List<dynamic>?)
           ?.map((e) => BadgeType.fromJson(e as Map<String, dynamic>))
@@ -128,7 +128,7 @@ Map<String, dynamic> _$UserInfoToJson(UserInfo instance) => <String, dynamic>{
 CurrentUser _$CurrentUserFromJson(Map<String, dynamic> json) => CurrentUser(
       id: (json['id'] as num).toInt(),
       username: json['username'] as String,
-      name: json['name'] as String,
+      name: json['name'] as String?,
       avatarTemplate: json['avatar_template'] as String?,
       email: json['email'] as String?,
       secondaryEmails: (json['secondary_emails'] as List<dynamic>?)
@@ -178,7 +178,9 @@ CurrentUser _$CurrentUserFromJson(Map<String, dynamic> json) => CurrentUser(
       associatedAccounts: (json['associated_accounts'] as List<dynamic>?)
           ?.map((e) => Map<String, String>.from(e as Map))
           .toList(),
-      cardBadge: json['card_badge'] as String?,
+      cardBadge: json['card_badge'] == null
+          ? null
+          : UserCardBadge.fromJson(json['card_badge'] as Map<String, dynamic>),
       invitedBy: json['invited_by'] == null
           ? null
           : UserInfo.fromJson(json['invited_by'] as Map<String, dynamic>),
@@ -190,6 +192,18 @@ CurrentUser _$CurrentUserFromJson(Map<String, dynamic> json) => CurrentUser(
       status: json['status'] == null
           ? null
           : UserStatus.fromJson(json['status'] as Map<String, dynamic>),
+      totalFollowers: (json['total_followers'] as num?)?.toInt(),
+      totalFollowing: (json['total_following'] as num?)?.toInt(),
+      acceptedAnswers: (json['accepted_answers'] as num?)?.toInt(),
+      cakedate: json['cakedate'] as String?,
+      cardBackgroundUploadUrl: json['card_background_upload_url'] as String?,
+      bioExcerpt: json['bio_excerpt'] as String?,
+      endorseCategories:
+          (json['category_expert_endorsements'] as List<dynamic>?)
+              ?.map((e) => CategoryExpert.fromJson(e as Map<String, dynamic>))
+              .toList(),
+      voteCount: (json['vote_count'] as num?)?.toInt(),
+      isFollowed: json['is_followed'] as bool?,
     );
 
 Map<String, dynamic> _$CurrentUserToJson(CurrentUser instance) =>
@@ -204,6 +218,7 @@ Map<String, dynamic> _$CurrentUserToJson(CurrentUser instance) =>
       'last_posted_at': instance.lastPostedAt,
       'last_seen_at': instance.lastSeenAt,
       'created_at': instance.createdAt,
+      'cakedate': instance.cakedate,
       'ignored': instance.ignored,
       'muted': instance.muted,
       'can_ignore_user': instance.canIgnoreUser,
@@ -237,10 +252,76 @@ Map<String, dynamic> _$CurrentUserToJson(CurrentUser instance) =>
       'second_factor_enabled': instance.secondFactorEnabled,
       'second_factor_backup_enabled': instance.secondFactorBackupEnabled,
       'associated_accounts': instance.associatedAccounts,
-      'card_badge': instance.cardBadge,
       'invited_by': instance.invitedBy,
       'groups': instance.groups,
       'gamification_score': instance.gamificationScore,
       'user_option': instance.userAction,
       'status': instance.status,
+      'total_followers': instance.totalFollowers,
+      'total_following': instance.totalFollowing,
+      'accepted_answers': instance.acceptedAnswers,
+      'card_background_upload_url': instance.cardBackgroundUploadUrl,
+      'card_badge': instance.cardBadge,
+      'bio_excerpt': instance.bioExcerpt,
+      'category_expert_endorsements': instance.endorseCategories,
+      'vote_count': instance.voteCount,
+      'is_followed': instance.isFollowed,
+    };
+
+UserCardBadge _$UserCardBadgeFromJson(Map<String, dynamic> json) =>
+    UserCardBadge(
+      id: (json['id'] as num).toInt(),
+      description: json['description'] as String?,
+      grantCount: (json['grant_count'] as num?)?.toInt(),
+      allowTitle: json['allow_title'] as bool?,
+      multipleGrant: json['multiple_grant'] as bool?,
+      icon: json['icon'] as String?,
+      imageUrl: json['image_url'] as String?,
+      listable: json['listable'] as bool?,
+      enabled: json['enabled'] as bool?,
+      badgeGroupId: (json['badge_grouping_id'] as num?)?.toInt(),
+      system: json['system'] as bool?,
+      slug: json['slug'] as String?,
+      manuallyGrantable: json['manually_grantable'] as bool?,
+      showInPostHeader: json['show_in_post_header'] as bool?,
+      badgeTypeId: (json['badge_type_id'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$UserCardBadgeToJson(UserCardBadge instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'description': instance.description,
+      'grant_count': instance.grantCount,
+      'allow_title': instance.allowTitle,
+      'multiple_grant': instance.multipleGrant,
+      'icon': instance.icon,
+      'image_url': instance.imageUrl,
+      'listable': instance.listable,
+      'enabled': instance.enabled,
+      'badge_grouping_id': instance.badgeGroupId,
+      'system': instance.system,
+      'slug': instance.slug,
+      'manually_grantable': instance.manuallyGrantable,
+      'show_in_post_header': instance.showInPostHeader,
+      'badge_type_id': instance.badgeTypeId,
+    };
+
+CategoryExpert _$CategoryExpertFromJson(Map<String, dynamic> json) =>
+    CategoryExpert(
+      id: (json['id'] as num?)?.toInt(),
+      userId: (json['user_id'] as num?)?.toInt(),
+      endorsedUserId: (json['endorsed_user_id'] as num?)?.toInt(),
+      categoryId: (json['category_id'] as num?)?.toInt(),
+      createdAt: json['created_at'] as String?,
+      updatedAt: json['updated_at'] as String?,
+    );
+
+Map<String, dynamic> _$CategoryExpertToJson(CategoryExpert instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'user_id': instance.userId,
+      'endorsed_user_id': instance.endorsedUserId,
+      'category_id': instance.categoryId,
+      'created_at': instance.createdAt,
+      'updated_at': instance.updatedAt,
     };

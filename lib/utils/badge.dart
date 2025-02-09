@@ -75,27 +75,27 @@ const badgeNames = [
 class BadgeIconHelper {
   static final Map<String, IconData> _iconCache = {};
   static final Map<String, Color> _colorCache = {};
-  
+
   static IconData getIcon(String badgeName) {
     if (_iconCache.containsKey(badgeName)) {
       return _iconCache[badgeName]!;
     }
-    
+
     final icon = _getIconForBadge(badgeName);
     _iconCache[badgeName] = icon;
     return icon;
   }
-  
+
   static Color getColor(String badgeName) {
     if (_colorCache.containsKey(badgeName)) {
       return _colorCache[badgeName]!;
     }
-    
+
     final color = _generateColorFromName(badgeName);
     _colorCache[badgeName] = color;
     return color;
   }
-  
+
   static IconData _getIconForBadge(String badgeName) {
     // 根据徽章名称返回对应的图标
     switch (badgeName) {
@@ -199,27 +199,54 @@ class BadgeIconHelper {
         return CupertinoIcons.star; // 默认图标
     }
   }
-  
+
   static Color _generateColorFromName(String name) {
     final int hash = name.hashCode;
     const List<Color> baseColors = [
       Color(0xFF1abc9c),
       Color(0xFF2ecc71),
+      Color(0xFF27ae60),
+
       Color(0xFF3498db),
+      Color(0xFF2980b9),
+      Color(0xFF00bcd4),
+
       Color(0xFF9b59b6),
+      Color(0xFF8e44ad),
+      Color(0xFFe040fb),
+
       Color(0xFFf1c40f),
+      Color(0xFFffd700),
+      Color(0xFFffeb3b),
+
       Color(0xFFe67e22),
+      Color(0xFFff9800),
+      Color(0xFFff5722),
+
       Color(0xFFe74c3c),
-      Color(0xFF34495e),
+      Color(0xFFf44336),
+      Color(0xFFff4081),
+
+      Color(0xFF00acc1),
+      Color(0xFF26c6da),
+      Color(0xFF4dd0e1),
+
+      Color(0xFF4caf50),
+      Color(0xFF8bc34a),
+      Color(0xFF7cb342),
+      Color(0xFF009688),
+
+      Color(0xFF00bfa5),
+      Color(0xFF64ffda),
     ];
-    
+
     // 使用哈希值选择一个基础颜色
     final baseColor = baseColors[hash.abs() % baseColors.length];
-    
+
     // 使用哈希值微调色相，以获得更多变化
     final hslColor = HSLColor.fromColor(baseColor);
     final adjustedHue = (hslColor.hue + (hash % 30)) % 360;
-    
+
     return hslColor.withHue(adjustedHue).toColor();
   }
 }

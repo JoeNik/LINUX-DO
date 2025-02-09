@@ -26,8 +26,8 @@ class PreviewPostController extends BaseController {
     super.onClose();
   }
 
-  void launchUrl(String url) {
-    if (url.isEmpty) return;
+  void launchUrl(String? url) {
+    if (url == null || url.isEmpty) return;
     Get.toNamed(Routes.WEBVIEW, arguments: url);
   }
 } 

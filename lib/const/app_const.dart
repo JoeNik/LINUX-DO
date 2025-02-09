@@ -67,7 +67,11 @@ class AppConst {
   /// 活动相关
   static const activity = _Activity();
 
+  /// 生日相关
   static const _Birthday birthday = _Birthday();
+
+  /// 用户相关
+  static const user = _User();
 }
 
 /// 抽屉菜单文本
@@ -377,4 +381,36 @@ class _Group {
   String get error => '获取群组数据失败';
   String get empty => '暂无群组数据';
   String get search => '搜索群组';
+}
+
+class _User {
+  const _User();
+
+  String get noDescription => '暂无简介';
+  String get admin => '管理员';
+  String get joinTime => '加入时间';
+  String get postTime => '发布时间';
+  String get points => '点数';
+  String get follow => '关注';
+  String get followers => '关注者';
+  String get solutions => '解决方案';
+  String get like => '认可';
+  String get followUser => '关注';
+  String get unfollowUser => '取消关注';
+  String get message => '私信';
+  String get chat => '聊天';
+  String get failed => '失败，请稍后重试~';
+
+  // 用户优点选项
+  String get readingPoetry => '读书成诗';
+  String get sevenThree => '掐七捏三';
+  String get marketInsight => '跳蚤市场';
+  String get communityBuilding => '文档共建';
+  String get welfareSheep => '福利羊毛';
+  String get devOps => '开发调优';
+  String get frontierNews => '前沿快讯';
+  String get startupNavigation => '扬帆起航';
+  String get resourceSharing => '资源荟萃';
+  String get nonMainstream => '非我莫属';
+  
 }

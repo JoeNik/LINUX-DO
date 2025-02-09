@@ -1,12 +1,27 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:linux_do/widgets/dis_loading.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../const/app_colors.dart';
 import '../utils/log.dart';
+import '../utils/mixins/toast_mixin.dart';
+import '../net/http_client.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class ImagePreviewDialog extends StatelessWidget {
+import 'dis_button.dart';
+
+class ImagePreviewDialog extends StatelessWidget with ToastMixin {
   final String imageUrl;
   final String? heroTag;
 
@@ -16,8 +31,20 @@ class ImagePreviewDialog extends StatelessWidget {
     this.heroTag,
   }) : super(key: key);
 
+  // 将缩略图URL转换为原图URL
+  String _getOriginalImageUrl(String url) {
+    if (url.contains('/optimized/')) {
+      return url.replaceFirst('/optimized/', '/original/').replaceAll(RegExp(r'_\d+_\d+x\d+'), '');
+    }
+    return url;
+  }
+
   @override
   Widget build(BuildContext context) {
+    // 获取原图URL
+    final originalImageUrl = _getOriginalImageUrl(imageUrl);
+    l.d('Original image URL: $originalImageUrl');
+
     return Dialog(
       insetPadding: EdgeInsets.zero,
       backgroundColor: Colors.transparent,
@@ -27,25 +54,17 @@ class ImagePreviewDialog extends StatelessWidget {
           // 图片预览
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
+            onLongPress: () => _showSaveOptions(context),
             child: Container(
               color: Colors.black87,
               child: PhotoView(
                 imageProvider: CachedNetworkImageProvider(
-                  imageUrl,
+                  originalImageUrl,
                   maxWidth: 2048,
                   maxHeight: 2048,
                 ),
                 loadingBuilder: (context, event) => Center(
-                  child: SizedBox(
-                    width: 40.w,
-                    height: 40.w,
-                    child: CircularProgressIndicator(
-                      value: event?.expectedTotalBytes != null
-                          ? event!.cumulativeBytesLoaded / event.expectedTotalBytes!
-                          : null,
-                      color: AppColors.primary,
-                    ),
-                  ),
+                  child: DisRefreshLoading(),
                 ),
                 errorBuilder: (context, error, stackTrace) {
                   l.e('图片加载失败: $error');
@@ -108,11 +127,278 @@ class ImagePreviewDialog extends StatelessWidget {
       ),
     );
   }
+
+  void _showSaveOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16.w)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 标题
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 16.w),
+                child: Text(
+                  '保存图片',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              // 选项列表
+              ListTile(
+                leading: Icon(
+                  CupertinoIcons.photo_fill_on_rectangle_fill,
+                  color: Theme.of(context).primaryColor,
+                ),
+                title: const Text('保存到相册'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _saveToGallery(_getOriginalImageUrl(imageUrl));
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  CupertinoIcons.folder_solid,
+                  color: Theme.of(context).primaryColor,
+                ),
+                title: const Text('保存到文件'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _saveToFile(_getOriginalImageUrl(imageUrl));
+                },
+              ),
+              // 取消按钮
+              Container(
+                width: double.infinity,
+                margin: EdgeInsets.all(16.w),
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 12.w),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.w),
+                    ),
+                    backgroundColor:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  ),
+                  child: Text(
+                    '取消',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openAppSettings() async {
+    if (Platform.isIOS) {
+      final url = Uri.parse('app-settings:');
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+      }
+    } else {
+      await openAppSettings();
+    }
+  }
+
+  Future<void> _saveToGallery(String imageUrl) async {
+    try {
+      PermissionStatus status;
+      if (Platform.isIOS) {
+        status = await Permission.photosAddOnly.status;
+        l.d('Initial photosAddOnly permission status: $status');
+        
+        if (status.isPermanentlyDenied) {
+          // 如果权限被永久拒绝，直接显示设置对话框
+          _showSettingsDialog();
+          return;
+        } else if (status.isDenied) {
+          // 只有在权限是 denied 状态时才请求权限
+          status = await Permission.photosAddOnly.request();
+          l.d('After request, permission status: $status');
+        }
+      } else {
+        status = await Permission.storage.status;
+        l.d('Initial storage permission status: $status');
+        
+        if (status.isPermanentlyDenied) {
+          // 如果权限被永久拒绝，直接显示设置对话框
+          _showSettingsDialog();
+          return;
+        } else if (status.isDenied) {
+          // 只有在权限是 denied 状态时才请求权限
+          status = await Permission.storage.request();
+          l.d('After request, permission status: $status');
+        }
+      }
+
+      if (status.isGranted || (Platform.isIOS && status.isLimited)) {
+        l.d('Permission is granted or limited, proceeding to save');
+        try {
+          final response = await Dio().get(
+            imageUrl,
+            options: Options(responseType: ResponseType.bytes),
+          );
+          final result = await ImageGallerySaver.saveImage(
+            Uint8List.fromList(response.data),
+            quality: 100,
+          );
+          l.d('Save result: $result');
+          if (result['isSuccess']) {
+            showSuccess('图片已保存到相册');
+          } else {
+            showError('保存失败');
+          }
+        } catch (e) {
+          l.e('Error saving image: $e');
+          showError('保存失败');
+        }
+      } else {
+        showError('没有权限');
+      }
+    } catch (e) {
+      l.e('Error in _saveToGallery: $e');
+      showError('保存失败');
+    }
+  }
+
+  void _showSettingsDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('需要权限'),
+        content: const Text('保存图片需要访问相册权限，请在设置中开启权限'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              if (Platform.isIOS) {
+                final url = Uri.parse('app-settings:');
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url);
+                }
+              } else {
+                await openAppSettings();
+              }
+            },
+            child: const Text('去设置'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveToFile(String imageUrl) async {
+    try {
+      var status = await Permission.storage.request();
+      if (status.isGranted) {
+        try {
+          // 从 URL 中获取文件名
+          String fileName = imageUrl.split('/').last;
+          if (!fileName.contains('.')) {
+            fileName = '$fileName.jpg';
+          }
+
+          // 让用户选择保存位置
+          String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+          if (selectedDirectory == null) {
+            print('User cancelled directory selection');
+            return;
+          }
+
+          // 下载图片
+          final response = await Dio().get(
+            imageUrl,
+            options: Options(responseType: ResponseType.bytes),
+          );
+
+          // iOS 获取 documents 目录
+          Directory? directory;
+          if (Platform.isIOS) {
+            directory = await getApplicationDocumentsDirectory();
+            selectedDirectory = directory.path;
+          }
+
+          // 保存文件
+          final file = File('$selectedDirectory/$fileName');
+          await file.writeAsBytes(response.data);
+
+          // 显示成功信息
+          if (Platform.isIOS) {
+            // iOS 需要将文件保存到相册后删除临时文件
+            final result = await ImageGallerySaver.saveFile(file.path);
+            if (result['isSuccess']) {
+              Get.snackbar('成功', '图片已保存到相册');
+            } else {
+              Get.snackbar('错误', '保存失败');
+            }
+            await file.delete();
+          } else {
+            Get.snackbar('成功', '图片已保存到: ${file.path}');
+          }
+        } catch (e) {
+          print('Error saving file: $e');
+          Get.snackbar('错误', '保存文件失败');
+        }
+      } else if (status.isPermanentlyDenied) {
+        final result = await Get.dialog<bool>(
+          AlertDialog(
+            title: const Text('需要权限'),
+            content: const Text('保存文件需要存储权限，请在设置中开启。'),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(result: false),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Get.back(result: true);
+                  _openAppSettings();
+                },
+                child: const Text('去设置'),
+              ),
+            ],
+          ),
+        );
+        if (result == true) {
+          print('User directed to settings to enable storage permission');
+        } else {
+          print('User cancelled permission request');
+        }
+      } else {
+        Get.snackbar('错误', '无法获取存储权限');
+        print('Storage permission denied: $status');
+      }
+    } catch (e) {
+      print('Error in _saveToFile: $e');
+      Get.snackbar('错误', '保存文件失败');
+    }
+  }
 }
 
 /// 显示图片预览弹窗的便捷方法
-void showImagePreview(BuildContext context, String imageUrl, {String? heroTag}) {
-  l.d('显示图片预览: imageUrl=$imageUrl, heroTag=$heroTag');
+void showImagePreview(BuildContext context, String imageUrl,
+    {String? heroTag}) {
+  l.d('showImagePreview: $imageUrl');
   showDialog(
     context: context,
     builder: (context) => ImagePreviewDialog(
@@ -120,4 +406,4 @@ void showImagePreview(BuildContext context, String imageUrl, {String? heroTag}) 
       heroTag: heroTag,
     ),
   );
-} 
+}

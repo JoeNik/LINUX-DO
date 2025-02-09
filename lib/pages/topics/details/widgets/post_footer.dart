@@ -289,7 +289,9 @@ class _ReplyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => controller.startReply(post.postNumber, post.name),
+      onTap: () => {
+        controller.startReply(post.postNumber, post.cooked, post.name?.isEmpty ?? true ? post.username : post.name)
+      },
       child: Row(
         children: [
           Icon(

@@ -5,7 +5,6 @@ import 'package:linux_do/const/app_spacing.dart';
 
 import '../../const/app_images.dart';
 import '../../controller/base_controller.dart';
-import '../../models/user.dart';
 import '../../net/api_service.dart';
 import '../../routes/app_pages.dart';
 import '../topics/topics_controller.dart';
@@ -45,7 +44,7 @@ class HomeController extends BaseController{
     topicsController = Get.find<TopicsController>();
 
     // 模拟请求的数据
-    badgeCount = {0: '12'};
+     // badgeCount = {0: '12'};
   }
 
 

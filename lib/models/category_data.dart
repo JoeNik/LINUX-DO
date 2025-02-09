@@ -31,17 +31,17 @@ class CategoryList {
 @JsonSerializable()
 class Category {
   final int id;
-  final String name;
+  final String? name;
   @JsonKey(name: 'color')
   final String? color;
   @JsonKey(name: 'text_color')
   final String? textColor;
   final String? description;
   @JsonKey(name: 'topic_count')
-  final int topicCount;
+  final int? topicCount;
   @JsonKey(name: 'post_count')
-  final int postCount;
-  final int position;
+  final int? postCount;
+  final int? position;
   @JsonKey(name: 'description_text')
   final String? descriptionText;
   @JsonKey(name: 'description_excerpt')
@@ -49,8 +49,8 @@ class Category {
   @JsonKey(name: 'topic_url')
   final String? topicUrl;
   @JsonKey(name: 'read_restricted')
-  final bool readRestricted;
-  final int permission;
+  final bool? readRestricted;
+  final int? permission;
   @JsonKey(name: 'notification_level')
   final int? notificationLevel;
   @JsonKey(name: 'can_edit')
@@ -86,18 +86,18 @@ class Category {
 
   Category({
     required this.id,
-    required this.name,
+    this.name,
     this.color,
     this.textColor,
     this.description,
-    required this.topicCount,
-    required this.postCount,
-    required this.position,
+    this.topicCount,
+    this.postCount,
+    this.position,
     this.descriptionText,
     this.descriptionExcerpt,
     this.topicUrl,
-    required this.readRestricted,
-    required this.permission,
+    this.readRestricted,
+    this.permission,
     this.notificationLevel,
     this.canEdit,
     this.topicTemplate,
@@ -229,4 +229,4 @@ class LastPoster {
   factory LastPoster.fromJson(Map<String, dynamic> json) =>
       _$LastPosterFromJson(json);
   Map<String, dynamic> toJson() => _$LastPosterToJson(this);
-} 
+}

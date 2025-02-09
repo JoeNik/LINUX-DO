@@ -4,11 +4,11 @@ part 'success_response.g.dart';
 
 @JsonSerializable(genericArgumentFactories: true)
 class SuccessResponse<T> {
-  final String success;
+  final String? success;
   final T? data;
 
   SuccessResponse({
-    required this.success,
+    this.success,
     this.data,
   });
 

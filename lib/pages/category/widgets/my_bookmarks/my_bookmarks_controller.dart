@@ -129,7 +129,14 @@ class MyBookmarksController extends BaseController
   String? getNickName(Topic topic) {
     final latestPosterId = topic.getOriginalPosterId();
     if (latestPosterId == null) return null;
-    return _userCache.getUserName(latestPosterId);
+    return _userCache.getNickName(latestPosterId);
+  }
+
+    // 获取用户名
+  String? getUserName(Topic topic) {
+    final id = topic.getOriginalPosterId();
+    if (id == null) return null;
+    return _userCache.getUserName(id);
   }
 
   Future<void> doNotDisturb(int id) async {

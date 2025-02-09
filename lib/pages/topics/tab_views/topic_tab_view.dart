@@ -56,7 +56,9 @@ class _TopicTabViewState extends State<TopicTabView>
                       topic: topic,
                       avatarUrl: controller.getLatestPosterAvatar(topic),
                       nickName: controller.getNickName(topic),
-                      onTap: () => controller.toTopicDetail(topic.id),
+                      username: controller.getUserName(topic),
+                      onTap: () {
+                        controller.toTopicDetail(topic.id);},
                       onDoNotDisturb: (topic) {
                         controller.doNotDisturb(topic.id);
                       },

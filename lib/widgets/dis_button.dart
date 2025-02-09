@@ -1,55 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../const/app_colors.dart';
 
 enum ButtonType {
-  primary,   // 主按钮
+  primary, // 主按钮
   secondary, // 次要按钮
-  text,      // 文本按钮
-  outline,   // 边框按钮
+  text, // 文本按钮
+  outline, // 边框按钮
   transform, // 变换按钮 - 支持加载动画和宽度变换效果
 }
 
 enum ButtonSize {
-  small,   // 小按钮
-  medium,  // 中等按钮
-  large,   // 大按钮
+  small, // 小按钮
+  medium, // 中等按钮
+  large, // 大按钮
 }
-
 
 /// LiDo主题按钮组件
 /// 支持多种按钮类型:
-/// - primary: 主按钮
+/// - primary: 主按钮（渐变色）
 /// - secondary: 次要按钮
 /// - text: 文本按钮
 /// - outline: 边框按钮
-/// - transform: 变换按钮(支持加载动画和宽度变换)
+/// - transform: 变换按钮(支持加载动画和宽度变换)（渐变色）
 class DisButton extends StatefulWidget {
-  final String text;                    // 按钮文本
-  final VoidCallback? onPressed;        // 点击回调
-  final ButtonType type;           // 按钮类型
-  final ButtonSize size;           // 按钮大小
-  final bool loading;                  // 是否处于加载状态
-  final bool block;                    // 是否块级按钮
-  final IconData? icon;                // 图标
-  final double? width;                 // 自定义宽度
-  final EdgeInsetsGeometry? margin;    // 外边距
-  final bool useWidthAnimation;        // 是否使用宽度动画(仅transform类型有效)
-  final Widget? loadingStateWidget;    // 自定义加载组件(仅transform类型有效)
+  final String? text; // 按钮文本
+  final VoidCallback? onPressed; // 点击回调
+  final ButtonType type; // 按钮类型
+  final ButtonSize size; // 按钮大小
+  final bool? loading; // 是否处于加载状态
+  final bool block; // 是否块级按钮
+  final IconData? icon; // 图标
+  final double? width; // 自定义宽度
+  final EdgeInsetsGeometry? margin; // 外边距
+  final bool useWidthAnimation; // 是否使用宽度动画(仅transform类型有效)
+  final Widget? loadingStateWidget; // 自定义加载组件(仅transform类型有效)
+  final bool? disabled; // 是否禁用按钮
+  final double? spacing; // Add spacing property
 
   const DisButton({
     super.key,
-    required this.text,
+    this.text,
     this.onPressed,
     this.type = ButtonType.primary,
     this.size = ButtonSize.medium,
-    this.loading = false,
+    this.loading,
     this.block = false,
     this.icon,
     this.width,
     this.margin,
     this.useWidthAnimation = false,
     this.loadingStateWidget,
+    this.disabled,
+    this.spacing,
   });
 
   @override
@@ -86,74 +90,151 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final fontSize = _getFontSize();
-    final height = _getHeight();
-    final iconSize = _getIconSize();
+    final loading = widget.loading ?? false;
+    final disabled = widget.disabled ?? false;
+    final onPressed = (loading || disabled) ? null : widget.onPressed;
+
     final style = _getButtonStyle(theme);
 
-    Widget child = Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (widget.loading) ...[
-          SizedBox(
-            width: iconSize,
-            height: iconSize,
-            child: widget.loadingStateWidget ?? CircularProgressIndicator(
-              strokeWidth: 2.w,
-              valueColor: AlwaysStoppedAnimation<Color>(_getLoadingColor(theme)),
+    Widget child;
+    if (widget.type == ButtonType.primary) {
+      child = Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              theme.primaryColor,
+              theme.primaryColor.withValues(alpha: .65),
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(4.w),
+        ),
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: style,
+          child: _buildChild(theme),
+        ),
+      );
+    } else if (widget.type == ButtonType.transform) {
+      if (widget.useWidthAnimation) {
+        child = PhysicalModel(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(_borderRadius),
+          child: SizedBox(
+            key: _globalKey,
+            height: _height,
+            width: _width,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    theme.primaryColor,
+                    theme.primaryColor.withValues(alpha: .65),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: BorderRadius.circular(_borderRadius),
+              ),
+              child: ElevatedButton(
+                onPressed: loading ? null : _handlePress,
+                style: style,
+                child: _buildChild(theme),
+              ),
             ),
           ),
-          SizedBox(width: 8.w),
-        ] else if (widget.icon != null) ...[
-          Icon(widget.icon, size: iconSize),
-          SizedBox(width: 8.w),
-        ],
-        Text(
-          widget.text,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.w500,
+        );
+      } else {
+        child = Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                theme.primaryColor,
+                theme.primaryColor.withValues(alpha: .65),
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(_borderRadius),
           ),
-        ),
-      ],
-    );
+          child: ElevatedButton(
+            onPressed: onPressed,
+            style: style,
+            child: _buildChild(theme),
+          ),
+        );
+      }
+    } else {
+      child = ElevatedButton(
+        onPressed: onPressed,
+        style: style,
+        child: _buildChild(theme),
+      );
+    }
 
     if (widget.block) {
       child = Center(child: child);
     }
 
-    if (widget.type == ButtonType.transform && widget.useWidthAnimation) {
-      return PhysicalModel(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(_borderRadius),
-        child: SizedBox(
-          key: _globalKey,
-          height: _height,
-          width: _width,
-          child: ElevatedButton(
-            onPressed: widget.loading ? null : _handlePress,
-            style: style,
-            child: child,
-          ),
-        ),
-      );
-    }
-
     return Container(
       width: widget.block ? double.infinity : widget.width,
-      height: height,
+      height: _height,
       margin: widget.margin,
-      child: ElevatedButton(
-        onPressed: widget.loading ? null : widget.onPressed,
-        style: style,
-        child: child,
-      ),
+      child: child,
     );
   }
 
+  Widget _buildChild(ThemeData theme) {
+    final fontSize = _getFontSize();
+    final iconSize = _getIconSize();
+
+    Widget child = Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (widget.icon != null) ...[
+          Icon(
+            widget.icon,
+            size: iconSize,
+            color: widget.type == ButtonType.primary
+                ? Colors.white
+                : theme.primaryColor,
+          ),
+          SizedBox(width: widget.spacing ?? 4.w),
+        ],
+        if ((widget.loading ?? false)) ...[
+          SizedBox(
+            width: iconSize,
+            height: iconSize,
+            child: widget.loadingStateWidget ??
+                CircularProgressIndicator(
+                  strokeWidth: 2.w,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    _getLoadingColor(theme),
+                  ),
+                ),
+          ),
+        ] else
+          Text(
+            widget.text ?? '',
+            style: TextStyle(
+              fontSize: fontSize,
+              color: widget.type == ButtonType.primary ||
+                      widget.type == ButtonType.transform
+                  ? Colors.white
+                  : theme.primaryColor,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+      ],
+    );
+
+    return child;
+  }
+
   Future<void> _handlePress() async {
-    if (widget.loading || widget.onPressed == null) return;
+    if ((widget.loading ?? false) || widget.onPressed == null) return;
 
     if (widget.useWidthAnimation) {
       _forward();
@@ -228,23 +309,23 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
   double _getIconSize() {
     switch (widget.size) {
       case ButtonSize.small:
-        return 16.w;
+        return 14.w;
       case ButtonSize.medium:
-        return 18.w;
+        return 16.w;
       case ButtonSize.large:
-        return 20.w;
+        return 18.w;
     }
   }
 
   ButtonStyle _getButtonStyle(ThemeData theme) {
     final baseStyle = switch (widget.type) {
       ButtonType.primary => ElevatedButton.styleFrom(
-          backgroundColor: theme.primaryColor,
+          backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
           padding: _getPadding(),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(widget.type == ButtonType.transform ? _borderRadius : 4.w),
+            borderRadius: BorderRadius.circular(4.w),
           ),
         ),
       ButtonType.secondary => ElevatedButton.styleFrom(
@@ -290,7 +371,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
           ),
         ),
       ButtonType.transform => ElevatedButton.styleFrom(
-          backgroundColor: theme.primaryColor,
+          backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
           padding: _getPadding(),
           elevation: 0,
@@ -309,20 +390,19 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
       _ => theme.primaryColor,
     };
   }
-} 
-
+}
 
 /// 按钮状态
 enum LiDoTransformButtonState {
-  idle,     // 空闲状态
-  loading,  // 加载状态
+  idle, // 空闲状态
+  loading, // 加载状态
 }
 
 /// 按钮类型
 enum LiDoTransformButtonType {
-  elevated,  // 凸起按钮
-  outlined,  // 边框按钮
-  text,      // 文本按钮
+  elevated, // 凸起按钮（渐变色）
+  outlined, // 边框按钮
+  text, // 文本按钮
 }
 
 /// 变换按钮组件
@@ -383,7 +463,8 @@ class LiDoTransformButton extends StatefulWidget {
   State createState() => _LiDoTransformButtonState();
 }
 
-class _LiDoTransformButtonState extends State<LiDoTransformButton> with TickerProviderStateMixin {
+class _LiDoTransformButtonState extends State<LiDoTransformButton>
+    with TickerProviderStateMixin {
   final GlobalKey _globalKey = GlobalKey();
 
   Animation? _anim;
@@ -435,14 +516,13 @@ class _LiDoTransformButtonState extends State<LiDoTransformButton> with TickerPr
 
   Widget _buildChild(BuildContext context) {
     var padding = EdgeInsets.all(widget.contentGap);
-    var buttonColor = widget.buttonColor;
     var shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(_borderRadius),
     );
 
     final ButtonStyle elevatedButtonStyle = ElevatedButton.styleFrom(
       padding: padding,
-      backgroundColor: buttonColor,
+      backgroundColor: Colors.transparent,
       elevation: widget.elevation,
       shape: shape,
     );
@@ -451,7 +531,7 @@ class _LiDoTransformButtonState extends State<LiDoTransformButton> with TickerPr
       padding: padding,
       shape: shape,
       side: BorderSide(
-        color: buttonColor,
+        color: widget.buttonColor,
       ),
     );
 
@@ -461,10 +541,23 @@ class _LiDoTransformButtonState extends State<LiDoTransformButton> with TickerPr
 
     switch (widget.type) {
       case LiDoTransformButtonType.elevated:
-        return ElevatedButton(
-          style: elevatedButtonStyle,
-          onPressed: _onButtonPressed(),
-          child: _buildChildren(context),
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor,
+                Theme.of(context).primaryColor.withValues(alpha: .8),
+              ],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            borderRadius: BorderRadius.circular(_borderRadius),
+          ),
+          child: ElevatedButton(
+            style: elevatedButtonStyle,
+            onPressed: _onButtonPressed(),
+            child: _buildChildren(context),
+          ),
         );
       case LiDoTransformButtonType.outlined:
         return TextButton(
@@ -581,4 +674,4 @@ class _LiDoTransformButtonState extends State<LiDoTransformButton> with TickerPr
   void _reverse() {
     _animController!.reverse();
   }
-} 
+}

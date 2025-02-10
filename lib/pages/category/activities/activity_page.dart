@@ -72,7 +72,7 @@ class ActivityPage extends GetView<EventController> {
               );
             },
             calendarType: CalendarDatePicker2Type.range,
-            selectedDayHighlightColor: AppColors.primary,
+            selectedDayHighlightColor: Theme.of(context).primaryColor,
             weekdayLabels: ['日', '一', '二', '三', '四', '五', '六'],
             weekdayLabelTextStyle: TextStyle(
               color: Theme.of(context).hintColor,
@@ -90,7 +90,7 @@ class ActivityPage extends GetView<EventController> {
               fontFamily: AppFontFamily.dinPro,
             ),
             todayTextStyle: TextStyle(
-              color: AppColors.primary,
+              color: Theme.of(context).primaryColor,
               fontSize: 14.w,
               fontWeight: FontWeight.bold,
               fontFamily: AppFontFamily.dinPro,
@@ -200,13 +200,13 @@ class ActivityPage extends GetView<EventController> {
                       AppConst.activity.viewDetail,
                       style: TextStyle(
                         fontSize: 12.w,
-                        color: AppColors.primary,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                     Icon(
                       Icons.arrow_forward_ios,
                       size: 12.w,
-                      color: AppColors.primary,
+                      color: Theme.of(context).primaryColor,
                     ),
                   ],
                 ),

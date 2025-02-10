@@ -219,7 +219,7 @@ class DrawerMenu extends StatelessWidget {
                 style: TextStyle(
                   fontSize: AppSizes.fontNormal,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.primary,
+                  color: Theme.of(context).primaryColor,
                 ),
               ),
               if (showViewAll) ...[
@@ -229,7 +229,7 @@ class DrawerMenu extends StatelessWidget {
                   icon: Icon(
                     CupertinoIcons.pencil_circle_fill,
                     size: AppSizes.iconSmall,
-                    color: AppColors.primary,
+                    color: Theme.of(context).primaryColor,
                   ),
                 )
               ],
@@ -278,8 +278,8 @@ class DrawerMenu extends StatelessWidget {
               Container(
                 width: 6.w,
                 height: 6.w,
-                decoration: const BoxDecoration(
-                  color: AppColors.primary,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
                   shape: BoxShape.circle,
                 ),
               ),

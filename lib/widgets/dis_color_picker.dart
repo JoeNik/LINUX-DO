@@ -1,11 +1,13 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:linux_do/const/app_const.dart';
 import '../const/app_colors.dart';
 import '../const/app_spacing.dart';
 
-MaterialColor primaryMaterial = AppColors.createMaterialColor(AppColors.primary);
-
+MaterialColor primaryMaterial =
+    AppColors.createMaterialColor(AppColors.primary);
 
 /// 颜色选择器弹窗
 class DisColorPicker {
@@ -47,24 +49,15 @@ class DisColorPicker {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          '选择颜色',
+          AppConst.settings.themeColor,
           style: TextStyle(
-            fontSize: 18.w,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(Get.context!).primaryColor
-          ),
-        ),
-        Text(
-          '(测试-可能存在bug)',
-          style: TextStyle(
-            fontSize: 10.w,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(Get.context!).primaryColor
-          ),
+              fontSize: 15.w,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(Get.context!).primaryColor),
         ),
         IconButton(
           onPressed: () => Get.back(),
-          icon: Icon(Icons.close, size: 20.w),
+          icon: Icon(CupertinoIcons.clear, size: 20.w),
         ),
       ],
     );
@@ -87,7 +80,6 @@ class _ColorPickerContent extends StatefulWidget {
 }
 
 class _ColorPickerContentState extends State<_ColorPickerContent> {
-  
   /// 主题色列表
   static final List<MaterialColor> _colors = [
     Colors.red,
@@ -176,7 +168,7 @@ class _ColorPickerContentState extends State<_ColorPickerContent> {
       _currentColor = color;
       _showShades = true;
     });
-    widget.onColorSelected?.call(color);
+     // widget.onColorSelected?.call(color);
   }
 
   /// 选择色调
@@ -206,7 +198,11 @@ class _ColorPickerContentState extends State<_ColorPickerContent> {
               children: [
                 IconButton(
                   onPressed: _onBack,
-                  icon: const Icon(Icons.arrow_back),
+                  icon: Icon(
+                    size: 24.w,
+                    CupertinoIcons.chevron_left_circle,
+                    color: Theme.of(Get.context!).primaryColor,
+                  ),
                 ),
               ],
             ),
@@ -271,7 +267,7 @@ class _ColorCircle extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -279,7 +275,7 @@ class _ColorCircle extends StatelessWidget {
         ),
         child: isSelected
             ? Icon(
-                Icons.check,
+                CupertinoIcons.checkmark_circle,
                 color: Colors.white,
                 size: 24.w,
               )
@@ -287,4 +283,4 @@ class _ColorCircle extends StatelessWidget {
       ),
     );
   }
-} 
+}

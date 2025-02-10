@@ -68,7 +68,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                   });
 
                   return Container(
-                    color: AppColors.primary.withValues(alpha: progress),
+                    color: Theme.of(context).primaryColor.withValues(alpha: progress),
                     child: FlexibleSpaceBar(
                       background: Stack(
                         fit: StackFit.expand,
@@ -222,9 +222,9 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                     containerWight: MediaQuery.of(context).size.width - 40.w,
                     initialIndex: controller.selectedIndex,
                     containerColor: Theme.of(context).cardColor,
-                    slidersGradients: const [
+                    slidersGradients: [
                       LinearGradient(
-                          colors: [AppColors.primary, AppColors.secondary2])
+                          colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.6)])
                     ],
                     onSelect: (index) => controller.selectedIndex = index,
                     children: [
@@ -258,7 +258,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.primary, width: 2.w),
+                      border: Border.all(color: Theme.of(context).primaryColor, width: 2.w),
                       borderRadius: BorderRadius.circular(45.w)),
                   child: CachedImage(
                     imageUrl: user?.getAvatar(240) ?? '',
@@ -335,7 +335,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                   color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(14.w)),
               child: InkWell(
-                onTap: () => showCustomStatusDialog(),
+                onTap: () => showCustomStatusDialog(context),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -406,7 +406,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
     );
   }
 
-  void showCustomStatusDialog() {
+  void showCustomStatusDialog(BuildContext context) {
     Get.dialog(
       Dialog(
         insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -435,7 +435,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
 
                   //       border: OutlineInputBorder(
                   //         borderSide:
-                  //             BorderSide(color: AppColors.primary, width: .5.w),
+                  //             BorderSide(color: Theme.of(context).primaryColor, width: .5.w),
                   //       ),
                   //       hintStyle: TextStyle(
                   //           color: Theme.of(Get.context!).hintColor,
@@ -488,7 +488,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                     child: Text(
                       AppConst.cancel,
                       style:
-                          TextStyle(color: AppColors.primary, fontSize: 12.sp),
+                          TextStyle(color: Theme.of(context).primaryColor, fontSize: 12.sp),
                     ),
                   ),
                   8.hGap,

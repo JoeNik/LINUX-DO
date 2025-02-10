@@ -23,9 +23,9 @@ class BirthdayPage extends GetView<BirthdayController> {
         ),
         bottom: TabBar(
           controller: controller.tabController,
-          labelColor: AppColors.primary,
+          labelColor: Theme.of(context).primaryColor,
           unselectedLabelColor: Theme.of(context).hintColor,
-          indicatorColor: AppColors.primary,
+          indicatorColor: Theme.of(context).primaryColor,
           indicatorSize: TabBarIndicatorSize.label,
           tabs: [
             Tab(text: AppConst.birthday.today),

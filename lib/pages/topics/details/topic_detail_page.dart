@@ -170,56 +170,59 @@ class TopicDetailPage extends GetView<TopicDetailController> {
   }
 
   Widget _buildPostItem(BuildContext context, PostNode node) {
-    return Card(
-      elevation: node.post.replyToPostNumber == null ? 0.7 : 0,
-      margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(12.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    6.vGap,
-                    PostHeader(post: node.post),
-                    2.vGap,
-                    PostContent(node: node),
-                    2.vGap,
-                    PostFooter(post: node.post),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
-                  decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(12.w),
-                      bottomLeft: Radius.circular(12.w),
-                    ),
-                  ),
-                  child: Text(
-                    '#${node.post.postNumber}',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 10.w,
-                      fontFamily: AppFontFamily.dinPro,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return GetBuilder<TopicDetailController>(
+      id: 'post_${node.post.postNumber}',
+      builder: (controller) => Card(
+        elevation: node.post.replyToPostNumber == null ? 0.7 : 0,
+        margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(12.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      6.vGap,
+                      PostHeader(post: node.post),
+                      2.vGap,
+                      PostContent(node: node),
+                      2.vGap,
+                      PostFooter(post: node.post),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
+                    decoration: BoxDecoration(
+                      color:
+                          Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(12.w),
+                        bottomLeft: Radius.circular(12.w),
+                      ),
+                    ),
+                    child: Text(
+                      '#${node.post.postNumber}',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: 10.w,
+                        fontFamily: AppFontFamily.dinPro,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -252,8 +255,8 @@ class TopicDetailPage extends GetView<TopicDetailController> {
             height: 25.w,
             circle: !(createUser?.isWebMaster() ?? false),
             borderRadius: BorderRadius.circular(4.w),
-            placeholder: const CircularProgressIndicator(
-              color: AppColors.primary,
+            placeholder: CircularProgressIndicator(
+              color: Theme.of(context).primaryColor,
             ),
             errorWidget: Icon(
               Icons.account_circle,
@@ -273,7 +276,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                   style: theme.textTheme.bodyMedium?.copyWith(
                       fontSize: 10.sp,
                       color: createUser?.isWebMaster() ?? false
-                          ? AppColors.primary
+                          ? Theme.of(context).primaryColor
                           : theme.textTheme.bodyMedium?.color,
                       fontWeight: createUser?.isWebMaster() ?? false
                           ? FontWeight.bold

@@ -227,6 +227,15 @@ abstract class ApiService {
   @PUT('discourse-reactions/posts/{post_id}/custom-reactions/heart/toggle.json')
   Future<Post> togglePostLike(@Path('post_id') String postId);
 
+  /// 删除帖子
+  @DELETE('posts/{post_id}')
+  Future<void> deletePost(@Path('post_id') String postId,
+  {@Query('context') String? context});
+
+  /// 获取删除的帖子
+  @GET('posts/{post_id}')
+  Future<Post> getDeletedPosts(@Path('post_id') String postId);
+
   @GET('categories.json')
   Future<CategoryListResponse> getCategories();
 

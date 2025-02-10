@@ -32,6 +32,9 @@ class AppConst {
   /// 支持的语言
   static const supportedLanguages = ['en', 'zh'];
 
+  /// 常见问题
+  static const faq = 'faq';
+
   /// 抽屉菜单
   static const drawerMenu = _DrawerMenu();
 
@@ -142,6 +145,8 @@ class _Identifier {
   String get isLogin => 'isLogin';
   String get csrfToken => 'csrfToken';
   String get clientId => 'clientId';
+
+  String get themeColor => 'themeColor';
 }
 
 /// 登录页面文本
@@ -207,6 +212,7 @@ class _Settings {
   String get cancel => '取消';
   String get confirm => '确定';
   String get status => '输入你的状态...';
+  String get themeColor => '请选择主题颜色';
 }
 
 class _Posts {
@@ -221,6 +227,9 @@ class _Posts {
   String get replyFailed => '回复失败';
   String get searchTopic => '搜索话题';
   String get copySuccess => '复制成功';
+  String get deleteSuccess => '删除成功';
+  String get deleteFailed => '删除失败';
+  String get deletePost => '帖子已被作者删除';
   
   // 举报相关
   List<Map<String, String>> get reasons => [

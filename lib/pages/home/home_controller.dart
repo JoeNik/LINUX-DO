@@ -145,7 +145,7 @@ class HomeController extends BaseController{
                         Get.toNamed(Routes.CREATE_TOPIC);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
+                        backgroundColor: Theme.of(context).primaryColor,
                         foregroundColor:
                             Theme.of(context).textTheme.titleLarge?.color,
                         elevation: 0,

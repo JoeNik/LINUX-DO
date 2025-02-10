@@ -47,7 +47,6 @@ class _NotificationItem extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       onTap: () {
-        l.d('notification: ${notification.toJson()}');
         if (notification.topicId != null) {
           Get.toNamed(Routes.TOPIC_DETAIL, arguments: notification.topicId,parameters: {
             'postNumber': notification.postNumber.toString(),

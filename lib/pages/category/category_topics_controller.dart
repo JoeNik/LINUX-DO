@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/pages/category/activities/activity_page.dart';
 import 'package:linux_do/pages/category/widgets/my_bookmarks/my_bookmarks_page.dart';
@@ -18,6 +19,7 @@ import 'widgets/articles/docs_controller.dart';
 import 'activities/activity_controller.dart';
 
 class CategoryTopicsController extends BaseController {
+  final scaffoldKey = GlobalKey<ScaffoldState>();
   final _currentTabIndex = 0.obs;
   int get currentTabIndex => _currentTabIndex.value;
 
@@ -28,9 +30,9 @@ class CategoryTopicsController extends BaseController {
   @override
   void onInit() {
     super.onInit();
-    Get.put(MyPostsController());
-    Get.put(MyBookmarksController());
-    Get.put(DocsController());
+    Get.put(MyPostsController(), tag: 'my_posts', permanent: true);
+    Get.put(MyBookmarksController(), tag: 'my_bookmarks', permanent: true);
+    Get.put(DocsController(), tag: 'docs', permanent: true);
     Get.put(LeaderboardController());
     Get.put(GroupController());
     Get.put(EventController());

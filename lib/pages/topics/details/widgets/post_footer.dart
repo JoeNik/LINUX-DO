@@ -31,6 +31,9 @@ class PostFooter extends StatelessWidget {
         16.hGap,
         // 举报按钮
         _ReportButton(post: post),
+        16.hGap,
+        if (post.canDelete == true)
+          _DeleteButton(post: post),
         const Spacer(),
         _ReplyButton(post: post),
       ],
@@ -182,15 +185,15 @@ class _ReportButton extends StatelessWidget {
                               color: Get.theme.hintColor,
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: AppColors.primary,
+                              borderSide:  BorderSide(
+                                color: Theme.of(Get.context!).primaryColor,
                               ),
                               borderRadius: BorderRadius.circular(8.w),
                             ),
                             
                             border: OutlineInputBorder(
-                              borderSide: const BorderSide(
-                                color: AppColors.primary,
+                              borderSide:  BorderSide(
+                                color: Theme.of(Get.context!).primaryColor,
                               ),
                               borderRadius: BorderRadius.circular(8.w),
                             ),
@@ -360,3 +363,23 @@ class _BookmarkButton extends StatelessWidget {
     );
   }
 }
+
+/// 删除按钮组件
+class _DeleteButton extends StatelessWidget {
+  final controller = Get.find<TopicDetailController>();
+  final Post post;
+
+  _DeleteButton({required this.post});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => controller.deletePost(post),
+      child: Row(
+        children: [
+          Icon(CupertinoIcons.trash, size: 16.w, color: Theme.of(context).hintColor),
+        ],
+      ),
+    );
+  }
+} 

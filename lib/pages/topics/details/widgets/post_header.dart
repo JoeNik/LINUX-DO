@@ -47,7 +47,7 @@ class _UserAvatar extends StatelessWidget {
       size: 32.w,
       circle: !post.isWebMaster(),
       borderRadius: 4.w,
-      borderColor: AppColors.primary,
+      borderColor: Theme.of(context).primaryColor,
       username: post.username ?? '',
     );
   }

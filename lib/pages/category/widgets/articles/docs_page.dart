@@ -20,7 +20,7 @@ class _DocsPageState extends State<DocsPage>
   @override
   void initState() {
     super.initState();
-    controller = Get.find();
+    controller = Get.find(tag: 'docs');
   }
 
   @override

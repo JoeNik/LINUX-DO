@@ -13,13 +13,12 @@ import 'category_topics_controller.dart';
 
 class CategoryTopicsPage extends GetView<CategoryTopicsController> {
   const CategoryTopicsPage({super.key});
-
+  
   @override
   Widget build(BuildContext context) {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
-
+    
     return Scaffold(
-      key: scaffoldKey,
+      key: controller.scaffoldKey,
       drawer: const DrawerMenu(),
       body: NestedScrollView(
           physics: const ClampingScrollPhysics(),
@@ -35,7 +34,7 @@ class CategoryTopicsPage extends GetView<CategoryTopicsController> {
                 icon: Icon(Icons.menu_rounded,
                     color: Theme.of(context).iconTheme.color),
                 onPressed: () {
-                  scaffoldKey.currentState?.openDrawer();
+                  controller.scaffoldKey.currentState?.openDrawer();
                 },
               ),
             ),
@@ -44,7 +43,7 @@ class CategoryTopicsPage extends GetView<CategoryTopicsController> {
             child: Column(
               children: [
                 // tishi
-                _buildBanner(),
+                _buildBanner(context),
                 // 菜单按钮
                 _buildMenuButtons(context),
               ],
@@ -64,7 +63,7 @@ class CategoryTopicsPage extends GetView<CategoryTopicsController> {
                     containerWight: MediaQuery.of(context).size.width - 32.w,
                     containerBorderRadius: 4.w,
                     initialIndex: controller.currentTabIndex,
-                    containerBorder: Border.all(width: .4,color: AppColors.primary),
+                    containerBorder: Border.all(width: .4,color: Theme.of(context).primaryColor),
                     containerColor: Theme.of(context).cardColor,
                     containerBoxShadow: [
                       BoxShadow(
@@ -74,9 +73,9 @@ class CategoryTopicsPage extends GetView<CategoryTopicsController> {
                         blurRadius: 10,
                       ),
                     ],
-                    slidersGradients: const [
+                    slidersGradients: [
                       LinearGradient(
-                          colors: [AppColors.primary, AppColors.secondary2])
+                          colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: .6)])
                     ],
                     onSelect: (index) => controller.currentTabIndex = index,
                     children: [
@@ -96,14 +95,14 @@ class CategoryTopicsPage extends GetView<CategoryTopicsController> {
   }
 
 
-  Widget _buildBanner() {
+  Widget _buildBanner(BuildContext context) {
     return SizedBox(
       height: 40.w,
       width: double.infinity,
       child: Center(
         child: TextScroll(
           AppConst.slogan.replaceAll('\n', ' '),
-          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold,color: AppColors.primary),
+          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold,color: Theme.of(context).primaryColor),
           mode: TextScrollMode.endless,
           intervalSpaces: 10,
           velocity: const Velocity(pixelsPerSecond: Offset(80, 0)),

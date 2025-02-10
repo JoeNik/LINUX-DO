@@ -155,7 +155,7 @@ class ChatDetailPage extends GetView<ChatDetailController> with Concatenated{
                     bottomRight: Radius.circular(12.w),
                   ),
                   border: Border.all(
-                    color: AppColors.primary,
+                    color: Theme.of(context).primaryColor,
                     width: .1.w
                   ),
                 ),

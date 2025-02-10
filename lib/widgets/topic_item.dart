@@ -98,7 +98,7 @@ class TopicItem extends StatelessWidget {
                                   circle: topic.getOriginalPosterId() != 1,
                                   borderRadius: 4.w,
                                   backgroundColor: Theme.of(context).cardColor,
-                                  borderColor: AppColors.primary,
+                                  borderColor: Theme.of(context).primaryColor,
                                   username: username ?? '',
                                 ),
                             ),
@@ -136,7 +136,7 @@ class TopicItem extends StatelessWidget {
                                         horizontal: 4.w, vertical: 2.w),
                                     decoration: BoxDecoration(
                                       color:
-                                          AppColors.primary,
+                                          Theme.of(context).primaryColor,
                                       borderRadius: BorderRadius.circular(4.w),
                                     ),
                                     child: Text(

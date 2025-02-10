@@ -145,7 +145,7 @@ class ChatPage extends GetView<ChatController> {
             bottomRight: Radius.circular(20.w),
           ),
           border: Border.all(
-            color: AppColors.primary.withValues(alpha: .25),
+            color: Theme.of(context).primaryColor.withValues(alpha: .25),
           ),
         ),
         child: Row(

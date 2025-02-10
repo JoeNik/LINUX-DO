@@ -42,10 +42,10 @@ class DisSquareLoading extends GetView {
       //   color: Colors.white.withValues(alpha: .8),
       //   borderRadius: BorderRadius.circular(4.w),
       // ),
-      child: const Center(
+      child: Center(
         child: LoadingIndicator(
           indicatorType: Indicator.ballBeat,
-          colors: [AppColors.primary],
+          colors: [Theme.of(context).primaryColor],
           strokeWidth: 2,
           pathBackgroundColor: Colors.black45,
         ),

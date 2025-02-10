@@ -957,6 +957,29 @@ class TopicDetailController extends BaseController
       scrollToPost(index + 1);
     }
   }
+
+  /// 删除帖子
+  void deletePost(Post post) async{
+    try {
+      await apiService.deletePost(post.id.toString(),
+      context: '/t/${topic.value?.id}/${post.postNumber}');
+      showSuccess(AppConst.posts.deleteSuccess);
+      /// 更新改帖子内容
+
+      // final newPost = await apiService.getDeletedPosts(post.id.toString());
+      // topic.value?.postStream?.posts?.removeWhere((p) => p.postNumber == post.postNumber);
+      // topic.value?.postStream?.posts?.add(newPost);
+
+      /// 本地更新cooked
+      post.cooked = AppConst.posts.deletePost;
+      update(['post_${post.postNumber}']);
+
+    } catch (e, s) {
+      l.e('删除帖子失败: $e -  \n$s');
+      showError(AppConst.posts.deleteFailed);
+    }
+
+  }
 }
 
 // 帖子节点类

@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/widgets/dis_loading.dart';
 import '../../const/app_const.dart';
-import '../../const/app_colors.dart';
 import '../../const/app_images.dart';
 import '../../routes/app_pages.dart';
 import '../../utils/tag.dart';
@@ -93,7 +92,14 @@ class _TopicsPageState extends State<TopicsPage>
               SliverToBoxAdapter(
                 child: Container(
                   padding: EdgeInsets.all(8.w),
-                  color: Theme.of(context).primaryColorDark,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).primaryColor,
+                        Theme.of(context).primaryColor.withValues(alpha: 0.6)
+                      ],
+                    ),
+                  ),
                   child: Text(
                     AppConst.slogan.replaceAll('\n', ''),
                     style: TextStyle(
@@ -124,7 +130,7 @@ class _TopicsPageState extends State<TopicsPage>
                     child: TabBar(
                       controller: controller.tabController,
                       isScrollable: false,
-                      labelColor: AppColors.primary,
+                      labelColor: Theme.of(context).primaryColor,
                       unselectedLabelColor: Theme.of(context).hintColor,
                       labelStyle: TextStyle(
                         fontSize: 14.w,
@@ -134,7 +140,7 @@ class _TopicsPageState extends State<TopicsPage>
                         fontSize: 14.w,
                         fontWeight: FontWeight.normal,
                       ),
-                      indicatorColor: AppColors.primary,
+                      indicatorColor: Theme.of(context).primaryColor,
                       indicatorSize: TabBarIndicatorSize.label,
                       tabs: controller.tabs,
                     ),
@@ -192,7 +198,7 @@ class _TopicsPageState extends State<TopicsPage>
                   color: Theme.of(context).cardColor.withValues(alpha: .9),
                   borderRadius: BorderRadius.circular(18.w),
                   border: Border.all(
-                    color: Theme.of(context).inputDecorationTheme.fillColor ??
+                    color: Theme.of(context).hintColor ??
                         Colors.transparent,
                     width: 0.5,
                   ),
@@ -259,7 +265,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return SizedBox.expand(child: child);
+    return SizedBox.expand(child: Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: child));
   }
 
   @override

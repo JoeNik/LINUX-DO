@@ -106,7 +106,7 @@ class SettingsPage extends GetView<SettingsController> {
                 AppConst.settings.themeCustom,
                 CupertinoIcons.paintbrush_fill,
                 onTap: () {
-                  // controller.showColorPicker();
+                   controller.showColorPicker();
                 },
               ),
             ],
@@ -120,13 +120,17 @@ class SettingsPage extends GetView<SettingsController> {
                 context,
                 AppConst.settings.about,
                 CupertinoIcons.info_circle_fill,
-                onTap: () {},
+                onTap: () {
+                  controller.toAbout();
+                },
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.faq,
                 CupertinoIcons.question_circle_fill,
-                onTap: () {},
+                onTap: () {
+                  controller.toFaq();
+                },
               ),
               _buildNavigationItem(
                 context,

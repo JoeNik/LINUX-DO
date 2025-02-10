@@ -126,14 +126,14 @@ class _BrithdayTabViewState extends State<BrithdayTabView> with AutomaticKeepAli
                               vertical: 2.w,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
+                              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4.w),
                             ),
                             child: Text(
                               birthday.title!,
                               style: TextStyle(
                                 fontSize: 10.w,
-                                color: AppColors.primary,
+                                color: Theme.of(context).primaryColor,
                               ),
                             ),
                           ),

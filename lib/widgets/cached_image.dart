@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../const/app_colors.dart';
 
 class CachedImage extends StatelessWidget {
   final String? imageUrl;
@@ -29,7 +28,7 @@ class CachedImage extends StatelessWidget {
     this.errorWidget,
     this.circle = false,
     this.showBorder = false,
-    this.borderColor = AppColors.primary,
+    this.borderColor,
   });
 
   @override
@@ -66,7 +65,7 @@ class CachedImage extends StatelessWidget {
         borderRadius: circle 
           ? BorderRadius.circular(width != null ? width!.w / 2 : height!.w / 2)
           : borderRadius,
-        border: showBorder ? Border.all(color: borderColor ?? AppColors.primary, width: 1.w) : null,
+        border: showBorder ? Border.all(color: borderColor ?? Theme.of(context).primaryColor, width: 1.w) : null,
       ),
       child: image,
     );

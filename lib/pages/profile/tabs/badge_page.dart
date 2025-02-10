@@ -42,7 +42,7 @@ class BadgePage extends GetView<BadgeController> {
                                 grouping.getDisplayName(),
                                 style: TextStyle(
                                   fontSize: 16.sp,
-                                  color: AppColors.primary,
+                                  color: Theme.of(context).primaryColor,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -57,7 +57,7 @@ class BadgePage extends GetView<BadgeController> {
                                 initialIndex: controller.selectedIndex.value,
                                 containerColor: AppColors.transparent,
                                 containerBorder: Border.all(
-                                    color: AppColors.primary, width: .4.w),
+                                    color: Theme.of(context).primaryColor, width: .4.w),
                                 slidersColors: [Theme.of(context).cardColor],
                                 isAllContainerTap: true,
                                 onSelect: (index) =>
@@ -68,7 +68,7 @@ class BadgePage extends GetView<BadgeController> {
                                     style: TextStyle(
                                         fontSize: 10.sp,
                                         color: controller.selectedIndex.value == 0
-                                            ? AppColors.primary
+                                            ? Theme.of(context).primaryColor
                                             : Theme.of(context)
                                                 .textTheme
                                                 .bodyMedium
@@ -79,7 +79,7 @@ class BadgePage extends GetView<BadgeController> {
                                     style: TextStyle(
                                         fontSize: 10.sp,
                                         color: controller.selectedIndex.value == 1
-                                            ? AppColors.primary
+                                            ? Theme.of(context).primaryColor
                                             : Theme.of(context)
                                                 .textTheme
                                                 .bodyMedium
@@ -96,7 +96,7 @@ class BadgePage extends GetView<BadgeController> {
                             grouping.getDisplayName(),
                             style: TextStyle(
                               fontSize: 16.sp,
-                              color: AppColors.primary,
+                              color: Theme.of(context).primaryColor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

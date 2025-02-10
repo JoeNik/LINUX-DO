@@ -88,7 +88,7 @@ class CreatePostPage extends GetView<CreatePostController> {
             child: ElevatedButton(
               onPressed: controller.publishPost,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: Theme.of(context).primaryColor,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 padding: EdgeInsets.symmetric(vertical: 12.w),

@@ -264,7 +264,7 @@ class UserInfoCard extends GetView<UserInfoCardController> {
                         style: TextStyle(
                           fontSize: 9.w,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
+                          color: Theme.of(context).primaryColor,
                         ),
                       ),
                     )

@@ -20,7 +20,7 @@ class LoginPage extends GetView<LoginController> {
   const LoginPage({super.key});
 
   /// 显示协议对话框
-  Future<void> showAgreementDialog(String title, String htmlAsset) async {
+  Future<void> showAgreementDialog(BuildContext context, String title, String htmlAsset ) async {
     try {
       final htmlContent = await rootBundle.loadString(htmlAsset);
       Get.dialog(
@@ -73,13 +73,13 @@ class LoginPage extends GetView<LoginController> {
                           margin: Margins.only(bottom: 12.w),
                           fontSize: FontSize(18.sp),
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
+                          color: Theme.of(context).primaryColor,
                         ),
                         "h2": Style(
                           margin: Margins.only(top: 16.w, bottom: 4.w),
                           fontSize: FontSize(AppSizes.fontNormal),
                           fontWeight: FontWeight.w500,
-                          color: AppColors.primary,
+                          color: Theme.of(context).primaryColor,
                         ),
                         "ul": Style(
                           margin: Margins.only(bottom: 4.w),
@@ -195,7 +195,7 @@ class LoginPage extends GetView<LoginController> {
                               AppImages.getInputAccount(context),
                               width: AppSizes.iconTiny,
                               height: AppSizes.iconTiny,
-                              color: AppColors.primary,
+                              color: Theme.of(context).primaryColor,
                             ),
                           ),
                           isDense: true,
@@ -239,7 +239,7 @@ class LoginPage extends GetView<LoginController> {
                                 AppImages.getInputPassword(context),
                                 width: AppSizes.iconTiny,
                                 height: AppSizes.iconTiny,
-                                color: AppColors.primary,
+                                color: Theme.of(context).primaryColor,
                               ),
                             ),
                             suffixIcon: IconButton(
@@ -351,6 +351,7 @@ class LoginPage extends GetView<LoginController> {
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () => showAgreementDialog(
+                                      context,
                                       AppConst.login.serviceAgreement,
                                       'assets/html/terms-service.html',
                                     ),
@@ -363,6 +364,7 @@ class LoginPage extends GetView<LoginController> {
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () => showAgreementDialog(
+                                      context,
                                       AppConst.login.privacyPolicy,
                                       'assets/html/privacy-policy.html',
                                     ),

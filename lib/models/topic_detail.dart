@@ -118,7 +118,7 @@ class Post {
   final String? username;
   final String? avatarTemplate;
   final String? createdAt;
-  final String? cooked;
+  String? cooked;
   final int? postNumber;
   final int? postType;
   final int? postsCount;

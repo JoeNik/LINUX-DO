@@ -64,7 +64,7 @@ class HomePage extends GetView<HomeController> {
                 controller.badgeCount,
                 style: TabStyle.fixed,
                 backgroundColor:
-                    Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+                    Theme.of(context).canvasColor,
                 color: Theme.of(context)
                     .bottomNavigationBarTheme
                     .unselectedItemColor,

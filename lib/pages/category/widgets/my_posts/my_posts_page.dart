@@ -20,7 +20,7 @@ class _MyPostsPageState extends State<MyPostsPage>
   @override
   void initState() {
     super.initState();
-    controller = Get.find<MyPostsController>();
+    controller = Get.find(tag: 'my_posts');
   }
 
   @override

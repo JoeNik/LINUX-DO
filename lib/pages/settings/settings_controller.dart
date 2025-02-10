@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/net/http_client.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import 'package:linux_do/utils/storage_manager.dart';
 import 'package:linux_do/controller/global_controller.dart';
 import 'package:linux_do/const/app_const.dart';
 
+import '../../net/http_config.dart';
 import '../../utils/log.dart';
 import '../../widgets/dis_color_picker.dart';
 import '../web_page.dart';
 
-class SettingsController extends GetxController {
+class SettingsController extends BaseController {
   final isAnonymousMode = false.obs;
   final isDoNotDisturb = false.obs;
   final isTrackingEnabled = false.obs;
@@ -93,11 +95,49 @@ class SettingsController extends GetxController {
 
   void showColorPicker() {
     DisColorPicker.show(
-      selectedColor: primaryMaterial, // 当前选中的颜色
+      selectedColor: primaryMaterial,
       onColorSelected: (color) {
-        // 处理颜色选择
-        Get.changeTheme(ThemeData(primaryColor: color));
+        changeTheme(color);   
       },  
     );
+  }
+
+  void changeTheme(Color color) {
+  try {
+    ThemeData lightTheme = ThemeData(
+      primaryColor: color,
+      brightness: Brightness.light,
+    );
+
+    ThemeData darkTheme = ThemeData(
+      primaryColor: color,
+      brightness: Brightness.dark,
+    );
+
+    // 根据当前主题模式切换
+    if (Get.isDarkMode) {
+      Get.changeTheme(darkTheme);
+    } else {
+      Get.changeTheme(lightTheme);
+    }
+
+    // 返回上一页
+    Get.back();
+
+    // 保存颜色
+    StorageManager.setData(AppConst.identifier.themeColor, color.toString());
+  } catch (e, s) {
+    l.e('changeTheme error: $e, $s');
+  }
+}
+
+
+  /// 关于页面
+  void toAbout() {
+  }
+
+  /// 常见问题页面
+  void toFaq() {
+    Get.toNamed(Routes.WEBVIEW, arguments: '${HttpConfig.baseUrl}${AppConst.faq}');
   }
 } 

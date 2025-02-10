@@ -19,7 +19,7 @@ class _MyBookmarksPageState extends State<MyBookmarksPage>
   @override
   void initState() {
     super.initState();
-    controller = Get.find<MyBookmarksController>();
+    controller = Get.find(tag: 'my_bookmarks');
   }
 
   @override

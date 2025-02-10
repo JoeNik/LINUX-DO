@@ -94,7 +94,8 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
   @override
   void didUpdateWidget(PostsSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.currentIndex != oldWidget.currentIndex && !_isLongPressed) {
+    // 只在非拖动状态且索引确实改变时才更新
+    if (!_isLongPressed && widget.currentIndex != _currentIndex) {
       setState(() {
         _currentIndex = widget.currentIndex;
         _dragPosition = _calculateInitialPosition();
@@ -124,6 +125,7 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
       // 计算新的索引，但只更新内部状态
       if (widget.postsCount > 1) {
         final progress = _dragPosition / (maxHeight - _handleHeight);
+        // 计算新的索引 (0-based)
         final newIndex = (progress * (widget.postsCount - 1)).round();
         
         if (newIndex != _currentIndex) {
@@ -136,8 +138,9 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
   void _handleDragEnd(DragEndDetails details) {
     if (!mounted) return;
     if (!_isLongPressed) {
-      widget.onIndexChanged(_currentIndex);
-      _loadPostData(_currentIndex + 1);
+      final targetIndex = _currentIndex;
+      // 拖动结束时通知 controller 更新索引
+      controller.updatePostSelectorIndex(targetIndex);
     }
   }
 
@@ -160,13 +163,8 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
       _dragPosition = newPosition.clamp(0.0, _defaultHeight - _handleHeight);
     });
     
-    widget.onIndexChanged(_currentIndex);
-    _loadDataTimer?.cancel();
-    _loadDataTimer = Timer(const Duration(milliseconds: 100), () {
-      if (!_isPostLoaded(_currentIndex + 1)) {
-        _loadPostData(_currentIndex + 1);
-      }
-    });
+    // 长按结束时通知 controller 更新索引
+    controller.updatePostSelectorIndex(_currentIndex);
     _expandController.reverse();
   }
 
@@ -216,89 +214,49 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
     return AnimatedBuilder(
       animation: _heightAnimation,
       builder: (context, child) {
-        final currentHeight = _isLongPressed 
-            ? _heightAnimation.value 
-            : _defaultHeight;
-            
         return GestureDetector(
+          onVerticalDragUpdate: _handleDragUpdate,
+          onVerticalDragEnd: _handleDragEnd,
           onLongPressStart: _handleLongPressStart,
           onLongPressEnd: _handleLongPressEnd,
           onLongPressMoveUpdate: _handleLongPressMoveUpdate,
-          onVerticalDragUpdate: _handleDragUpdate,
-          onVerticalDragEnd: _handleDragEnd,
           child: Container(
-            width: _handleHeight,
-            height: currentHeight,
-            margin: EdgeInsets.only(right: 8.w, top: 8.w),
-            clipBehavior: Clip.antiAlias,
+            width: 32.w,
+            height: _heightAnimation.value,
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(_handleHeight / 2),
+              borderRadius: BorderRadius.circular(16.w),
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).hintColor.withValues(alpha: 0.3),
-                  blurRadius: _handleHeight / 2,
-                  offset: const Offset(0, 2),
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4.w,
+                  offset: Offset(0, 2.w),
                 ),
               ],
             ),
             child: Stack(
               children: [
-                // 当前值指示器
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
+                Positioned(
                   left: 0,
                   right: 0,
                   top: _dragPosition,
                   child: Container(
-                    width: _handleHeight,
+                    width: 32.w,
                     height: _handleHeight,
-                    clipBehavior: Clip.antiAlias,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Theme.of(context).primaryColor,
-                          Theme.of(context).primaryColor.withValues(alpha: 0.8),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(_handleHeight / 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                          blurRadius: _handleHeight / 2,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.circular(16.w),
                     ),
                     child: Center(
                       child: Text(
                         '${_currentIndex + 1}',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 13.w,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 12.w,
                           fontFamily: AppFontFamily.dinPro,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                  ),
-                ),
-                // 总数显示
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 4.w,
-                  child: Text(
-                    '/${widget.postsCount}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Theme.of(context).hintColor,
-                      fontSize: 10.w,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: AppFontFamily.dinPro,
                     ),
                   ),
                 ),

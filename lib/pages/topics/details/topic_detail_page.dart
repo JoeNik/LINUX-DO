@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:keframe/keframe.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/widgets/dis_button.dart';
@@ -50,12 +49,12 @@ class TopicDetailPage extends GetView<TopicDetailController> {
               child: PostsSelector(
                 postsCount: postsCount,
                 currentIndex:
-                    controller.currentPostIndex.value.clamp(0, postsCount - 1),
+                    controller.currentPostIndex.value,
                 onIndexChanged: (index) {
                   if (!controller.isLoading.value) {
                     controller.scrollToPost(index);
                   }
-                },
+                }
               ),
             );
           }),
@@ -141,7 +140,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                   }
 
                   final node = controller.replyTree[index - 1];
-                  return _buildPostItem(context, node, index);
+                  return _buildPostItem(context, node);
                 },
               )),
         ),
@@ -170,63 +169,57 @@ class TopicDetailPage extends GetView<TopicDetailController> {
     );
   }
 
-  Widget _buildPostItem(BuildContext context, PostNode node, int index) {
-    return FrameSeparateWidget(
-      index: index,
-      placeHolder: Container(
-        height: 80.w,
-      ),
-      child: Card(
-        elevation: node.post.replyToPostNumber == null ? 0.7 : 0,
-        margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(12.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      6.vGap,
-                      PostHeader(post: node.post),
-                      2.vGap,
-                      PostContent(node: node),
-                      2.vGap,
-                      PostFooter(post: node.post),
-                    ],
-                  ),
+  Widget _buildPostItem(BuildContext context, PostNode node) {
+    return Card(
+      elevation: node.post.replyToPostNumber == null ? 0.7 : 0,
+      margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(12.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    6.vGap,
+                    PostHeader(post: node.post),
+                    2.vGap,
+                    PostContent(node: node),
+                    2.vGap,
+                    PostFooter(post: node.post),
+                  ],
                 ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
-                    decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(12.w),
-                        bottomLeft: Radius.circular(12.w),
-                      ),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
+                  decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(12.w),
+                      bottomLeft: Radius.circular(12.w),
                     ),
-                    child: Text(
-                      '#${node.post.postNumber}',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 10.w,
-                        fontFamily: AppFontFamily.dinPro,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  ),
+                  child: Text(
+                    '#${node.post.postNumber}',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 10.w,
+                      fontFamily: AppFontFamily.dinPro,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

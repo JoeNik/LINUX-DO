@@ -9,7 +9,6 @@ import '../../const/app_colors.dart';
 import '../../const/app_images.dart';
 import '../../routes/app_pages.dart';
 import '../../utils/tag.dart';
-import '../../widgets/drawer_menu.dart';
 import 'topics_controller.dart';
 
 class TopicsPage extends StatefulWidget {

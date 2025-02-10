@@ -98,8 +98,8 @@ class TopicDetail {
 
 @JsonSerializable()
 class PostStream {
-  final List<Post>? posts;
-  final List<int>? stream;
+  List<Post>? posts;
+  List<int>? stream;
 
   PostStream({
     this.posts,

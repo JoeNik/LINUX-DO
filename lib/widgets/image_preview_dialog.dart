@@ -365,16 +365,16 @@ class ImagePreviewDialog extends StatelessWidget with ToastMixin {
             title: const Text('需要权限'),
             content: const Text('保存文件需要存储权限，请在设置中开启。'),
             actions: [
-              TextButton(
+              DisButton(
                 onPressed: () => Get.back(result: false),
-                child: const Text('取消'),
+                text: '取消',
               ),
-              TextButton(
+              DisButton(
                 onPressed: () {
                   Get.back(result: true);
                   _openAppSettings();
                 },
-                child: const Text('去设置'),
+                text: '去设置',
               ),
             ],
           ),

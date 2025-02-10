@@ -10,9 +10,6 @@ import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:slide_switcher/slide_switcher.dart';
-import 'package:linux_do/const/app_spacing.dart';
 import '../../../controller/global_controller.dart';
 import '../../../models/topic_detail.dart';
 import '../../../models/upload_image_response.dart';
@@ -90,6 +87,7 @@ class TopicDetailController extends BaseController
 
   // 当前帖子索引
   final currentPostIndex = 0.obs;
+  final isManualScrolling = false.obs;
 
     // 图片列表
   final uploadedImages = <UploadImageResponse>[].obs;
@@ -125,10 +123,35 @@ class TopicDetailController extends BaseController
   void onClose() {
     _debounceTimer?.cancel();
     itemPositionsListener.itemPositions.removeListener(_onScroll);
+    
+    // 优化在页面关闭时保存最后的阅读位置
+    final positions = itemPositionsListener.itemPositions.value.toList();
+    if (positions.isNotEmpty) {
+      positions.sort((a, b) => a.index.compareTo(b.index));
+      // 找到第一个可见的帖子（可见度超过50%的）
+      for (var position in positions) {
+        if (position.index >= 1 && position.index - 1 < replyTree.length) {
+          if (position.itemLeadingEdge < 0.5 && position.itemTrailingEdge > 0.5) {
+            final node = replyTree[position.index - 1];
+            if (node.post.postNumber != null) {
+              StorageManager.setData(_topicPostKey, node.post.postNumber);
+              break;
+            }
+          }
+        }
+      }
+      
+      // 如果没有找到足够可见的帖子，使用第一个可见的帖子
+      if (positions.first.index >= 1 && positions.first.index - 1 < replyTree.length) {
+        final node = replyTree[positions.first.index - 1];
+        if (node.post.postNumber != null) {
+          StorageManager.setData(_topicPostKey, node.post.postNumber);
+        }
+      }
+    }
+    
     // 移除应用生命周期监听
     WidgetsBinding.instance.removeObserver(this);
-    // 页面关闭前发送一次计时
-    //_updateTopicTiming();
     _presenceTimer?.cancel();
     _draftTimer?.cancel();
     super.onClose();
@@ -167,49 +190,23 @@ class TopicDetailController extends BaseController
     positions.sort((a, b) => a.index.compareTo(b.index));
     final visiblePosts = <int>{};
 
-    // 收集所有可见帖子的编号
-    for (var position in positions) {
-      if (position.index >= 1 && position.index - 1 < replyTree.length) {
-        final node = replyTree[position.index - 1];
-        if (node.post.postNumber != null) {
-          visiblePosts.add(node.post.postNumber!);
+    if (!isManualScrolling.value) {
+      for (var position in positions) {
+        if (position.index >= 1 && position.index - 1 < replyTree.length) {
+          if (position.itemLeadingEdge < 0.5 && position.itemTrailingEdge > 0.5) {
+            final node = replyTree[position.index - 1];
+            if (node.post.postNumber != null) {
+              // 使用实际的楼层号减1作为索引
+              currentPostIndex.value = node.post.postNumber! - 1;
+              visiblePosts.add(node.post.postNumber!);
+              break;
+            }
+          }
         }
       }
     }
 
-    // 更新可见帖子集合
     _visiblePostNumbers.value = visiblePosts;
-
-    // 保存最后阅读的帖子编号
-    // if (visiblePosts.isNotEmpty) {
-    //   StorageManager.setData(_topicPostKey, visiblePosts.reduce(max));
-
-    //   // 找出视图中最中间的帖子
-    //   var maxVisibleItem = positions.first;
-    //   var maxVisibleFraction = 0.0;
-
-    //   for (var position in positions) {
-    //     final visibleFraction = (1.0 - position.itemLeadingEdge)
-    //         .clamp(0.0, 1.0) *
-    //         position.itemTrailingEdge
-    //         .clamp(0.0, 1.0);
-
-    //     if (visibleFraction > maxVisibleFraction) {
-    //       maxVisibleFraction = visibleFraction;
-    //       maxVisibleItem = position;
-    //     }
-    //   }
-
-    //   // 获取对应的帖子编号
-    //   if (maxVisibleItem.index >= 1 && maxVisibleItem.index - 1 < replyTree.length) {
-    //     final node = replyTree[maxVisibleItem.index - 1];
-    //     if (node.post.postNumber != null) {
-    //       currentPostIndex.value = node.post.postNumber! - 1;
-    //     }
-    //   }
-    // }
-
-    // 滚动停止时更新阅读时间
     _debouncedUpdateTiming();
 
     // 检查是否需要加载更多
@@ -238,6 +235,7 @@ class TopicDetailController extends BaseController
   }
 
   // 更新阅读时间
+  // 暂时不更新阅读时间
   Future<void> _updateTopicTiming() async {
     final visiblePosts = _visiblePostNumbers.value;
     if (visiblePosts.isEmpty) return;
@@ -357,7 +355,6 @@ class TopicDetailController extends BaseController
           final newIndex =
               updatedPosts.indexWhere((p) => p.id == targetPost?.id);
 
-          // 因为第0位是"顶部加载指示器"，帖子索引要 +1
           if (newIndex >= 0) {
             final scrollIndex = newIndex + 1;
             itemScrollController.jumpTo(index: scrollIndex);
@@ -379,9 +376,19 @@ class TopicDetailController extends BaseController
       isLoading.value = true;
       clearError();
 
+      // 清空所有数据和状态
+      topic.value = null;
+      loadedPostIds.clear();
+      hasMore.value = false;
+      hasPrevious.value = false;
+      replyTree.clear();
+      likedPosts.clear();
+      postScores.clear();
+      bookmarkedPosts.clear();
+      initialScrollIndex.value = 0;
+
       // 使用传入的楼层号，如果没有则使用上次浏览的位置
-      final targetPostNumber =
-          postNumber ?? StorageManager.getInt(_topicPostKey);
+      final targetPostNumber = postNumber ?? StorageManager.getInt(_topicPostKey);
       final page = targetPostNumber != null ? "/$targetPostNumber" : "/1";
 
       final response = await apiService.getTopicDetail(
@@ -389,19 +396,23 @@ class TopicDetailController extends BaseController
         page: page,
       );
 
-      // 如果是加载指定楼层，先清空当前数据 不然会出现数据里有20层楼接下来就是90层楼 诡异
-      if (postNumber != null) {
-        topic.value = null;
-        replyTree.clear();
-        loadedPostIds.clear();
+      topic.value = response;
+      
+      // 设置初始滚动位置
+      if (targetPostNumber != null) {
+        final posts = response.postStream?.posts ?? [];
+        final index = posts.indexWhere((p) => p.postNumber == targetPostNumber);
+        if (index >= 0) {
+          initialScrollIndex.value = index + 1; 
+          currentPostIndex.value = index;  // 使用实际的索引而不是楼层号减1
+          l.d('设置初始位置 - targetPostNumber: $targetPostNumber, index: $index');
+        }
       }
 
       // 记录已加载的post ids
       final posts = response.postStream?.posts ?? [];
       final stream = response.postStream?.stream ?? [];
       loadedPostIds.addAll(posts.map((p) => p.id ?? 0));
-
-      topic.value = response;
 
       // 根据stream和当前加载的posts判断是否还有更多
       hasMore.value =
@@ -413,22 +424,11 @@ class TopicDetailController extends BaseController
         hasPrevious.value = firstLoadedPostIndex > 0;
       }
 
-      // 设置滚动位置
-      if (posts.isNotEmpty && targetPostNumber != null) {
-        // 查找目标帖子在列表中的位置
-        final index =
-            posts.indexWhere((post) => post.postNumber == targetPostNumber);
-        if (index != -1) {
-          initialScrollIndex.value = index + 1; // +1考虑顶部的加载指示器
-          // 延迟执行滚动，确保列表已经构建完成
-          Future.delayed(const Duration(milliseconds: 100), () {
-            currentPostIndex.value = targetPostNumber;
-            itemScrollController.jumpTo(index: initialScrollIndex.value);
-          });
-        }
-      }
-    } catch (e, s) {
-      l.e('获取帖子详情失败: $e -  \n$s');
+      // 初始化点赞和书签数据
+      _initPostScores();
+      
+    } catch (e) {
+      l.e('获取帖子详情失败: $e');
       setError('获取帖子详情失败');
     } finally {
       isLoading.value = false;
@@ -514,7 +514,7 @@ class TopicDetailController extends BaseController
   }
 
   Future<void> refreshTopicDetail() async {
-    loadedPostIds.clear();
+    // loadedPostIds.clear();
     await fetchTopicDetail();
   }
 
@@ -756,15 +756,28 @@ class TopicDetailController extends BaseController
   }
 
   // 滚动到指定帖子
-  void scrollToPost(int index) {
-    if (topic.value == null) return;
-
-    currentPostIndex.value = index;
-    itemScrollController.scrollTo(
-      index: index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+  Future<void> scrollToPost(int postNumber) async {
+    try {
+      isManualScrolling.value = true;
+      if (!_isPostLoaded(postNumber)) {
+        await fetchTopicDetail(postNumber: postNumber);
+      }
+      final index = replyTree.indexWhere((node) => node.post.postNumber == postNumber);
+      if (index != -1) {
+        // 保存当前阅读位置
+        StorageManager.setData(_topicPostKey, postNumber);
+        itemScrollController.scrollTo(
+          index: index + 1,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    } finally {
+      // 延迟重置手动滚动标志，确保滚动动画完成后再重置
+      Future.delayed(const Duration(milliseconds: 350), () {
+        isManualScrolling.value = false;
+      });
+    }
   }
 
   void copyPost(Post post) {
@@ -918,6 +931,23 @@ class TopicDetailController extends BaseController
       bookmarkedPosts[post.postNumber!] = originalBookmarked;
       post.bookmarked = originalBookmarked;
       l.e('添加/删除书签失败: $e -  \n$s');
+    }
+  }
+
+  bool _isPostLoaded(int postNumber) {
+    return topic.value?.postStream?.posts?.any((p) => p.postNumber == postNumber) == true;
+  }
+
+  // 更新楼层选择器的索引
+  void updatePostSelectorIndex(int index, {bool shouldScroll = true}) {
+    if (index < 0 || index >= (topic.value?.postsCount ?? 0)) return;
+    
+    // 设置当前索引
+    currentPostIndex.value = index;
+    
+    if (shouldScroll) {
+      // 将索引转换为楼层号 (index + 1)
+      scrollToPost(index + 1);
     }
   }
 }

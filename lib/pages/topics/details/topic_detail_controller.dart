@@ -100,8 +100,15 @@ class TopicDetailController extends BaseController
   void onInit() {
     super.onInit();
     topicId.value = Get.arguments as int;
+    final postNumber = Get.parameters['postNumber'];
+    
     itemPositionsListener.itemPositions.addListener(_onScroll);
-    fetchTopicDetail();
+
+    if (postNumber != null) {
+      fetchTopicDetail(postNumber: int.parse(postNumber));
+    } else {
+      fetchTopicDetail();
+    }
     // 添加应用生命周期监听
     WidgetsBinding.instance.addObserver(this);
 

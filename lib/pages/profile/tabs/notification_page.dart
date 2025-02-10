@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/models/notification.dart';
+import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/widgets/cached_image.dart';
 import 'package:linux_do/widgets/dis_refresh.dart';
 import 'package:linux_do/widgets/state_view.dart';
@@ -46,8 +47,11 @@ class _NotificationItem extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       onTap: () {
+        l.d('notification: ${notification.toJson()}');
         if (notification.topicId != null) {
-          Get.toNamed(Routes.TOPIC_DETAIL, arguments: notification.topicId);
+          Get.toNamed(Routes.TOPIC_DETAIL, arguments: notification.topicId,parameters: {
+            'postNumber': notification.postNumber.toString(),
+          });
         }
       },
       child: Container(

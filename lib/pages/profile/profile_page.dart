@@ -368,6 +368,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                     value: (user?.userAction?.hidePresence ?? false),
                     textOn: '在线',
                     textOff: '离线',
+                    colorOn: Theme.of(context).primaryColor,
                     iconOn: CupertinoIcons.checkmark_alt_circle_fill,
                     iconOff: Icons.power_settings_new,
                     animationDuration: const Duration(milliseconds: 300),

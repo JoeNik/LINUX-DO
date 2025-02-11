@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/const/app_spacing.dart';
+import '../../widgets/switch.dart';
 import 'settings_controller.dart';
 
 class SettingsPage extends GetView<SettingsController> {
@@ -101,12 +102,28 @@ class SettingsPage extends GetView<SettingsController> {
             AppConst.settings.appearance,
             [
               _buildThemeDropdown(context),
-               _buildNavigationItem(
+              _buildNavigationItem(
                 context,
                 AppConst.settings.themeCustom,
                 CupertinoIcons.paintbrush_fill,
                 onTap: () {
-                   controller.showColorPicker();
+                  controller.showColorPicker();
+                },
+              ),
+            ],
+          ),
+          16.vGap,
+          _buildSection(
+            context,
+            AppConst.settings.other,
+            [
+              _buildSwitchItem(
+                context,
+                AppConst.settings.browserTips,
+                controller.browserTips.value,
+                CupertinoIcons.signature,
+                (value) {
+                  controller.updateBrowserTips(value);
                 },
               ),
             ],
@@ -174,26 +191,27 @@ class SettingsPage extends GetView<SettingsController> {
           12.hGap,
           Expanded(
             child: Obx(() => DropdownButton(
-              value: controller.selectedThemeMode,
-              dropdownColor: Theme.of(context).cardColor,
-              items: controller.themeModeOptions.map((String value) {
-                return DropdownMenuItem(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: controller.setThemeMode,
-              isExpanded: true,
-              borderRadius: BorderRadius.circular(12.w),
-              underline: const SizedBox(),
-            )),
+                  value: controller.selectedThemeMode,
+                  dropdownColor: Theme.of(context).cardColor,
+                  items: controller.themeModeOptions.map((String value) {
+                    return DropdownMenuItem(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: controller.setThemeMode,
+                  isExpanded: true,
+                  borderRadius: BorderRadius.circular(12.w),
+                  underline: const SizedBox(),
+                )),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSection(BuildContext context, String title, List<Widget> children) {
+  Widget _buildSection(
+      BuildContext context, String title, List<Widget> children) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -231,7 +249,8 @@ class SettingsPage extends GetView<SettingsController> {
                       height: .5.w,
                       thickness: 1.w,
                       indent: 16.w,
-                      color: Theme.of(context).dividerColor.withValues(alpha: .4),
+                      color:
+                          Theme.of(context).dividerColor.withValues(alpha: .4),
                     ),
                 ],
               );
@@ -360,4 +379,52 @@ class SettingsPage extends GetView<SettingsController> {
       controller.logout();
     }
   }
-} 
+
+  Widget _buildSwitchItem(BuildContext context, String title, bool value,
+      IconData icon, Function(bool) onChanged) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.w),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 20.w,
+            color: Theme.of(context).primaryColor,
+          ),
+          12.hGap,
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: Theme.of(context).textTheme.titleMedium?.color,
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 28.w,
+            child: DisSwitch(
+              value: value,
+              textOn: AppConst.open,
+              textOff: AppConst.close,
+              colorOn: Theme.of(context).primaryColor,
+              iconOn: CupertinoIcons.check_mark_circled_solid,
+              iconOff: CupertinoIcons.clear_circled_solid,
+              animationDuration: const Duration(milliseconds: 200),
+              onChanged: (bool state) {
+                onChanged(state);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

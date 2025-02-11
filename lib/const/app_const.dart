@@ -35,6 +35,10 @@ class AppConst {
   /// 常见问题
   static const faq = 'faq';
 
+  static const open = '打开';
+  
+  static const close = '关闭';
+
   /// 抽屉菜单
   static const drawerMenu = _DrawerMenu();
 
@@ -75,6 +79,8 @@ class AppConst {
 
   /// 用户相关
   static const user = _User();
+
+
 }
 
 /// 抽屉菜单文本
@@ -147,6 +153,8 @@ class _Identifier {
   String get clientId => 'clientId';
 
   String get themeColor => 'themeColor';
+
+  String get browserTips => 'browserTips';
 }
 
 /// 登录页面文本
@@ -213,6 +221,8 @@ class _Settings {
   String get confirm => '确定';
   String get status => '输入你的状态...';
   String get themeColor => '请选择主题颜色';
+  String get other => '其他';
+  String get browserTips => '浏览器提示';
 }
 
 class _Posts {
@@ -230,7 +240,9 @@ class _Posts {
   String get deleteSuccess => '删除成功';
   String get deleteFailed => '删除失败';
   String get deletePost => '帖子已被作者删除';
-  
+  String get openBrowser => '选择浏览器';
+  String get openInApp => '应用内打开';
+  String get openInBrowser => '系统浏览器打开';
   // 举报相关
   List<Map<String, String>> get reasons => [
     {

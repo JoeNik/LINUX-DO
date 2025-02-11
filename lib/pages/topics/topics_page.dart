@@ -198,8 +198,7 @@ class _TopicsPageState extends State<TopicsPage>
                   color: Theme.of(context).cardColor.withValues(alpha: .9),
                   borderRadius: BorderRadius.circular(18.w),
                   border: Border.all(
-                    color: Theme.of(context).hintColor ??
-                        Colors.transparent,
+                    color: Theme.of(context).hintColor,
                     width: 0.5,
                   ),
                 ),

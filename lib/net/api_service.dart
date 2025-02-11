@@ -47,7 +47,7 @@ abstract class ApiService {
   /// 获取首页话题
   @GET("{path}.json")
   Future<TopicListResponse> getTopics(@Path('path') String path,
-      [@Query("page") int page = 1]);
+      [@Query("page") int? page = 0]);
 
   /// 设置某个话题免打扰
   @POST("t/{id}/notifications")

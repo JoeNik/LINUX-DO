@@ -17,6 +17,7 @@ class SettingsController extends BaseController {
   final isDoNotDisturb = false.obs;
   final isTrackingEnabled = false.obs;
   final themeMode = ThemeMode.system.obs;
+  final browserTips = false.obs;
 
   List<String> get themeModeOptions => [
     AppConst.settings.themeSystem,
@@ -45,12 +46,14 @@ class SettingsController extends BaseController {
   }
 
   void _loadSettings() {
-    final savedThemeMode = StorageManager.getString(AppConst.identifier.theme) ?? 'system';
-    l.e(savedThemeMode.toString());
+    final savedThemeMode = StorageManager.getString(AppConst.identifier.theme);
     themeMode.value = _parseThemeMode(savedThemeMode);
+
+    final savedBrowserTips = StorageManager.getBool(AppConst.identifier.browserTips) ?? false;
+    browserTips.value = savedBrowserTips;
   }
 
-  ThemeMode _parseThemeMode(String value) {
+  ThemeMode _parseThemeMode(String? value) {
     switch (value) {
       case 'system':
         return ThemeMode.system;
@@ -139,5 +142,11 @@ class SettingsController extends BaseController {
   /// 常见问题页面
   void toFaq() {
     Get.toNamed(Routes.WEBVIEW, arguments: '${HttpConfig.baseUrl}${AppConst.faq}');
+  }
+
+  /// 更新浏览器提示  
+  void updateBrowserTips(bool value) {
+    browserTips.value = value;
+    StorageManager.setData(AppConst.identifier.browserTips, value);
   }
 } 

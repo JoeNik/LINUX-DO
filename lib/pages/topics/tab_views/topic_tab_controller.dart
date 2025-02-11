@@ -17,7 +17,7 @@ class TopicTabController extends BaseController
   late final RefreshController refreshController;
   final topics = <Topic>[].obs;
   final hasMore = true.obs;
-  final currentPage = 1.obs;
+  final currentPage = 0.obs;
 
   // 加载状态
   final isRefreshing = false.obs;
@@ -46,6 +46,11 @@ class TopicTabController extends BaseController
     try {
       isLoading.value = true;
       clearError();
+      String path = this.path;
+      if (path == 'latest' && currentPage.value < 1) {
+        path = 'top';
+      }
+
       final response = await apiService.getTopics(path);
 
       // 更新用户缓存
@@ -66,8 +71,15 @@ class TopicTabController extends BaseController
   // 刷新数据
   Future<void> onRefresh() async {
     try {
+      currentPage.value = 0;
       isRefreshing.value = true;
       clearError(); // 清除之前的错误
+
+      String path = this.path;
+      if (path == 'latest' && currentPage.value < 1) {
+        path = 'top';
+      }
+
       final response = await apiService.getTopics(path);
 
       // 更新用户缓存
@@ -95,9 +107,10 @@ class TopicTabController extends BaseController
 
     try {
       isLoadingMore.value = true;
-      clearError(); 
+      clearError();
       final nextPage = currentPage.value + 1;
-      final response = await apiService.getTopics('$path?page=$nextPage');
+      l.d('当前页码: $nextPage');
+      final response = await apiService.getTopics(path, nextPage);
 
       // 更新用户缓存
       _userCache.updateUsers(response.users);
@@ -151,33 +164,30 @@ class TopicTabController extends BaseController
     try {
       final response = await apiService.setTopicMute(id.toString(), 0);
       l.d('设置免打扰响应: $response');
-      
+
       // 检查响应是否成功
-      final isSuccess = response is Map 
+      final isSuccess = response is Map
           ? response['success'] == 'OK'
           : response.toString().contains('OK');
-          
+
       if (isSuccess) {
         showSnackbar(
-          title: AppConst.commonTip,
-          message: AppConst.posts.disturbSuccess,
-          type: SnackbarType.success
-        );
+            title: AppConst.commonTip,
+            message: AppConst.posts.disturbSuccess,
+            type: SnackbarType.success);
       } else {
         l.e('设置免打扰失败: 响应数据异常 $response');
         showSnackbar(
-          title: AppConst.commonTip,
-          message: AppConst.posts.error,
-          type: SnackbarType.error
-        );
+            title: AppConst.commonTip,
+            message: AppConst.posts.error,
+            type: SnackbarType.error);
       }
     } catch (e, stackTrace) {
       l.e('设置免打扰失败: $e\n$stackTrace');
       showSnackbar(
-        title: AppConst.commonTip,
-        message: AppConst.posts.error,
-        type: SnackbarType.error
-      );
+          title: AppConst.commonTip,
+          message: AppConst.posts.error,
+          type: SnackbarType.error);
     }
   }
 }

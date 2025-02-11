@@ -63,7 +63,9 @@ class _ActivityItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
         onTap: () {
           if (action.topicId != null) {
-            Get.toNamed(Routes.TOPIC_DETAIL, arguments: action.topicId);
+            Get.toNamed(Routes.TOPIC_DETAIL, arguments: action.topicId,parameters: {
+            'postNumber': action.postNumber.toString(),
+          });
           }
         },
         child: Padding(

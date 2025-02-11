@@ -13,6 +13,13 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart' as dio;
 import 'dart:math';
+import 'package:linux_do/net/http_config.dart';
+import 'package:linux_do/routes/app_pages.dart';
+import 'package:linux_do/utils/log.dart';
+import 'package:linux_do/utils/mixins/toast_mixin.dart';
+
+import 'preview_post_controller.dart';
+import 'preview_post_page.dart';
 
 class CreatePostController extends BaseController {
   final ApiService _apiService = Get.find<ApiService>();
@@ -167,9 +174,31 @@ class CreatePostController extends BaseController {
           final name = match.group(1) ?? '';
           final width = match.group(2) ?? '';
           final height = match.group(3) ?? '';
-          final url = match.group(4) ?? '';
+          var url = match.group(4) ?? '';
           
-          // 直接使用图片URL
+          // 打印匹配到的URL
+          l.d('Original image URL: $url');
+          
+          // 处理 upload:// 短链接
+          if (url.startsWith('upload://')) {
+            // 查找对应的上传图片记录
+            final uploadedImage = uploadedImages.firstWhereOrNull(
+              (img) => img.shortUrl == url || img.url.contains(url.substring(9))
+            );
+            
+            if (uploadedImage != null) {
+              url = uploadedImage.url;
+            } else {
+              // 如果找不到记录，使用基础URL
+              final baseUrl = HttpConfig.baseUrl.endsWith('/')
+                  ? HttpConfig.baseUrl.substring(0, HttpConfig.baseUrl.length - 1)
+                  : HttpConfig.baseUrl;
+              url = '$baseUrl/uploads/default/${url.substring(9)}';
+            }
+            l.d('Converted image URL: $url');
+          }
+          
+          // 构建img标签
           line = '<img src="$url" alt="$name" width="$width" height="$height">';
         }
       }
@@ -187,14 +216,14 @@ class CreatePostController extends BaseController {
     if (!validateInputs()) return;
     
     // 预览不重要, 碰到问题了,先不做
-    // Get.to(() => const PreviewPostPage(), binding: BindingsBuilder(() {
-    //   Get.put(PreviewPostController(
-    //     title: titleController.text,
-    //     content: _formatContentToHtml(),
-    //     category: selectedCategory.value!,
-    //     tags: tags,
-    //   ));
-    // }));
+    Get.to(() => const PreviewPostPage(), binding: BindingsBuilder(() {
+      Get.put(PreviewPostController(
+        title: titleController.text,
+        content: _formatContentToHtml(),
+        category: selectedCategory.value!,
+        tags: tags,
+      ));
+    }));
   }
 
   // 计算文件的SHA1
@@ -242,9 +271,12 @@ class CreatePostController extends BaseController {
           formData,
         );
         
+        // 打印上传响应信息
+        l.d('Image upload response - shortUrl: ${response.shortUrl}, url: ${response.url}');
+        
         uploadedImages.add(response);
         
-        // 将图片插入到内容中
+        // 将图片插入到内容中，使用 shortUrl 作为标记但在预览时使用完整 url
         final imageMarkdown = '\n![${response.originalFilename}|${response.width}x${response.height}](${response.shortUrl})\n';
         final currentContent = contentController.text;
         final cursorPosition = contentController.selection.baseOffset;
@@ -262,7 +294,7 @@ class CreatePostController extends BaseController {
         }
       } catch (e,s) {
         showToast(AppConst.createPost.uploadFailed);
-        debugPrint('Error uploading image: $e -- $s');
+        l.e('Error uploading image: $e -- $s');
       } finally {
         isUploading.value = false;
       }

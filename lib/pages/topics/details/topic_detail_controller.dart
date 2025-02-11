@@ -607,7 +607,7 @@ class TopicDetailController extends BaseController
                   ),
                   12.vGap,
                   _buildOptionButton(
-                    icon: CupertinoIcons.arrowshape_turn_up_right_circle_fill,
+                    icon: CupertinoIcons.arrowshape_turn_up_right_circle,
                     title: AppConst.posts.openInBrowser,
                     onTap: () async {
                       Get.back();

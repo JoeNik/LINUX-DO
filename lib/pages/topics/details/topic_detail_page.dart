@@ -186,7 +186,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       6.vGap,
-                      PostHeader(post: node.post),
+                      PostHeader(post: node.post, title: controller.topic.value?.title),
                       2.vGap,
                       PostContent(node: node),
                       2.vGap,

@@ -10,7 +10,6 @@ import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:flutter/widgets.dart';
 import '../../../controller/global_controller.dart';
 import '../../../models/topic_detail.dart';
 import '../../../models/upload_image_response.dart';
@@ -28,7 +27,6 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:linux_do/const/app_spacing.dart';
-import 'package:url_launcher/url_launcher.dart' show LaunchMode;
 
 class TopicDetailController extends BaseController
     with WidgetsBindingObserver, Concatenated {

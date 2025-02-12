@@ -195,7 +195,7 @@ class ChatPage extends GetView<ChatController> {
                     children: [
                       Expanded(
                         child: Text(
-                          message.title,
+                          message.title ?? '',
                           style: TextStyle(
                             fontSize: 16.w,
                             fontWeight: FontWeight.w500,

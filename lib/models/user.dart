@@ -295,6 +295,8 @@ class CurrentUser {
   final int? voteCount;
   @JsonKey(name: 'is_followed')
   final bool? isFollowed;
+  @JsonKey(name: 'user_title')
+  final String? userTitle;
 
   CurrentUser({
     required this.id,
@@ -355,6 +357,7 @@ class CurrentUser {
     this.endorseCategories,
     this.voteCount,
     this.isFollowed,
+    this.userTitle,
   });
 
   factory CurrentUser.fromJson(Map<String, dynamic> json) =>

@@ -2,55 +2,55 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageManager {
-  static SharedPreferences? _prefs;
+  static late final SharedPreferences prefs;
 
   /// 初始化SharedPreferences
   static Future<void> init() async {
-    _prefs ??= await SharedPreferences.getInstance();
+    prefs = await SharedPreferences.getInstance();
   }
 
   /// 保存数据
   static Future<bool> setData<T>(String key, T value) async {
-    if (_prefs == null) await init();
+    if (prefs == null) await init();
 
     if (value is String) {
-      return await _prefs!.setString(key, value);
+      return await prefs.setString(key, value);
     } else if (value is int) {
-      return await _prefs!.setInt(key, value);
+      return await prefs.setInt(key, value);
     } else if (value is double) {
-      return await _prefs!.setDouble(key, value);
+      return await prefs.setDouble(key, value);
     } else if (value is bool) {
-      return await _prefs!.setBool(key, value);
+      return await prefs.setBool(key, value);
     } else if (value is List<String>) {
-      return await _prefs!.setStringList(key, value);
+      return await prefs.setStringList(key, value);
     } else {
-      return await _prefs!.setString(key, json.encode(value));
+      return await prefs.setString(key, json.encode(value));
     }
   }
 
   /// 获取String类型数据
   static String? getString(String key, {String? defaultValue}) {
-    return _prefs?.getString(key) ?? defaultValue;
+    return prefs.getString(key) ?? defaultValue;
   }
 
   /// 获取int类型数据
   static int? getInt(String key, {int? defaultValue}) {
-    return _prefs?.getInt(key) ?? defaultValue;
+    return prefs.getInt(key) ?? defaultValue;
   }
 
   /// 获取double类型数据
   static double? getDouble(String key, {double? defaultValue}) {
-    return _prefs?.getDouble(key) ?? defaultValue;
+    return prefs.getDouble(key) ?? defaultValue;
   }
 
   /// 获取bool类型数据
   static bool? getBool(String key, {bool? defaultValue}) {
-    return _prefs?.getBool(key) ?? defaultValue;
+    return prefs.getBool(key) ?? defaultValue;
   }
 
   /// 获取List<String>类型数据
   static List<String>? getStringList(String key, {List<String>? defaultValue}) {
-    return _prefs?.getStringList(key) ?? defaultValue;
+    return prefs.getStringList(key) ?? defaultValue;
   }
 
   /// 获取JSON对象
@@ -69,23 +69,36 @@ class StorageManager {
 
   /// 删除指定key的数据
   static Future<bool> remove(String key) async {
-    if (_prefs == null) await init();
-    return await _prefs!.remove(key);
+    if (prefs == null) await init();
+    return await prefs.remove(key);
   }
 
   /// 清空所有数据
   static Future<bool> clear() async {
-    if (_prefs == null) await init();
-    return await _prefs!.clear();
+    if (prefs == null) await init();
+    return await prefs.clear();
   }
 
   /// 获取所有key
   static Set<String>? getKeys() {
-    return _prefs?.getKeys();
+    return prefs.getKeys();
   }
 
   /// 是否包含某个key
   static bool? containsKey(String key) {
-    return _prefs?.containsKey(key);
+    return prefs.containsKey(key);
+  }
+
+  // 获取代理服务器地址
+  static String? getProxyServer() {
+    return prefs.getString('proxy_server');
+  }
+
+  // 设置代理服务器地址
+  static Future<bool> setProxyServer(String? server) {
+    if (server == null || server.isEmpty) {
+      return prefs.remove('proxy_server');
+    }
+    return prefs.setString('proxy_server', server);
   }
 }

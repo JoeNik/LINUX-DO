@@ -180,10 +180,16 @@ class _TopicsPageState extends State<TopicsPage>
           Expanded(
             child: GestureDetector(
               onTap: () {
+                final delegate = TopicSearchDelegate(controller);
                 showSearch(
                   context: context,
-                  delegate: TopicSearchDelegate(controller),
-                );
+                  delegate: delegate,
+                ).then((_) {
+                  if (controller.lastSearchQuery.value.isNotEmpty) {
+                    delegate.query = controller.lastSearchQuery.value;
+                    delegate.showResults(context);
+                  }
+                });
               },
               child: Container(
                 height: 32.w,
@@ -382,10 +388,11 @@ class TopicSearchDelegate extends SearchDelegate<String> {
           return Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () {
-                controller.clearSearch();
-                close(context, topic.id.toString());
-                Get.toNamed(Routes.TOPIC_DETAIL, arguments: topic.id);
+              onTap: () async {
+                // 不清除搜索结果 也不管理搜索的状态
+                // controller.clearSearch();
+                // close(context, topic.id.toString());
+                await Get.toNamed(Routes.TOPIC_DETAIL, arguments: topic.id,preventDuplicates: true);
               },
               borderRadius: BorderRadius.circular(4.w),
               splashColor: Theme.of(context).primaryColor.withValues(alpha: .1),

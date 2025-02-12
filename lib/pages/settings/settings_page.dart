@@ -6,6 +6,7 @@ import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import '../../widgets/switch.dart';
+import '../../widgets/dis_button.dart';
 import 'settings_controller.dart';
 
 class SettingsPage extends GetView<SettingsController> {
@@ -37,30 +38,35 @@ class SettingsPage extends GetView<SettingsController> {
                 context,
                 AppConst.settings.accountSettings,
                 CupertinoIcons.person_fill,
+                iconColor: const Color(0xFF5C6BC0),
                 onTap: () {},
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.security,
                 CupertinoIcons.shield_fill,
+                iconColor: const Color(0xFF66BB6A),
                 onTap: () {},
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.editProfile,
                 CupertinoIcons.pencil_circle_fill,
+                iconColor: const Color(0xFFFF7043),
                 onTap: () {},
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.emailSettings,
                 CupertinoIcons.envelope_circle_fill,
+                iconColor: const Color(0xFF26A69A),
                 onTap: () {},
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.dataExport,
                 CupertinoIcons.doc_text_fill,
+                iconColor: const Color(0xFF7E57C2),
                 onTap: () {},
               ),
             ],
@@ -74,24 +80,28 @@ class SettingsPage extends GetView<SettingsController> {
                 context,
                 AppConst.settings.notifications,
                 CupertinoIcons.bell_fill,
+                iconColor: const Color(0xFFEF5350),
                 onTap: () {},
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.tracking,
                 CupertinoIcons.location_fill,
+                iconColor: const Color(0xFF42A5F5),
                 onTap: () {},
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.doNotDisturb,
                 CupertinoIcons.moon_fill,
+                iconColor: const Color(0xFF8D6E63),
                 onTap: () {},
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.anonymousMode,
                 CupertinoIcons.eye_slash_fill,
+                iconColor: const Color(0xFF78909C),
                 onTap: () {},
               ),
             ],
@@ -101,11 +111,12 @@ class SettingsPage extends GetView<SettingsController> {
             context,
             AppConst.settings.appearance,
             [
-              _buildThemeDropdown(context),
+              _buildThemeDropdown(context, const Color(0xFFFFB300), CupertinoIcons.moon_stars_fill),
               _buildNavigationItem(
                 context,
                 AppConst.settings.themeCustom,
                 CupertinoIcons.paintbrush_fill,
+                iconColor: const Color(0xFFFFB300),
                 onTap: () {
                   controller.showColorPicker();
                 },
@@ -121,10 +132,11 @@ class SettingsPage extends GetView<SettingsController> {
                 context,
                 AppConst.settings.browserTips,
                 controller.browserTips.value,
-                CupertinoIcons.signature,
+                CupertinoIcons.globe,
                 (value) {
                   controller.updateBrowserTips(value);
                 },
+                const Color(0xFF10B086),
               ),
             ],
           ),
@@ -137,6 +149,7 @@ class SettingsPage extends GetView<SettingsController> {
                 context,
                 AppConst.settings.about,
                 CupertinoIcons.info_circle_fill,
+                iconColor: const Color(0xFF29B6F6),
                 onTap: () {
                   controller.toAbout();
                 },
@@ -145,6 +158,7 @@ class SettingsPage extends GetView<SettingsController> {
                 context,
                 AppConst.settings.faq,
                 CupertinoIcons.question_circle_fill,
+                iconColor: const Color(0xFF4DB6AC),
                 onTap: () {
                   controller.toFaq();
                 },
@@ -153,12 +167,14 @@ class SettingsPage extends GetView<SettingsController> {
                 context,
                 AppConst.settings.terms,
                 CupertinoIcons.doc_text_fill,
+                iconColor: const Color(0xFF9CCC65),
                 onTap: () {},
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.privacy,
                 CupertinoIcons.lock_fill,
+                iconColor: const Color(0xFFBA68C8),
                 onTap: () {},
               ),
             ],
@@ -171,7 +187,7 @@ class SettingsPage extends GetView<SettingsController> {
     );
   }
 
-  Widget _buildThemeDropdown(BuildContext context) {
+  Widget _buildThemeDropdown(BuildContext context, Color? iconColor, IconData icon) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
@@ -183,11 +199,19 @@ class SettingsPage extends GetView<SettingsController> {
       ),
       child: Row(
         children: [
-          Icon(
-            CupertinoIcons.moon_stars_fill,
-            size: 20.w,
-            color: Theme.of(context).primaryColor,
-          ),
+          Container(
+              width: 30.w,
+              height: 30.w,
+              decoration: BoxDecoration(
+                color: (iconColor ?? Theme.of(context).primaryColor).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4.w),
+              ),
+              child:  Icon(
+                icon,
+                size: 20.w,
+                color: iconColor ?? Theme.of(context).primaryColor,
+              ),
+              ),
           12.hGap,
           Expanded(
             child: Obx(() => DropdownButton(
@@ -240,11 +264,11 @@ class SettingsPage extends GetView<SettingsController> {
           ),
           child: Column(
             children: children.asMap().entries.map((entry) {
-              final isLast = entry.key == children.length - 1;
+              final index = entry.key;
               return Column(
                 children: [
                   entry.value,
-                  if (!isLast)
+                  if (index < children.length - 1)
                     Divider(
                       height: .5.w,
                       thickness: 1.w,
@@ -266,6 +290,7 @@ class SettingsPage extends GetView<SettingsController> {
     String title,
     IconData icon, {
     required VoidCallback onTap,
+    Color? iconColor,
   }) {
     return Material(
       color: Colors.transparent,
@@ -282,10 +307,19 @@ class SettingsPage extends GetView<SettingsController> {
           ),
           child: Row(
             children: [
-              Icon(
-                icon,
-                size: 20.w,
-                color: Theme.of(context).primaryColor,
+              Container(
+                width: 30.w,
+                height: 30.w,
+                decoration: BoxDecoration(
+                  color: (iconColor ?? Theme.of(context).primaryColor)
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4.w),
+                ),
+                child: Icon(
+                  icon,
+                  size: 20.w,
+                  color: iconColor ?? Theme.of(context).primaryColor,
+                ),
               ),
               12.hGap,
               Expanded(
@@ -310,24 +344,21 @@ class SettingsPage extends GetView<SettingsController> {
   }
 
   Widget _buildLogoutButton(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: ElevatedButton(
-        onPressed: () => _showLogoutDialog(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.error,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.w),
-          ),
-          padding: EdgeInsets.symmetric(vertical: 12.w),
+    return ElevatedButton(
+      onPressed: () => _showLogoutDialog(context),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.error,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.w),
         ),
-        child: Text(
-          AppConst.settings.logout,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
-            color: AppColors.white,
-          ),
+        padding: EdgeInsets.symmetric(vertical: 12.w),
+      ),
+      child: Text(
+        AppConst.settings.logout,
+        style: TextStyle(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w500,
+          color: AppColors.white,
         ),
       ),
     );
@@ -335,43 +366,71 @@ class SettingsPage extends GetView<SettingsController> {
 
   Future<void> _showLogoutDialog(BuildContext context) async {
     final result = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text(
-          AppConst.settings.logoutConfirmTitle,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.w),
+        ),
+        child: Container(
+          width: 0.8.sw,
+          padding: EdgeInsets.all(24.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 50.w,
+                height: 50.w,
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  CupertinoIcons.exclamationmark_triangle_fill,
+                  color: AppColors.error,
+                  size: 24.w,
+                ),
+              ),
+              16.vGap,
+              Text(
+                AppConst.settings.logoutConfirmTitle,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
+                ),
+              ),
+              12.vGap,
+              Text(
+                AppConst.settings.logoutConfirmMessage,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
+                  height: 1.4,
+                ),
+              ),
+              24.vGap,
+              Row(
+                children: [
+                  Expanded(
+                    child: DisButton(
+                      text: AppConst.settings.cancel,
+                      type: ButtonType.outline,
+                      onPressed: () => Get.back(result: false),
+                    ),
+                  ),
+                  12.hGap,
+                  Expanded(
+                    child: DisButton(
+                      text: AppConst.settings.confirm,
+                      type: ButtonType.transform,
+                      onPressed: () => Get.back(result: true),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-        content: Text(
-          AppConst.settings.logoutConfirmMessage,
-          style: TextStyle(
-            fontSize: 14.sp,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(result: false),
-            child: Text(
-              AppConst.settings.cancel,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Get.back(result: true),
-            child: Text(
-              AppConst.settings.confirm,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: AppColors.error,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
       ),
     );
 
@@ -381,7 +440,7 @@ class SettingsPage extends GetView<SettingsController> {
   }
 
   Widget _buildSwitchItem(BuildContext context, String title, bool value,
-      IconData icon, Function(bool) onChanged) {
+      IconData icon, Function(bool) onChanged, Color? iconColor) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.w),
       decoration: BoxDecoration(
@@ -393,11 +452,19 @@ class SettingsPage extends GetView<SettingsController> {
       ),
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 20.w,
-            color: Theme.of(context).primaryColor,
-          ),
+          Container(
+              width: 30.w,
+              height: 30.w,
+              decoration: BoxDecoration(
+                color: (iconColor ?? Theme.of(context).primaryColor).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(4.w),
+              ),
+              child:  Icon(
+                icon,
+                size: 20.w,
+                color: iconColor ?? Theme.of(context).primaryColor,
+              ),
+              ),
           12.hGap,
           Expanded(
             child: Text(

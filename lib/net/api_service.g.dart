@@ -1333,18 +1333,20 @@ class _ApiService implements ApiService {
   Future<CreatePostResponse> createPost({
     required String title,
     required String content,
-    required int categoryId,
-    bool unlistTopic = false,
-    bool isWarning = false,
-    String archetype = 'regular',
+    int? categoryId,
+    bool? unlistTopic = false,
+    bool? isWarning = false,
+    String? archetype = 'regular',
     int typingDurationMsecs = 1000,
     int composerOpenDurationMsecs = 1000,
     bool nestedPost = true,
-    required List<String> tags,
-    required Map<String, ImageSize> imageSizes,
+    List<String>? tags,
+    Map<String, ImageSize>? imageSizes,
+    String? targetRecipients,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     final _data = {
       'title': title,
@@ -1358,7 +1360,9 @@ class _ApiService implements ApiService {
       'nested_post': nestedPost,
       'tags[]': tags,
       'image_sizes': imageSizes,
+      'target_recipients': targetRecipients,
     };
+    _data.removeWhere((k, v) => v == null);
     final _options = _setStreamType<CreatePostResponse>(Options(
       method: 'POST',
       headers: _headers,
@@ -1390,13 +1394,14 @@ class _ApiService implements ApiService {
   @override
   Future<SearchResult> search({
     required String query,
-    int page = 1,
+    int? page,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'q': query,
       r'page': page,
     };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<SearchResult>(Options(
@@ -1499,6 +1504,46 @@ class _ApiService implements ApiService {
     late ChatMessagesResponse _value;
     try {
       _value = ChatMessagesResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<ChatDirect> getDirectChannel(
+    List<String> targetUsernames, {
+    bool? upsert = true,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'target_usernames': targetUsernames,
+      r'upsert': upsert,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<ChatDirect>(Options(
+      method: 'POST',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          'chat/api/direct-message-channels.json',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ChatDirect _value;
+    try {
+      _value = ChatDirect.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;

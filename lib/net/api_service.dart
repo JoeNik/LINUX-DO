@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart' hide Headers, MultipartFile;
+import 'package:linux_do/models/chat_direct.dart';
 import 'package:linux_do/models/docs.dart';
 import 'package:linux_do/models/leaderboard.dart';
 import 'package:linux_do/net/success_response.dart';
@@ -132,11 +133,13 @@ abstract class ApiService {
 
   /// 关注用户
   @PUT('follow/{username}.json')
-  Future<SuccessResponse<dynamic>> followUser(@Path('username') String username);
+  Future<SuccessResponse<dynamic>> followUser(
+      @Path('username') String username);
 
   /// 取消关注用户
   @DELETE('follow/{username}.json')
-  Future<SuccessResponse<dynamic>> unfollowUser(@Path('username') String username);
+  Future<SuccessResponse<dynamic>> unfollowUser(
+      @Path('username') String username);
 
   /// 查询用户分类信息
   @GET('category-experts/endorsable-categories/{username}.json')
@@ -230,7 +233,7 @@ abstract class ApiService {
   /// 删除帖子
   @DELETE('posts/{post_id}')
   Future<void> deletePost(@Path('post_id') String postId,
-  {@Query('context') String? context});
+      {@Query('context') String? context});
 
   /// 获取删除的帖子
   @GET('posts/{post_id}')
@@ -268,22 +271,23 @@ abstract class ApiService {
   Future<CreatePostResponse> createPost({
     @Field('title') required String title,
     @Field('raw') required String content,
-    @Field('category') required int categoryId,
-    @Field('unlist_topic') bool unlistTopic = false,
-    @Field('is_warning') bool isWarning = false,
-    @Field('archetype') String archetype = 'regular',
+    @Field('category') int? categoryId,
+    @Field('unlist_topic') bool? unlistTopic = false,
+    @Field('is_warning') bool? isWarning = false,
+    @Field('archetype') String? archetype = 'regular',
     @Field('typing_duration_msecs') int typingDurationMsecs = 1000,
     @Field('composer_open_duration_msecs') int composerOpenDurationMsecs = 1000,
     @Field('nested_post') bool nestedPost = true,
-    @Field('tags[]') required List<String> tags,
-    @Field('image_sizes') required Map<String, ImageSize> imageSizes,
+    @Field('tags[]') List<String>? tags,
+    @Field('image_sizes') Map<String, ImageSize>? imageSizes,
+    @Field('target_recipients') String? targetRecipients,
   });
 
   /// 搜索
   @GET('search')
   Future<SearchResult> search({
     @Query('q') required String query,
-    @Query('page') int page = 1,
+    @Query('page') int? page,
   });
 
   /// 获取聊天列表
@@ -299,6 +303,13 @@ abstract class ApiService {
     @Query('direction') String? direction,
     @Query('target_message_id') int? targetMessageId,
     @Query('position') String? position,
+  });
+
+  /// 获取个人频道信息
+  @POST('chat/api/direct-message-channels.json')
+  Future<ChatDirect> getDirectChannel(
+    @Query('target_usernames') List<String> targetUsernames, {
+    @Query('upsert') bool? upsert = true,
   });
 
   /// 发送消息

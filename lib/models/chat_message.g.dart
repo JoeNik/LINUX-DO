@@ -11,17 +11,19 @@ ChatMessage _$ChatMessageFromJson(Map<String, dynamic> json) => ChatMessage(
       allowChannelWideMentions: json['allow_channel_wide_mentions'] as bool,
       chatable: ChatableData.fromJson(json['chatable'] as Map<String, dynamic>),
       chatableId: (json['chatable_id'] as num).toInt(),
-      chatableType: json['chatable_type'] as String,
+      chatableType: json['chatable_type'] as String?,
       chatableUrl: json['chatable_url'] as String?,
       description: json['description'] as String?,
-      title: json['title'] as String,
-      unicodeTitle: json['unicode_title'] as String,
+      title: json['title'] as String?,
+      unicodeTitle: json['unicode_title'] as String?,
       slug: json['slug'] as String?,
-      status: json['status'] as String,
-      membershipsCount: (json['memberships_count'] as num).toInt(),
-      currentUserMembership: Membership.fromJson(
-          json['current_user_membership'] as Map<String, dynamic>),
-      threadingEnabled: json['threading_enabled'] as bool,
+      status: json['status'] as String?,
+      membershipsCount: (json['memberships_count'] as num?)?.toInt(),
+      currentUserMembership: json['current_user_membership'] == null
+          ? null
+          : Membership.fromJson(
+              json['current_user_membership'] as Map<String, dynamic>),
+      threadingEnabled: json['threading_enabled'] as bool?,
       iconUploadUrl: json['icon_upload_url'] as String?,
       lastMessage: json['last_message'] == null
           ? null

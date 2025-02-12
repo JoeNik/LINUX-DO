@@ -13,21 +13,21 @@ class ChatMessage {
   @JsonKey(name: 'chatable_id')
   final int chatableId;
   @JsonKey(name: 'chatable_type')
-  final String chatableType;
+  final String? chatableType;
   @JsonKey(name: 'chatable_url')
   final String? chatableUrl;
   final String? description;
-  final String title;
+  final String? title;
   @JsonKey(name: 'unicode_title')
-  final String unicodeTitle;
+  final String? unicodeTitle;
   final String? slug;
-  final String status;
+  final String? status;
   @JsonKey(name: 'memberships_count')
-  final int membershipsCount;
+  final int? membershipsCount;
   @JsonKey(name: 'current_user_membership')
-  final Membership currentUserMembership;
+  final Membership? currentUserMembership;
   @JsonKey(name: 'threading_enabled')
-  final bool threadingEnabled;
+  final bool? threadingEnabled;
   @JsonKey(name: 'icon_upload_url')
   final String? iconUploadUrl;
   @JsonKey(name: 'last_message')
@@ -39,16 +39,16 @@ class ChatMessage {
     required this.allowChannelWideMentions,
     required this.chatable,
     required this.chatableId,
-    required this.chatableType,
+    this.chatableType,
     this.chatableUrl,
     this.description,
-    required this.title,
-    required this.unicodeTitle,
+    this.title,
+    this.unicodeTitle,
     this.slug,
-    required this.status,
-    required this.membershipsCount,
-    required this.currentUserMembership,
-    required this.threadingEnabled,
+    this.status,
+    this.membershipsCount,
+    this.currentUserMembership,
+    this.threadingEnabled,
     this.iconUploadUrl,
     this.lastMessage,
     required this.meta,

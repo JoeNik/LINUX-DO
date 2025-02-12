@@ -185,6 +185,15 @@ class _LoginConst {
   String get welcomeBack => '欢迎回来';
   String get notImplemented => '此功能暂未开发';
   String get registerTip => '请先前往${AppConst.siteName}站点注册';
+
+  // 代理服务器相关
+  String get proxyServer => '代理服务器';
+  String get proxyServerHint => '例如: https://proxy.example.com';
+  String get inputProxyServer => '请输入代理服务器地址';
+  String get save => '保存';
+  String get cancel => '取消';
+  String get clearProxy => '清除代理';
+  String get noProxy => '未设置代理';
 }
 
 /// 设置相关
@@ -283,6 +292,14 @@ class _Posts {
   String get reportFailed => '举报失败';
 
   get reportHint => '让我们具体了解您关心的问题，并尽可能提供相关的链接和示例。';
+
+  String get sendSuccess => '发送成功';
+  String get sendFailed => '发送失败';
+
+  String get officialWarning => '官方警告信息';
+
+  String get messagePlaceholder => '在此处输入私信内容...';
+  String get titlePlaceholder => '输入标题...';
 }
 
 /// 发帖相关常量

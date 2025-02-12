@@ -1,15 +1,24 @@
+import 'dart:io';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/controller/global_controller.dart';
+import 'package:linux_do/models/image_size.dart';
 import 'package:linux_do/models/topic_detail.dart';
+import 'package:linux_do/models/upload_image_response.dart';
+import 'package:linux_do/routes/app_pages.dart';
 import 'package:linux_do/utils/expand/datetime_expand.dart';
 import 'package:linux_do/widgets/cached_image.dart';
 import 'package:linux_do/widgets/dis_button.dart';
 import 'package:linux_do/widgets/dis_loading.dart';
 import 'package:linux_do/widgets/html_widget.dart';
+import 'package:dio/dio.dart' as dio;
 
 import '../const/app_colors.dart';
 import '../const/app_theme.dart';
@@ -33,6 +42,8 @@ class AvatarWidget extends StatelessWidget {
   final Color? borderColor;
   final String username;
   final bool canOpenCard;
+  final Post? post;
+  final String? title;
   const AvatarWidget({
     super.key,
     required this.avatarUrl,
@@ -43,6 +54,8 @@ class AvatarWidget extends StatelessWidget {
     this.borderColor,
     this.username = '',
     this.canOpenCard = true,
+    this.post,
+    this.title,
   });
 
   @override
@@ -57,6 +70,8 @@ class AvatarWidget extends StatelessWidget {
             ),
             child: UserInfoCard(
               username: username,
+              post: post,
+              title: title,
             ),
           ),
           barrierColor: Colors.black.withValues(alpha: 0.5),
@@ -77,7 +92,10 @@ class AvatarWidget extends StatelessWidget {
 
 class UserInfoCard extends GetView<UserInfoCardController> {
   final String username;
-  const UserInfoCard({super.key, required this.username});
+  final Post? post;
+  final String? title;
+  const UserInfoCard(
+      {super.key, required this.username, this.post, this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -407,7 +425,9 @@ class UserInfoCard extends GetView<UserInfoCardController> {
                 Expanded(
                     child: DisButton(
                   text: AppConst.user.message,
-                  onPressed: () {},
+                  onPressed: () {
+                    _showPrivateMessageDialog();
+                  },
                   icon: CupertinoIcons.envelope_circle,
                   size: ButtonSize.small,
                 )),
@@ -415,7 +435,9 @@ class UserInfoCard extends GetView<UserInfoCardController> {
                 Expanded(
                     child: DisButton(
                   text: AppConst.user.chat,
-                  onPressed: () {},
+                  onPressed: () {
+                    controller.toChatDetail();
+                  },
                   type: ButtonType.secondary,
                   icon: CupertinoIcons.chat_bubble_2,
                   size: ButtonSize.small,
@@ -455,6 +477,7 @@ class UserInfoCard extends GetView<UserInfoCardController> {
     return ViewState.content;
   }
 
+  /// 构建徽章
   _buildBadges(BuildContext context) {
     final badges = controller._userInfo.value?.badges;
     if (badges == null || badges.isEmpty) return const SizedBox();
@@ -509,6 +532,7 @@ class UserInfoCard extends GetView<UserInfoCardController> {
     );
   }
 
+  /// 构建其他信息
   _buildOtherInfo(BuildContext context) {
     final user = controller._userInfo.value?.user;
     return user?.bioExcerpt == null || user?.bioExcerpt?.isEmpty == true
@@ -568,6 +592,7 @@ class UserInfoCard extends GetView<UserInfoCardController> {
           );
   }
 
+  /// 显示认可对话框
   void _showAcceptDialog() {
     controller._endorseUserCategorys.value = [];
     final user = controller._userInfo.value?.user;
@@ -703,12 +728,364 @@ class UserInfoCard extends GetView<UserInfoCardController> {
       );
     });
   }
+
+
+  /// 发送私信弹窗
+  void _showPrivateMessageDialog() {
+    final content = post?.cooked;
+    final user = controller._userInfo.value?.user;
+
+    Get.dialog(
+      Dialog(
+        backgroundColor: Theme.of(Get.context!).cardColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.w),
+        ),
+        child: Container(
+          width: 0.9.sw,
+          padding: EdgeInsets.all(12.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 标题栏
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '发送私信',
+                    style: TextStyle(
+                      fontSize: 15.w,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(Get.context!).textTheme.titleLarge?.color,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: Icon(
+                      CupertinoIcons.clear,
+                      size: 20.w,
+                      color: Theme.of(Get.context!).hintColor,
+                    ),
+                  ),
+                ],
+              ),
+              8.vGap,
+              // 标题和描述
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.w),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Theme.of(Get.context!).primaryColor,
+                      Theme.of(Get.context!)
+                          .primaryColor
+                          .withValues(alpha: 0.6),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(4.w),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      CupertinoIcons.reply,
+                      size: 16.w,
+                      color: AppColors.white,
+                    ),
+                    8.hGap,
+                    Expanded(
+                      child: Text(
+                        title ?? '',
+                        style: TextStyle(
+                          fontSize: 12.w,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.white,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              8.vGap,
+              Stack(
+                children: [
+                  Container(
+                    height: 68.w,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4.w),
+                    ),
+                    child: ClipRect(
+                      child: OverflowBox(
+                        alignment: Alignment.topLeft,
+                        maxHeight: 68.w,
+                        child: HtmlWidget(
+                          html: content ?? '',
+                          fontSize: 12.w,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // 渐变遮罩
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0.w,
+                    child: Container(
+                      height: 30.w,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Theme.of(Get.context!)
+                                .cardColor
+                                .withValues(alpha: 0),
+                            Theme.of(Get.context!).cardColor,
+                          ],
+                        ),
+                      ),
+                      alignment: Alignment.bottomRight,
+                      padding: EdgeInsets.only(right: 4.w),
+                    ),
+                  ),
+                ],
+              ),
+              16.vGap,
+              // 用户信息
+              Row(
+                children: [
+                  AvatarWidget(
+                    avatarUrl: user?.getAvatar(80) ?? '',
+                    size: 40.w,
+                    username: username,
+                    circle: user?.id != 1,
+                    canOpenCard: false,
+                  ),
+                  12.hGap,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user?.name == null || user?.name?.isEmpty == true
+                            ? username
+                            : user?.name ?? '',
+                        style: TextStyle(
+                          fontSize: 12.w,
+                          fontWeight:
+                              user?.id != 1 ? FontWeight.w500 : FontWeight.w600,
+                          color: user?.id != 1
+                              ? Theme.of(Get.context!)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.color
+                              : Theme.of(Get.context!).primaryColor,
+                        ),
+                      ),
+                      Text(
+                        user?.userTitle ?? '',
+                        style: TextStyle(
+                          fontSize: 10.w,
+                          color:
+                              Theme.of(Get.context!).textTheme.bodySmall?.color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Get.find<GlobalController>().userInfo?.user?.admin ?? false
+                  ? Row(
+                      children: [
+                        const Spacer(),
+                        Obx(
+                          () => Checkbox(
+                            fillColor: WidgetStateProperty.all(
+                                Theme.of(Get.context!).canvasColor),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4.w),
+                            ),
+                            checkColor: Theme.of(Get.context!).primaryColor,
+                            activeColor: Theme.of(Get.context!).primaryColor,
+                            value: controller.isOfficialWarning.value,
+                            onChanged: (value) {
+                              controller.isOfficialWarning.value =
+                                  value ?? false;
+                            },
+                          ),
+                        ),
+                        Text(
+                          AppConst.posts.officialWarning,
+                          style: TextStyle(
+                            fontSize: 10.w,
+                            color: Theme.of(Get.context!)
+                                .textTheme
+                                .bodyMedium
+                                ?.color,
+                          ),
+                        ),
+                      ],
+                    )
+                  : 12.vGap,
+
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(Get.context!).cardColor,
+                  borderRadius: BorderRadius.circular(8.w),
+                  border: Border.all(
+                    color: Theme.of(Get.context!)
+                        .primaryColor
+                        .withValues(alpha: 0.3),
+                  ),
+                ),
+                child: TextField(
+                  controller: controller.titleController,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 10.w,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: AppConst.posts.titlePlaceholder,
+                    hintStyle: TextStyle(
+                      fontSize: 12.w,
+                      color: Theme.of(Get.context!).hintColor,
+                    ),
+                    filled: false,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12.w),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              6.vGap,
+              // 输入框
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(Get.context!).cardColor,
+                  borderRadius: BorderRadius.circular(8.w),
+                  border: Border.all(
+                    color: Theme.of(Get.context!)
+                        .primaryColor
+                        .withValues(alpha: 0.3),
+                  ),
+                ),
+                child: TextField(
+                  controller: controller.messageController,
+                  maxLines: 4,
+                  style: TextStyle(
+                    fontSize: 10.w,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: AppConst.posts.messagePlaceholder,
+                    hintStyle: TextStyle(
+                      fontSize: 12.w,
+                      color: Theme.of(Get.context!).hintColor,
+                    ),
+                    filled: false,
+                    contentPadding: EdgeInsets.all(12.w),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              6.vGap,
+              // 图片列表
+              Obx(() => Column(
+                    children: controller.uploadedImages
+                        .map((image) => Container(
+                              margin: EdgeInsets.only(bottom: 4.w),
+                              decoration: BoxDecoration(
+                                color: Theme.of(Get.context!).cardColor,
+                                borderRadius: BorderRadius.circular(4.w),
+                                border: Border.all(
+                                  color: Theme.of(Get.context!)
+                                      .dividerColor
+                                      .withValues(alpha: 0.1),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      image.originalFilename,
+                                      style: TextStyle(
+                                        fontSize: 10.w,
+                                        color: Theme.of(Get.context!)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.color,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () => controller.removeImage(image),
+                                    child: Icon(
+                                      CupertinoIcons.delete,
+                                      size: 16.w,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ))
+                        .toList(),
+                  )),
+              6.vGap,
+              // 底部工具栏
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      controller.pickAndUploadImage();
+                    },
+                    child: Icon(
+                      CupertinoIcons.paperclip,
+                      size: 20.w,
+                      color: Theme.of(Get.context!).hintColor,
+                    ),
+                  ),
+                  12.hGap,
+                  Obx(() => controller.isUploading.value
+                      ? SizedBox(
+                          height: 20.w,
+                          child: DisRefreshLoading(
+                            fontSize: 8,
+                          ),
+                        )
+                      : const SizedBox()),
+                  const Spacer(),
+                  DisButton(
+                    text: AppConst.posts.send,
+                    onPressed: () {
+                      if (controller.messageController.text.trim().isEmpty) {
+                        return;
+                      }
+                      controller.sendMessage();
+                      Get.back();
+                    },
+                    type: ButtonType.primary,
+                    size: ButtonSize.small,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
+  }
 }
 
 class UserInfoCardController extends BaseController {
+  final TextEditingController messageController = TextEditingController();
+  final TextEditingController titleController = TextEditingController();
   final ApiService apiService = Get.find();
   final String username;
   final int? postCount;
+
   // 用户信息
   final _userInfo = Rxn<UserResponse>();
   final _categorys = Rxn<List<Category>>();
@@ -716,6 +1093,12 @@ class UserInfoCardController extends BaseController {
   final _loading = RxBool(false);
   final _isFirst = RxBool(true);
   final _coverLoading = RxBool(false);
+
+  final uploadedImages = <UploadImageResponse>[].obs;
+  final isUploading = false.obs;
+
+  // 是否是官方警告信息
+  final isOfficialWarning = false.obs;
 
   UserInfoCardController({required this.username, this.postCount});
 
@@ -782,6 +1165,146 @@ class UserInfoCardController extends BaseController {
       }
     } catch (e, s) {
       l.e('followUser error: $e --- $s');
+      showError(AppConst.user.failed);
+    }
+  }
+
+  // 计算文件的SHA1
+  String _calculateSha1(List<int> bytes) {
+    return sha1.convert(bytes).toString();
+  }
+
+  // 生成短文件名
+  String _generateShortFileName(String originalFileName) {
+    final extension = originalFileName.split('.').last;
+    final timestamp =
+        DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    final random = (1000 + Random().nextInt(9000)).toString();
+    return 'img_${timestamp}_$random.$extension';
+  }
+
+  // 选择并上传图片
+  Future<void> pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      isUploading.value = true;
+      try {
+        final file = File(pickedFile.path);
+        final bytes = await file.readAsBytes();
+        final originalFileName = pickedFile.path.split('/').last;
+        final shortFileName = _generateShortFileName(originalFileName);
+        final sha1Checksum = _calculateSha1(bytes);
+
+        // 创建 FormData
+        final formData = dio.FormData.fromMap({
+          'upload_type': 'composer',
+          'pasted': false,
+          'name': shortFileName,
+          'type': 'image/${shortFileName.split('.').last}',
+          'sha1_checksum': sha1Checksum,
+          'file': await dio.MultipartFile.fromFile(
+            pickedFile.path,
+            filename: shortFileName,
+          ),
+        });
+
+        final response = await apiService.uploadImage(
+          GlobalController.clientId,
+          formData,
+        );
+
+        // 打印上传响应信息
+        l.d('Image upload response - shortUrl: ${response.shortUrl}, url: ${response.url}');
+
+        uploadedImages.add(response);
+
+        // 将图片插入到内容中，使用 shortUrl 作为标记但在预览时使用完整 url
+        final imageMarkdown =
+            '\n![${response.originalFilename}|${response.width}x${response.height}](${response.shortUrl})\n';
+        final currentContent = messageController.text;
+        final cursorPosition = messageController.selection.baseOffset;
+
+        if (cursorPosition >= 0) {
+          final newContent = currentContent.substring(0, cursorPosition) +
+              imageMarkdown +
+              currentContent.substring(cursorPosition);
+          messageController.text = newContent;
+          messageController.selection = TextSelection.collapsed(
+            offset: cursorPosition + imageMarkdown.length,
+          );
+        } else {
+          messageController.text += imageMarkdown;
+        }
+      } catch (e, s) {
+        showToast(AppConst.createPost.uploadFailed);
+        l.e('Error uploading image: $e -- $s');
+      } finally {
+        isUploading.value = false;
+      }
+    }
+  }
+
+  // 删除图片
+  void removeImage(UploadImageResponse image) {
+    uploadedImages.remove(image);
+    // 从内容中移除图片引用
+    final imagePattern =
+        '\\!\\[${image.originalFilename}\\|${image.width}x${image.height}\\]\\(${image.shortUrl}\\)';
+    final regex = RegExp(imagePattern);
+    messageController.text = messageController.text.replaceAll(regex, '');
+  }
+
+  /// 发送私信
+  void sendMessage() async {
+    final title = titleController.text;
+    final content = messageController.text;
+    if (title.isEmpty || content.isEmpty) {
+      showError("请输入标题和内容");
+      return;
+    }
+
+    final imageSizes = <String, ImageSize>{};
+    for (final image in uploadedImages) {
+      imageSizes[image.url] = ImageSize(
+        width: image.width,
+        height: image.height,
+      );
+    }
+
+    try {
+      final response = await apiService.createPost(
+        title: title,
+        content: content,
+        targetRecipients: _userInfo.value?.user?.username,
+        isWarning: isOfficialWarning.value,
+        imageSizes: imageSizes,
+        archetype: 'private_message',
+      );
+
+      if (response.success) {
+        showSuccess(AppConst.posts.sendSuccess);
+        Get.back();
+      } else {
+        showError(AppConst.posts.sendFailed);
+      }
+    } catch (e) {
+      l.e('sendMessage error: $e');
+      showError(AppConst.posts.sendFailed);
+    }
+  }
+  
+  void toChatDetail() async{
+    try{
+      final response = await apiService.getDirectChannel([username]);
+      if(response.channel != null){
+        Get.toNamed(Routes.CHAT_DETAIL, arguments: response.channel);
+      }else{
+        showError(AppConst.user.failed);
+      }
+    }catch(e, s){
+      l.e('toChatDetail error: $e --- $s');
       showError(AppConst.user.failed);
     }
   }

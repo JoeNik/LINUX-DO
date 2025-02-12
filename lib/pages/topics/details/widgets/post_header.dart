@@ -4,7 +4,6 @@ import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/utils/expand/datetime_expand.dart';
 
-import '../../../../const/app_colors.dart';
 import '../../../../models/topic_detail.dart';
 import '../../../../widgets/avatar_widget.dart';
 
@@ -12,16 +11,17 @@ import '../../../../widgets/avatar_widget.dart';
 class PostHeader extends StatelessWidget {
   const PostHeader({
     required this.post,
+    this.title,
     Key? key,
   }) : super(key: key);
 
   final Post post;
-
+  final String? title;
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _UserAvatar(post: post),
+        _UserAvatar(post: post, title: title),
         8.hGap,
         _UserInfo(post: post),
         const Spacer(),
@@ -35,11 +35,12 @@ class PostHeader extends StatelessWidget {
 class _UserAvatar extends StatelessWidget {
   const _UserAvatar({
     required this.post,
+    this.title,
     Key? key,
   }) : super(key: key);
 
   final Post post;
-
+  final String? title;
   @override
   Widget build(BuildContext context) {
     return AvatarWidget(
@@ -49,6 +50,8 @@ class _UserAvatar extends StatelessWidget {
       borderRadius: 4.w,
       borderColor: Theme.of(context).primaryColor,
       username: post.username ?? '',
+      post: post,
+      title: title,
     );
   }
 }

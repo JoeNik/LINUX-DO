@@ -60,6 +60,9 @@ class TopicsController extends BaseController
   // 各个标签页的控制器
   final _tabControllers = <String, TopicTabController>{}.obs;
 
+  // 保存最后的搜索查询
+  final lastSearchQuery = ''.obs;
+
   // 移除 tabViews getter，改用 _buildTabView 方法
   Widget _buildTabView(int index) {
     final path = paths[index];
@@ -163,7 +166,6 @@ class TopicsController extends BaseController
 
     final context = Get.context!;
     final overlay = Overlay.of(context);
-    if (overlay == null) return;
 
     // 获取搜索框的全局位置和大小
     final box = context.findRenderObject() as RenderBox?;
@@ -257,8 +259,7 @@ class TopicsController extends BaseController
 
       // 调用搜索 API
       final result = await _apiService.search(
-        query: '$filter order:latest',
-        page: 1,
+        query: filter,
       );
 
       // 保存搜索结果
@@ -284,15 +285,17 @@ class TopicsController extends BaseController
 
   // 清除搜索结果
   void clearSearch() {
+    lastSearchQuery.value = '';
     topics.clear();
     searchResult.value = null;
     searchError.value = '';
+    isSearching.value = false;
   }
 
   // 加载更多搜索结果
   Future<void> loadMoreSearchResults() async {
     if (searchResult.value == null || 
-        !searchResult.value!.groupedSearchResult.moreFullPageResults ||
+        (searchResult.value!.groupedSearchResult.moreFullPageResults ?? false) ||
         isSearching.value) {
       return;
     }

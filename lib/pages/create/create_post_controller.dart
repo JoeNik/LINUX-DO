@@ -14,9 +14,7 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart' as dio;
 import 'dart:math';
 import 'package:linux_do/net/http_config.dart';
-import 'package:linux_do/routes/app_pages.dart';
 import 'package:linux_do/utils/log.dart';
-import 'package:linux_do/utils/mixins/toast_mixin.dart';
 
 import 'preview_post_controller.dart';
 import 'preview_post_page.dart';

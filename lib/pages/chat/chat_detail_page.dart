@@ -38,7 +38,7 @@ class ChatDetailPage extends GetView<ChatDetailController> with Concatenated{
             ),
             8.hGap,
             Text(
-              controller.channel.title,
+              controller.channel.title ?? '',
               style: TextStyle(
                 fontSize: 16.w,
                 fontWeight: FontWeight.w600,

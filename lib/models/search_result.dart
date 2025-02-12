@@ -91,7 +91,7 @@ class GroupedSearchResult {
   @JsonKey(name: 'search_log_id')
   final int searchLogId;
   @JsonKey(name: 'more_full_page_results')
-  final bool moreFullPageResults;
+  final bool? moreFullPageResults;
   @JsonKey(name: 'can_create_topic')
   final bool canCreateTopic;
   final dynamic error;
@@ -105,7 +105,7 @@ class GroupedSearchResult {
     this.moreCategories,
     required this.term,
     required this.searchLogId,
-    required this.moreFullPageResults,
+    this.moreFullPageResults,
     required this.canCreateTopic,
     this.error,
     required this.extra,

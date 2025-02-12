@@ -86,7 +86,7 @@ GroupedSearchResult _$GroupedSearchResultFromJson(Map<String, dynamic> json) =>
       moreCategories: json['more_categories'],
       term: json['term'] as String,
       searchLogId: (json['search_log_id'] as num).toInt(),
-      moreFullPageResults: json['more_full_page_results'] as bool,
+      moreFullPageResults: json['more_full_page_results'] as bool?,
       canCreateTopic: json['can_create_topic'] as bool,
       error: json['error'],
       extra: json['extra'] as Map<String, dynamic>,

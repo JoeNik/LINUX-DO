@@ -73,7 +73,27 @@ class HttpClient {
       followRedirects: true,
       receiveDataWhenStatusError: true,
     );
+
+    // 设置代理服务器
+    final proxyServer = StorageManager.getProxyServer();
+    if (proxyServer != null && proxyServer.isNotEmpty) {
+      l.d('使用代理服务器: $proxyServer');
+      _options.baseUrl = proxyServer;
+    }
+
     _dio = Dio(_options);
+  }
+
+  /// 更新代理服务器设置
+  void updateProxy(String? proxyServer) {
+    if (proxyServer != null && proxyServer.isNotEmpty) {
+      l.d('更新代理服务器: $proxyServer');
+      _options.baseUrl = proxyServer;
+    } else {
+      l.d('清除代理服务器设置');
+      _options.baseUrl = HttpConfig.baseUrl;
+    }
+    _dio.options = _options;
   }
 
   /// 初始化Cookie管理器

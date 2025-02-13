@@ -228,7 +228,7 @@ class _Settings {
   String get logoutConfirmMessage => '确定要退出登录吗？';
   String get cancel => '取消';
   String get confirm => '确定';
-  String get status => '输入你的状态...';
+  String get status => '自定义的状态,为空则删除';
   String get themeColor => '请选择主题颜色';
   String get other => '其他';
   String get browserTips => '浏览器提示';

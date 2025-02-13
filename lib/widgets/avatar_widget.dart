@@ -316,7 +316,7 @@ class UserInfoCard extends GetView<UserInfoCardController> {
   Widget _buildStats(BuildContext context) {
     final user = controller._userInfo.value?.user;
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.only(bottom: 16.w, left: 16.w, right: 16.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -533,63 +533,48 @@ class UserInfoCard extends GetView<UserInfoCardController> {
   }
 
   /// 构建其他信息
-  _buildOtherInfo(BuildContext context) {
+  Widget _buildOtherInfo(BuildContext context) {
     final user = controller._userInfo.value?.user;
-    return user?.bioExcerpt == null || user?.bioExcerpt?.isEmpty == true
-        ? Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(6.w),
-            margin: EdgeInsets.symmetric(horizontal: 16.w),
-            decoration: BoxDecoration(
+    return Container(
+      width: double.infinity,
+      height: 60.w,
+      margin: EdgeInsets.symmetric(
+        horizontal: 12.w,
+      ),
+      decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(4.w),
               border: Border.all(
                   color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
                   width: .6.w),
             ),
-            child: Text(
-              AppConst.user.noDescription,
-              style: TextStyle(
-                fontSize: 12.w,
-                color: Theme.of(context).hintColor,
-              ),
-            ))
-        : Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(6.w),
-            margin: EdgeInsets.symmetric(horizontal: 16.w),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(4.w),
-              border: Border.all(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                  width: .6.w),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8.w),
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 6.w),
+            child: HtmlWidget(
+              html: user?.bioExcerpt ?? '这个人真懒，什么都没有留下。',
+              fontSize: 11.w,
+              customWidgetBuilder: (element) {
+                if (element.localName == 'img') {
+                  String? src = element.attributes['src'];
+                  if (src != null && src.startsWith('/')) {
+                    return Image.network(
+                      '${HttpConfig.baseUrl}$src',
+                      width: 20.w,
+                      height: 20.w,
+                    );
+                  }
+                }
+                return const SizedBox();
+              },
             ),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  HtmlWidget(
-                    html: user?.bioExcerpt ?? '',
-                    fontSize: 11.w,
-                    customWidgetBuilder: (element) {
-                      if (element.localName == 'img') {
-                        String? src = element.attributes['src'];
-                        if (src != null && src.startsWith('/')) {
-                          return Image.network(
-                            '${HttpConfig.baseUrl}$src',
-                            width: 20.w,
-                            height: 20.w,
-                          );
-                        }
-                      }
-                      return const SizedBox();
-                    },
-                  ),
-                ],
-              ),
-            ),
-          );
+          ),
+        ),
+      ),
+    );
   }
 
   /// 显示认可对话框

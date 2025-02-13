@@ -330,8 +330,12 @@ abstract class ApiService {
 
   /// 更新自定义状态
   @PUT('user-status.json')
-  Future<dynamic> updateUserStatus(@Field('description') String description,
+  Future<SuccessResponse<dynamic>> updateUserStatus(@Field('description') String description,
       {@Field('emoji') String emoji = 'speech_balloon'});
+
+  /// 删除自定义状态
+  @DELETE('user-status.json')
+  Future<SuccessResponse<dynamic>> deleteUserStatus();
 
   /// 获取我的帖子列表
   @GET('posted.json')

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/widgets/dis_loading.dart';
 import '../../const/app_const.dart';
@@ -9,6 +10,7 @@ import '../../const/app_images.dart';
 import '../../routes/app_pages.dart';
 import '../../utils/tag.dart';
 import 'topics_controller.dart';
+import '../../utils/storage_manager.dart';
 
 class TopicsPage extends StatefulWidget {
   const TopicsPage({Key? key}) : super(key: key);
@@ -285,6 +287,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
 class TopicSearchDelegate extends SearchDelegate<String> {
   final TopicsController controller;
+  final RxList<String> searchHistory = <String>[].obs;
+  static const String searchHistoryKey = 'topic_search_history';
 
   TopicSearchDelegate(this.controller)
       : super(
@@ -293,7 +297,44 @@ class TopicSearchDelegate extends SearchDelegate<String> {
             fontSize: 14.w,
             color: Get.theme.textTheme.bodyMedium?.color,
           ),
-        );
+        ) {
+    // 加载搜索历史
+    _loadSearchHistory();
+  }
+
+  // 加载搜索历史
+  void _loadSearchHistory() {
+    final history = StorageManager.getStringList(searchHistoryKey) ?? [];
+    searchHistory.value = history;
+  }
+
+  // 保存搜索历史
+  void _saveSearchHistory(String query) {
+    if (query.isEmpty) return;
+    
+    // 如果已存在，先删除旧的
+    searchHistory.remove(query);
+    // 添加到开头
+    searchHistory.insert(0, query);
+    // 限制历史记录数量
+    if (searchHistory.length > 10) {
+      searchHistory.removeLast();
+    }
+    // 保存到本地存储
+    StorageManager.setData(searchHistoryKey, searchHistory.toList());
+  }
+
+  // 清除搜索历史
+  void _clearSearchHistory() {
+    searchHistory.clear();
+    StorageManager.remove(searchHistoryKey);
+  }
+
+  // 删除单个搜索历史
+  void _removeSearchHistory(String query) {
+    searchHistory.remove(query);
+    StorageManager.setData(searchHistoryKey, searchHistory.toList());
+  }
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -326,20 +367,147 @@ class TopicSearchDelegate extends SearchDelegate<String> {
             ),
           );
         }
-        return IconButton(
-          icon: Icon(
-            CupertinoIcons.clear,
-            size: 18.w,
-            color: Theme.of(context).hintColor,
-          ),
-          onPressed: () {
-            if (query.isEmpty) {
-              close(context, '');
-            } else {
-              query = '';
-              controller.clearSearch();
-            }
-          },
+        return Row(
+          children: [
+            if (searchHistory.isNotEmpty && query.isEmpty)
+              IconButton(
+                icon: Icon(
+                  CupertinoIcons.delete,
+                  size: 18.w,
+                  color: AppColors.error,
+                ),
+                onPressed: () {
+                  Get.dialog(
+                    Dialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.w),
+                      ),
+                      child: Container(
+                        width: 0.8.sw,
+                        padding: EdgeInsets.all(20.w),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(16.w),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 40.w,
+                              height: 40.w,
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                CupertinoIcons.delete,
+                                color: Theme.of(context).primaryColor,
+                                size: 20.w,
+                              ),
+                            ),
+                            16.vGap,
+                            Text(
+                              '清除搜索历史',
+                              style: TextStyle(
+                                fontSize: 16.w,
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).textTheme.titleLarge?.color,
+                              ),
+                            ),
+                            12.vGap,
+                            Text(
+                              '确定要清除所有搜索历史吗？',
+                              style: TextStyle(
+                                fontSize: 14.w,
+                                color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            24.vGap,
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => Get.back(),
+                                    child: Container(
+                                      height: 40.w,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(20.w),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        AppConst.cancel,
+                                        style: TextStyle(
+                                          fontSize: 14.w,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                12.hGap,
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      _clearSearchHistory();
+                                      Get.back();
+                                    },
+                                    child: Container(
+                                      height: 40.w,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            Theme.of(context).primaryColor,
+                                            Theme.of(context).primaryColor.withValues(alpha: 0.6),
+                                          ],
+                                        ),
+                                        borderRadius: BorderRadius.circular(20.w),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        AppConst.confirm,
+                                        style: TextStyle(
+                                          fontSize: 14.w,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    barrierColor: Theme.of(context).shadowColor.withValues(alpha: 0.4),
+                  );
+                },
+              ),
+            IconButton(
+              icon: Icon(
+                CupertinoIcons.clear,
+                size: 18.w,
+                color: Theme.of(context).hintColor,
+              ),
+              onPressed: () {
+                if (query.isEmpty) {
+                  close(context, '');
+                } else {
+                  query = '';
+                  controller.clearSearch();
+                }
+              },
+            ),
+          ],
         );
       }),
     ];
@@ -365,6 +533,59 @@ class TopicSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
+    if (query.isEmpty) {
+      // 显示搜索历史
+      return Obx(() {
+        if (searchHistory.isEmpty) {
+          return Center(
+            child: Text(
+              '暂无搜索历史',
+              style: TextStyle(
+                color: Theme.of(context).hintColor,
+                fontSize: 14.w,
+              ),
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: EdgeInsets.zero,
+          itemCount: searchHistory.length,
+          itemBuilder: (context, index) {
+            final historyItem = searchHistory[index];
+            return ListTile(
+              leading: Icon(
+                CupertinoIcons.clock,
+                size: 18.w,
+                color: Theme.of(context).primaryColor,
+              ),
+              title: Text(
+                historyItem,
+                style: TextStyle(
+                  fontSize: 14.w,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
+              ),
+              trailing: IconButton(
+                icon: Icon(
+                  CupertinoIcons.clear_circled,
+                  size: 18.w,
+                  color: Theme.of(context).hintColor,
+                ),
+                onPressed: () => _removeSearchHistory(historyItem),
+              ),
+              onTap: () {
+                query = historyItem;
+                _saveSearchHistory(historyItem);
+                controller.lastSearchQuery.value = historyItem;
+                showResults(context);
+              },
+            );
+          },
+        );
+      });
+    }
+
     return Obx(() {
       if (controller.topics.isEmpty) {
         return Center(
@@ -389,10 +610,9 @@ class TopicSearchDelegate extends SearchDelegate<String> {
             color: Colors.transparent,
             child: InkWell(
               onTap: () async {
-                // 不清除搜索结果 也不管理搜索的状态
-                // controller.clearSearch();
-                // close(context, topic.id.toString());
-                await Get.toNamed(Routes.TOPIC_DETAIL, arguments: topic.id,preventDuplicates: true);
+                _saveSearchHistory(query);
+                controller.lastSearchQuery.value = query;
+                await Get.toNamed(Routes.TOPIC_DETAIL, arguments: topic.id, preventDuplicates: true);
               },
               borderRadius: BorderRadius.circular(4.w),
               splashColor: Theme.of(context).primaryColor.withValues(alpha: .1),
@@ -466,6 +686,8 @@ class TopicSearchDelegate extends SearchDelegate<String> {
   void showResults(BuildContext context) {
     super.showResults(context);
     if (query.isNotEmpty) {
+      _saveSearchHistory(query);
+      controller.lastSearchQuery.value = query;
       controller.searchTopics(query);
     } else {
       controller.clearSearch();
@@ -476,6 +698,8 @@ class TopicSearchDelegate extends SearchDelegate<String> {
   void showSuggestions(BuildContext context) {
     super.showSuggestions(context);
     if (query.isNotEmpty) {
+      _saveSearchHistory(query);
+      controller.lastSearchQuery.value = query;
       controller.searchTopics(query);
     } else {
       controller.clearSearch();

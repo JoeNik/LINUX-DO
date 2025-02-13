@@ -536,7 +536,6 @@ class TopicDetailController extends BaseController
     final savedBrowserTips = StorageManager.getBool(AppConst.identifier.browserTips) ?? false;
 
     if (!savedBrowserTips) {
-      Get.back();
       Get.toNamed(Routes.WEBVIEW, arguments: url);
       return;
     }

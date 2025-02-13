@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/net/api_service.dart';
+import 'package:linux_do/net/success_response.dart';
 import 'package:linux_do/pages/profile/tabs/message_controller.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import '../../const/app_const.dart';
@@ -106,17 +107,23 @@ class ProfileController extends BaseController with Concatenated {
   // 更新状态
   void updateStatus() async {
     try {
-      final response = await _apiService.updateUserStatus(
-        statusController.text.trim(),
-      );
-      if (response != null && response['success'] == 'OK') {
+      SuccessResponse<dynamic>? response;
+
+      if (statusController.text.trim().isNotEmpty) {
+        response = await _apiService.updateUserStatus(
+          statusController.text.trim(),
+        );
+      } else {
+        response = await _apiService.deleteUserStatus();
+      }
+      if (response != null && response.isSuccess) {
         showSuccess(AppConst.configSuccess);
         Get.find<GlobalController>().fetchUserInfo();
       } else {
         showError(AppConst.configFailed);
       }
-    } catch (e) {
-      l.e('更新失败 $e');
+    } catch (e, s) {
+      l.e('更新失败 $e --- $s');
       showError('更新失败');
     }
   }

@@ -500,9 +500,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                         text: AppConst.confirm,
                         size: ButtonSize.small,
                         onPressed: () {
-                          if (controller.statusController.text.trim().isEmpty) {
-                            return;
-                          }
+                          
                           controller.updateStatus();
                           Get.back();
                         },

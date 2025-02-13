@@ -75,10 +75,6 @@ class TopicTabController extends BaseController
       isRefreshing.value = true;
       clearError(); // 清除之前的错误
 
-      String path = this.path;
-      if (path == 'latest' && currentPage.value < 1) {
-        path = 'top';
-      }
 
       final response = await apiService.getTopics(path);
 

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/controller/base_controller.dart';
+import 'package:linux_do/net/api_service.dart';
 import 'package:linux_do/net/http_client.dart';
+import 'package:linux_do/net/success_response.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import 'package:linux_do/utils/storage_manager.dart';
 import 'package:linux_do/controller/global_controller.dart';
@@ -13,6 +16,7 @@ import '../../widgets/dis_color_picker.dart';
 import '../web_page.dart';
 
 class SettingsController extends BaseController {
+  final ApiService _apiService = Get.find();
   final isAnonymousMode = false.obs;
   final isDoNotDisturb = false.obs;
   final isTrackingEnabled = false.obs;
@@ -137,6 +141,7 @@ class SettingsController extends BaseController {
 
   /// 关于页面
   void toAbout() {
+    Get.toNamed(Routes.ABOUT);
   }
 
   /// 常见问题页面
@@ -146,7 +151,63 @@ class SettingsController extends BaseController {
 
   /// 更新浏览器提示  
   void updateBrowserTips(bool value) {
-    browserTips.value = value;
     StorageManager.setData(AppConst.identifier.browserTips, value);
+    browserTips.value = value;
+  }
+
+  /// 安全设置页
+  void toSecuritySettings() {
+    Get.toNamed(Routes.SECURITY_SETTINGS);
+  }
+
+  /// 个性资料页
+  void toProfileSettings() {
+    //Get.toNamed(Routes.PROFILE_SETTINGS);
+    showWarning('开发中');
+  }
+
+  /// 电子邮件设置页
+  void toEmailSettings() {
+    Get.toNamed(Routes.EMAIL_SETTINGS);
+  }
+
+  /// 通知设置页
+  void toNotificationSettings() {
+    Get.toNamed(Routes.NOTIFICATION_SETTINGS);
+  }
+
+  /// 跟踪设置页
+  void toTrackingSettings() {
+    Get.toNamed(Routes.TRACKING_SETTINGS);
+  }
+
+  /// 免打扰设置页
+  void toDoNotDisturbSettings() {
+    Get.toNamed(Routes.DO_NOT_DISTURB_SETTINGS);
+  }
+
+  /// 导出数据
+  void exportData() async{
+    try{
+      SuccessResponse data = await _apiService.requestDataExport();
+      if (data.isSuccess) {
+        showSuccess(AppConst.settings.dataExportSuccess);
+      }
+    } catch (e, s) {
+      showError(AppConst.settings.dataExportFailed);
+      l.e('exportData error: $e, $s');
+    }
+  }
+
+  /// 用户协议
+  void toTerms() async{
+    final htmlContent = await rootBundle.loadString(AppConst.terms);
+    Get.toNamed(Routes.WEBVIEW, arguments: htmlContent);
+  }
+
+  /// 隐私政策
+  void toPrivacy() async{
+    final htmlContent = await rootBundle.loadString(AppConst.privacy);
+    Get.toNamed(Routes.WEBVIEW, arguments: htmlContent);
   }
 } 

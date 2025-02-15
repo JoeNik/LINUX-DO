@@ -1,4 +1,12 @@
 import 'package:get/get.dart';
+import 'package:linux_do/pages/profile/edit_profile_controller.dart';
+import 'package:linux_do/pages/profile/edit_profile_page.dart';
+import 'package:linux_do/pages/settings/about_controller.dart';
+import 'package:linux_do/pages/settings/about_page.dart';
+import 'package:linux_do/pages/settings/profile_settings_controller.dart';
+import 'package:linux_do/pages/settings/profile_settings_page.dart';
+import 'package:linux_do/pages/settings/security_settings_controller.dart';
+import 'package:linux_do/pages/settings/security_settings_page.dart';
 import '../pages/chat/chat_detail_controller.dart';
 import '../pages/chat/chat_detail_page.dart';
 import '../pages/create/create_post_controller.dart';
@@ -19,6 +27,14 @@ import '../pages/topics/topics_controller.dart';
 import '../pages/common/webview_page.dart';
 import '../pages/common/webview_controller.dart';
 import '../pages/create/create_post_page.dart';
+import '../pages/settings/email_settings_controller.dart';
+import '../pages/settings/email_settings_page.dart';
+import '../pages/settings/notification_settings_controller.dart';
+import '../pages/settings/notification_settings_page.dart';
+import '../pages/settings/tracking_settings_controller.dart';
+import '../pages/settings/tracking_settings_page.dart';
+import '../pages/settings/do_not_disturb_controller.dart';
+import '../pages/settings/do_not_disturb_page.dart';
 
 part 'app_routes.dart';
 
@@ -100,5 +116,79 @@ class AppPages {
         Get.lazyPut(() => ChatDetailController());
       }),
     ),
+
+    /// 编辑资料页
+    GetPage(
+      name: Routes.EDIT_PROFILE,
+      page: () => const EditProfilePage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => EditProfileController());
+      }),
+    ),
+
+    /// 安全设置页
+    GetPage(
+      name: Routes.SECURITY_SETTINGS,
+      page: () => const SecuritySettingsPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => SecuritySettingsController());
+      }),
+    ),
+
+
+    /// 个性资料页
+    GetPage(
+      name: Routes.PROFILE_SETTINGS,
+      page: () => const ProfileSettingsPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => ProfileSettingsController());
+      }),
+    ),
+
+    /// 电子邮件设置页
+    GetPage(
+      name: Routes.EMAIL_SETTINGS,
+      page: () => const EmailSettingsPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => EmailSettingsController());
+      }),
+    ),
+
+    /// 通知设置页
+    GetPage(
+      name: Routes.NOTIFICATION_SETTINGS,
+      page: () => const NotificationSettingsPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => NotificationSettingsController());
+      }),
+    ),
+
+    /// 跟踪设置页
+    GetPage(
+      name: Routes.TRACKING_SETTINGS,
+      page: () => const TrackingSettingsPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => TrackingSettingsController());
+      }),
+    ),
+
+    /// 免打扰设置页
+    GetPage(
+      name: Routes.DO_NOT_DISTURB_SETTINGS,
+      page: () => const DoNotDisturbPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => DoNotDisturbController());
+      }),
+    ),
+
+    /// 关于页
+    GetPage(
+      name: Routes.ABOUT,
+      page: () => const AboutPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => AboutController());
+      }),
+    ),
+    
   ];
 }

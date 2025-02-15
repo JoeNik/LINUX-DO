@@ -1,11 +1,9 @@
-import 'dart:io';
-
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:io' as dart_io;
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:linux_do/const/app_spacing.dart';
+import 'package:linux_do/utils/device_util.dart';
 import '../../net/http_config.dart';
 import '../controller/global_controller.dart';
 import '../widgets/dis_loading.dart';
@@ -65,7 +63,7 @@ class _WebPageState extends State<WebPage> {
 
   Future<void> _initUserAgent() async {
     setState(() {});
-    _userAgent = await getUserAgent();
+    _userAgent = await DeviceUtil.getUserAgent();
   }
 
   Future<void> _initCookieJar() async {
@@ -78,7 +76,7 @@ class _WebPageState extends State<WebPage> {
 
   Future<void> _checkAndSaveCookies() async {
     try {
-      final uri = Uri.parse(HttpConfig.baseUrl);
+      final uri = Uri.parse('${HttpConfig.baseUrl}login');
       final webUri = WebUri(uri.toString());
 
       // 获取所有 Cookie
@@ -140,22 +138,74 @@ class _WebPageState extends State<WebPage> {
           (!needsCfVerification || (needsCfVerification && hasCfCookie));
 
       if (isLoginSuccess) {
-        // 获取 CSRF Token
-        final result = await _controller?.evaluateJavascript(source: '''
-          (function() {
-            const meta = document.querySelector('meta[name="csrf-token"]');
-            return meta ? meta.getAttribute('content') : null;
-          })();
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        int maxRetries = 5;
+        var result;
+
+        for (int i = 0; i < maxRetries; i++) {
+          // 首先尝试从 meta 标签获取
+          result = await _controller?.evaluateJavascript(source: '''
+            (function() {
+              const meta = document.querySelector('meta[name="csrf-token"]');
+              return meta ? meta.getAttribute('content') : null;
+            })();
         ''');
 
-        if (result != null) {
-          await StorageManager.setData(
-              AppConst.identifier.csrfToken, result.toString());
-          l.d('已保存 CSRF Token: $result');
+          // 如果 meta 标签获取失败，尝试通过 API 获取
+          if (result == null ||
+              result.toString() == '{}' ||
+              result.toString().isEmpty) {
+            result = await _controller?.evaluateJavascript(source: '''
+              fetch('${HttpConfig.baseUrl}session/csrf', {
+                credentials: 'include',
+                headers: {
+                  'Accept': 'application/json',
+                  'X-Requested-With': 'XMLHttpRequest',
+                  'User-Agent': '$_userAgent'
+                }
+              })
+              .then(response => response.text())
+              .then(text => {
+                try {
+                  const data = JSON.parse(text);
+                  return data.csrf;
+                } catch (e) {
+                  console.error('解析响应失败:', e);
+                  return null;
+                }
+              })
+              .catch(error => {
+                console.error('请求失败:', error);
+                return null;
+              });
+      ''');
+          }
+
+          // 检查是否获取到有效的 token
+          if (result != null &&
+              result.toString() != '{}' &&
+              result.toString().isNotEmpty) {
+            l.d('第 ${i + 1} 次尝试成功获取 CSRF Token: $result');
+            await StorageManager.setData(
+                AppConst.identifier.csrfToken, result.toString());
+            break;
+          } else {
+            l.e('第 ${i + 1} 次尝试获取 CSRF Token 失败');
+            if (i < maxRetries - 1) {
+              // 在重试之前等待一段时间
+              await Future.delayed(const Duration(milliseconds: 500));
+            }
+          }
         }
 
-        // l.d('登录成功');
-        // await Future.delayed(const Duration(milliseconds: 500));
+        if (result == null ||
+            result.toString() == '{}' ||
+            result.toString().isEmpty) {
+          l.e('在 $maxRetries 次尝试后仍无法获取有效的 CSRF Token');
+          return;
+        }
+
         if (mounted) {
           Future.delayed(const Duration(milliseconds: 200), () {
             Get.find<GlobalController>().fetchUserInfo();
@@ -298,26 +348,5 @@ class _WebPageState extends State<WebPage> {
         ],
       ),
     );
-  }
-
-  Future<String> getUserAgent() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    String userAgent = '';
-
-    if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      userAgent =
-          'Mozilla/5.0 (Linux; Android ${androidInfo.version.release}; ${androidInfo.model} Build/${androidInfo.version.sdkInt}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
-    } else if (Platform.isIOS) {
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-      userAgent =
-          'Mozilla/5.0 (iPhone; CPU iPhone OS ${iosInfo.systemVersion.replaceAll('_', ' ')} like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/537.36';
-    } else if (Platform.isMacOS) {
-      MacOsDeviceInfo macInfo = await deviceInfo.macOsInfo;
-      userAgent =
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X ${macInfo.osRelease}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-    }
-
-    return userAgent;
   }
 }

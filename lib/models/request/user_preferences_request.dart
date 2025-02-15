@@ -5,31 +5,31 @@ part 'user_preferences_request.g.dart';
 @JsonSerializable()
 class UserPreferencesRequest {
   @JsonKey(name: 'bio_raw')
-  final String bioRaw;
-  final String website;
-  final String location;
+  final String? bioRaw;
+  final String? website;
+  final String? location;
   @JsonKey(name: 'custom_fields')
-  final CustomFields customFields;
+  final CustomFields? customFields;
   @JsonKey(name: 'card_background_upload_url')
-  final String cardBackgroundUploadUrl;
+  final String? cardBackgroundUploadUrl;
   @JsonKey(name: 'date_of_birth')
-  final String dateOfBirth;
+  final String? dateOfBirth;
   @JsonKey(name: 'hide_profile')
-  final bool hideProfile;
-  final String timezone;
+  final bool? hideProfile;
+  final String? timezone;
   @JsonKey(name: 'default_calendar')
-  final String defaultCalendar;
+  final String? defaultCalendar;
 
   UserPreferencesRequest({
-    required this.bioRaw,
-    required this.website,
-    required this.location,
-    required this.customFields,
-    required this.cardBackgroundUploadUrl,
-    required this.dateOfBirth,
-    required this.hideProfile,
-    required this.timezone,
-    required this.defaultCalendar,
+     this.bioRaw,
+     this.website,
+     this.location,
+     this.customFields,
+     this.cardBackgroundUploadUrl,
+     this.dateOfBirth,
+     this.hideProfile,
+     this.timezone,
+     this.defaultCalendar,
   });
 
   factory UserPreferencesRequest.fromJson(Map<String, dynamic> json) =>

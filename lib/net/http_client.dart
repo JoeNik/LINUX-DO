@@ -3,6 +3,7 @@ import 'package:get/get.dart' hide Response;
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:linux_do/utils/device_util.dart';
 import 'package:path_provider/path_provider.dart';
 import 'api_response.dart';
 import 'http_config.dart';
@@ -46,25 +47,27 @@ class HttpClient {
   HttpClient._();
 
   Future<void> init() async {
-    _initOptions();
+    await _initOptions();
     await _initCookieManager();
     
     _initInterceptors();
   }
 
   /// 初始化options
-  void _initOptions() {
+  Future<void>  _initOptions() async{
+    final userAgent = await DeviceUtil.getUserAgent();
     _options = BaseOptions(
       baseUrl: HttpConfig.baseUrl,
       connectTimeout: const Duration(milliseconds: HttpConfig.connectTimeout),
       receiveTimeout: const Duration(milliseconds: HttpConfig.receiveTimeout),
       sendTimeout: const Duration(milliseconds: HttpConfig.sendTimeout),
+      
       headers: {
         'Accept': 'application/json, text/plain, */*',
         'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
         'Content-Type': 'application/json; charset=utf-8',
         'X-Requested-With': 'XMLHttpRequest',
-        'User-Agent': HttpConfig.userAgent,
+        'User-Agent': userAgent,
       },
       responseType: ResponseType.json,
       validateStatus: (status) {
@@ -153,9 +156,9 @@ class HttpClient {
         return handler.next(response);
       },
       onError: (DioException e, handler) async {
-        if (e.response != null) {
-          await _handleCookies(e.response!);
-        }
+        // if (e.response != null) {
+        //   await _handleCookies(e.response!);
+        // }
         return handler.next(e);
       },
     ));
@@ -372,10 +375,10 @@ class HttpClient {
           case HttpConfig.unauthorizedCode:
             message = HttpConfig.unauthorizedMessage;
             // 清除登录状态
-            StorageManager.remove(AppConst.identifier.csrfToken);
-            clearCookies(); // 清除Cookie
-            Get.find<GlobalController>().setIsLogin(false);
-            Get.offAllNamed('/login');
+            // StorageManager.remove(AppConst.identifier.csrfToken);
+            // clearCookies(); // 清除Cookie
+            // Get.find<GlobalController>().setIsLogin(false);
+            // Get.offAllNamed('/login');
             break;
           case HttpConfig.forbiddenCode:
             message = HttpConfig.forbiddenMessage;
@@ -533,6 +536,10 @@ class HttpClient {
       bool hasCfClearance = false;
       bool hasForumSession = false;
       bool hasToken = false;
+      final csrfToken =
+            StorageManager.getString(AppConst.identifier.csrfToken) ;
+
+        l.d('没有 CSRF Token  $csrfToken');
 
       // 检查所有必要的 cookies
       for (var cookie in cookies) {
@@ -547,7 +554,7 @@ class HttpClient {
       l.d('Cookie 状态: CF=$hasCfClearance, Session=$hasForumSession, Token=$hasToken, NeedCF=$needsCfVerification');
       
       // 根据是否需要 CF 验证来判断 cookies 是否有效
-      return hasForumSession && hasToken && (!needsCfVerification || (needsCfVerification && hasCfClearance));
+      return  hasForumSession && hasToken && (!needsCfVerification || (needsCfVerification && hasCfClearance));
     } catch (e) {
       l.e('检查 cookies 失败: $e');
       return false;

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_theme.dart';
-import '../const/app_colors.dart';
 import '../const/app_const.dart';
 import '../utils/mixins/animation_mixin.dart';
 

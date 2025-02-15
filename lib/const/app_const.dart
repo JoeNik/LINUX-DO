@@ -39,6 +39,12 @@ class AppConst {
   
   static const close = '关闭';
 
+  /// 用户协议
+  static const terms = 'assets/html/terms-service.html';
+
+  /// 隐私政策
+  static const privacy = 'assets/html/privacy-policy.html';
+
   /// 抽屉菜单
   static const drawerMenu = _DrawerMenu();
 
@@ -204,7 +210,7 @@ class _Settings {
   String get accountAndProfile => '账号与个人资料';
   String get accountSettings => '账号设置';
   String get security => '安全设置';
-  String get editProfile => '编辑个人资料';
+  String get editProfile => '编辑资料';
   String get emailSettings => '邮箱设置';
   String get dataExport => '数据导出';
   String get notificationsAndPrivacy => '通知与隐私';
@@ -223,15 +229,163 @@ class _Settings {
   String get faq => '常见问题';
   String get terms => '服务条款';
   String get privacy => '隐私政策';
-  String get logout => '退出登录';
+  String get logout => '退出';
   String get logoutConfirmTitle => '确认退出';
   String get logoutConfirmMessage => '确定要退出登录吗？';
   String get cancel => '取消';
   String get confirm => '确定';
   String get status => '自定义的状态,为空则删除';
-  String get themeColor => '请选择主题颜色';
+  String get themeColor => '主题色';
   String get other => '其他';
   String get browserTips => '浏览器提示';
+  String get save => '保存';
+  String get change => '更换';
+  String get none => '无';
+
+  // 编辑资料
+  String get basicInfo => '基本信息';
+  String get contact => '联系方式';
+  String get linkedAccounts => '关联账户';
+  String get name => '姓名';
+  String get username => '用户名';
+  String get userTitle => '头衔';
+  String get email => '电子邮件';
+  String get backupEmail => '备用邮箱';
+  String get inputName => '请输入姓名';
+  String get usernameNotEditable => '用户名不可修改';
+  String get inputTitle => '请输入头衔';
+  String get emailNotEditable => '主邮箱不可修改';
+  String get inputBackupEmail => '请输入备用邮箱';
+  String get link => '关联';
+  String get unlink => '解除';
+  String get unknownAccount => '未知账户';
+  String get noBadge => '无';
+
+  String get deviceHistory => '设备登录历史';
+  String get password => '密码';
+  String get currentDevice => '当前设备';
+  String get lastSeen => '最后使用';
+  String get location => '位置';
+  String get browser => '浏览器';
+  String get device => '设备';
+  String get operatingSystem => '操作系统';
+  String get logoutAll => '退出所有设备';
+  String get logoutOthers => '退出其他设备';
+  String get logoutConfirm => '确认退出？';
+  String get logoutAllConfirm => '确认退出所有设备？';
+  String get logoutOthersConfirm => '确认退出其他设备？';
+  String get active => '当前设备';
+  String get inactive => '离线';
+  String get sendResetEmail => '发送重置密码邮件';
+  String get sendEmailSuccess => '邮件发送成功';
+  String get sendEmailFailed => '邮件发送失败';
+
+  String get profile => '个人资料';
+  String get introduction => '个人简介';
+  String get introductionHint => '介绍一下你自己...';
+  String get timezone => '时区';
+  String get useCurrentTimezone => '使用当前时区';
+  String get website => '个人网站';
+  String get websiteHint => '输入有效的URL';
+  String get profileTitle => '个人头衔';
+  String get profileTitleHint => '设置你的个人头衔';
+  String get cardBackground => '用户卡片背景';
+  String get cardBackgroundHint => '上传背景图片';
+  String get featuredTopic => '精选主题';
+  String get selectNewTopic => '选择新主题';
+  String get topicLinkHint => '输入主题链接';
+  String get cardBadge => '用户卡片徽章';
+  String get birthDate => '生日';
+  String get region => '所在地';
+  String get useCurrentRegion => '使用当前位置';
+  String get enableSignature => '启用签名';
+  String get signatureHint => '输入有效的URL';
+  String get mySignature => '我的签名';
+  String get imageUrl => '图片URL';
+  String get telegramNotification => 'Telegram 通知';
+  String get telegramHint => '输入机器人给你的 Chat ID';
+
+  
+  String get dataExportMessage => '您确定要下载您的帐户活动和偏好设置的归档吗？';
+  String get dataExportSuccess => '数据导出成功';
+  String get dataExportFailed => '数据导出失败';
+
+  String get emailSettingsTitle => '电子邮件设置';
+  String get personalMessage => '个人消息';
+  String get mentionsAndReplies => '提及和回复';
+  String get watchingCategory => '关注的类别';
+  String get policyReview => '策略审核';
+  String get activitySummary => '活动总结';
+  String get emailSettingsTip => '只有在过去 10 分钟内没有见到您，我们才会向您发送电子邮件。';
+  String get includeReplies => '在电子邮件底部包含以前的回复';
+  String get includeNewUsers => '在总结电子邮件中包含来自新用户的内容';
+  String get summary => '当我不访问这里时，向我发送热门话题和回复的电子邮件总结';
+  String get always => '始终';
+  String get whenAway => '只在离开时';
+  String get never => '从不';
+
+  // 通知设置
+  String get notificationSettingsTitle => '通知设置';
+  String get notificationWhenLiked => '被赞时通知';
+  String get notificationWhenFollowed => '允许其他人关注我';
+  String get notificationWhenUserFollowed => '当用户关注我时通知我';
+  String get notificationWhenIFollow => '当我关注用户时通知他们';
+  String get notificationWhenReplied => '当我关注的人回复时通知我';
+  String get notificationWhenTopicCreated => '当我关注的人创建话题时通知我';
+  String get notificationSchedule => '接收指定话题提醒的频率';
+  String get notificationTip => '注意：您必须须在使用的每个浏览器上更改此设置。如果您从用户菜单暂停通知，则无论此设置如何，所有通知都将被禁用。';
+
+  String get ignoredUsers => '已忽略的用户';
+  String get noIgnoredUsers => '您没有忽略任何用户';
+  String get addIgnoredUser => '添加忽略用户';
+  String get inputIgnoredUsername => '请输入要忽略的用户名';
+  String get duration => '持续时间';
+  String get dndSettingsTitle => '已设为免打扰';
+  String get dndSettingsDescription => '禁止来自这些用户的所有帖子、消息、通知、个人消息和聊天直接消息。';
+  String get allowPersonalMessages => '允许个人消息';
+  String get allowChatMessages => '允许聊天消息';
+  String get messageSettingsTitle => '消息';
+  String get messageSettingsDescription => '禁止来自这些用户的所有通知、个人消息和聊天直接消息。';
+  String get allowOthersMessage => '允许其他用户向我发送个人消息和聊天直接消息';
+  String get addSuccess => '添加成功';
+  String get addFailed => '添加失败';
+  String get removeSuccess => '移除成功';
+  String get removeFailed => '移除失败';
+  String get saveSuccess => '保存成功';
+  String get saveFailed => '保存失败';
+  String get selectUserToBlock => '请选择要屏蔽的用户';
+  String get loadSettingsFailed => '加载设置失败';
+
+  // Tracking Settings
+  String get trackingInDev => '开发中';
+  String get enableTracking => '启用跟踪';
+  String get enableTrackingDesc => '允许收集使用数据以改善您的体验';
+  String get trackLocation => '位置信息';
+  String get trackLocationDesc => '允许访问您的位置信息以提供本地化服务';
+  String get trackActivity => '活动跟踪';
+  String get trackActivityDesc => '记录您的应用使用情况以提供个性化推荐';
+  String get trackBrowsingHistory => '浏览历史';
+  String get trackBrowsingHistoryDesc => '保存您的浏览历史以提供更好的内容推荐';
+  String get shareAnalytics => '分析数据共享';
+  String get shareAnalyticsDesc => '与我们分享匿名使用数据以帮助改进服务';
+  String get trackingPrivacyTip => '我们重视您的隐私。您可以随时调整这些设置来控制数据的收集和使用方式。所有数据都将按照我们的隐私政策进行处理。';
+
+  String get communityData => '社区数据';
+  String get ourModerators => '我们的版主';
+  String get ourAdmin => '我们的管理员';
+  String get websiteActivity => '网站活跃度';
+  String get userActivity => '用户活跃';
+  String get contentCreation => '内容创作';
+  String get interactionData => '互动数据';
+  String get chatData => '聊天数据';
+  String get contactUs => '联系我们';
+  String get emergencyIssues => '紧急事项';
+  String get contactForCriticalIssues => '如果出现影响此网站的关键问题或紧急事项，请联系';
+  String get inappropriateContentReport => '不当内容报告';
+  String get reportInappropriateContent => '如果您发现任何不当内容，请立即与我们的版主和管理员进行对话。请记住，联系前请先登录。';
+  String get versionInfo => '版本信息';
+  String get webVersion => 'Web版本号';
+  String get appVersion => 'App版本号';
 }
 
 class _Posts {

@@ -5,7 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/const/app_spacing.dart';
-import '../../widgets/switch.dart';
+import '../../controller/global_controller.dart';
+import '../../widgets/dis_switch.dart';
 import '../../widgets/dis_button.dart';
 import 'settings_controller.dart';
 
@@ -34,40 +35,48 @@ class SettingsPage extends GetView<SettingsController> {
             context,
             AppConst.settings.accountAndProfile,
             [
-              _buildNavigationItem(
-                context,
-                AppConst.settings.accountSettings,
-                CupertinoIcons.person_fill,
-                iconColor: const Color(0xFF5C6BC0),
-                onTap: () {},
-              ),
+              // _buildNavigationItem(
+              //   context,
+              //   AppConst.settings.accountSettings,
+              //   CupertinoIcons.person_fill,
+              //   iconColor: const Color(0xFF5C6BC0),
+              //   onTap: () {},
+              // ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.security,
                 CupertinoIcons.shield_fill,
                 iconColor: const Color(0xFF66BB6A),
-                onTap: () {},
+                onTap: () {
+                  controller.toSecuritySettings();
+                },
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.editProfile,
                 CupertinoIcons.pencil_circle_fill,
                 iconColor: const Color(0xFFFF7043),
-                onTap: () {},
+                onTap: () {
+                  controller.toProfileSettings();
+                },
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.emailSettings,
                 CupertinoIcons.envelope_circle_fill,
                 iconColor: const Color(0xFF26A69A),
-                onTap: () {},
+                onTap: () {
+                  controller.toEmailSettings();
+                },
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.dataExport,
                 CupertinoIcons.doc_text_fill,
                 iconColor: const Color(0xFF7E57C2),
-                onTap: () {},
+                onTap: () {
+                  _showExportDialog(context);
+                },
               ),
             ],
           ),
@@ -81,28 +90,37 @@ class SettingsPage extends GetView<SettingsController> {
                 AppConst.settings.notifications,
                 CupertinoIcons.bell_fill,
                 iconColor: const Color(0xFFEF5350),
-                onTap: () {},
+                onTap: () {
+                  controller.toNotificationSettings();
+                },
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.tracking,
                 CupertinoIcons.location_fill,
                 iconColor: const Color(0xFF42A5F5),
-                onTap: () {},
+                onTap: () {
+                  controller.toTrackingSettings();
+                },
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.doNotDisturb,
                 CupertinoIcons.moon_fill,
                 iconColor: const Color(0xFF8D6E63),
-                onTap: () {},
+                onTap: () {
+                  controller.toDoNotDisturbSettings();
+                },
               ),
-              _buildNavigationItem(
+              _buildSwitchItem(
                 context,
                 AppConst.settings.anonymousMode,
+                controller.isAnonymousMode,
                 CupertinoIcons.eye_slash_fill,
-                iconColor: const Color(0xFF78909C),
-                onTap: () {},
+                (value) {
+                  controller.isAnonymousMode.value = value;
+                },
+                const Color(0xFF78909C),
               ),
             ],
           ),
@@ -131,7 +149,7 @@ class SettingsPage extends GetView<SettingsController> {
               _buildSwitchItem(
                 context,
                 AppConst.settings.browserTips,
-                controller.browserTips.value,
+                controller.browserTips,
                 CupertinoIcons.globe,
                 (value) {
                   controller.updateBrowserTips(value);
@@ -168,14 +186,18 @@ class SettingsPage extends GetView<SettingsController> {
                 AppConst.settings.terms,
                 CupertinoIcons.doc_text_fill,
                 iconColor: const Color(0xFF9CCC65),
-                onTap: () {},
+                onTap: () {
+                  controller.toTerms();
+                },
               ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.privacy,
                 CupertinoIcons.lock_fill,
                 iconColor: const Color(0xFFBA68C8),
-                onTap: () {},
+                onTap: () {
+                  controller.toPrivacy();
+                },
               ),
             ],
           ),
@@ -439,7 +461,7 @@ class SettingsPage extends GetView<SettingsController> {
     }
   }
 
-  Widget _buildSwitchItem(BuildContext context, String title, bool value,
+  Widget _buildSwitchItem(BuildContext context, String title, Rx<bool> value,
       IconData icon, Function(bool) onChanged, Color? iconColor) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.w),
@@ -477,20 +499,85 @@ class SettingsPage extends GetView<SettingsController> {
           ),
           SizedBox(
             height: 28.w,
-            child: DisSwitch(
-              value: value,
-              textOn: AppConst.open,
-              textOff: AppConst.close,
-              colorOn: Theme.of(context).primaryColor,
-              iconOn: CupertinoIcons.check_mark_circled_solid,
-              iconOff: CupertinoIcons.clear_circled_solid,
-              animationDuration: const Duration(milliseconds: 200),
-              onChanged: (bool state) {
-                onChanged(state);
-              },
-            ),
+            child: Obx(() => DisSwitch(
+              value: value.value,
+              onChanged: onChanged,
+            )),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showExportDialog(BuildContext context) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.w),
+        ),
+        child: Container(
+          width: 0.8.sw,
+          padding: EdgeInsets.all(24.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 50.w,
+                height: 50.w,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7E57C2).withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  CupertinoIcons.arrow_down_doc,
+                  color: const Color(0xFF7E57C2),
+                  size: 24.w,
+                ),
+              ),
+              16.vGap,
+              Text(
+                AppConst.settings.dataExport,
+                style: TextStyle(
+                  fontSize: 18.w,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
+                ),
+              ),
+              12.vGap,
+              Text(
+                AppConst.settings.dataExportMessage,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14.w,
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
+              ),
+              24.vGap,
+              Row(
+                children: [
+                  Expanded(
+                    child: DisButton(
+                      text: AppConst.settings.cancel,
+                      type: ButtonType.outline,
+                      onPressed: () => Get.back(),
+                    ),
+                  ),
+                  12.hGap,
+                  Expanded(
+                    child: DisButton(
+                      text: AppConst.confirm,
+                      type: ButtonType.primary,
+                      onPressed: () {
+                        controller.exportData();
+                        Get.back();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

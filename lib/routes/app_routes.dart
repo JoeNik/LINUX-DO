@@ -30,4 +30,28 @@ abstract class Routes {
 
   // 聊天详情页
   static const CHAT_DETAIL = '/chat/detail';
+
+  // 编辑资料页
+  static const EDIT_PROFILE = '/profile/edit';
+
+  // 安全设置页面
+  static const SECURITY_SETTINGS = '/settings/security';
+
+  // 个性资料页
+  static const PROFILE_SETTINGS = '/settings/profile';
+
+  // 电子邮件设置页
+  static const EMAIL_SETTINGS = '/settings/email';
+
+  // 通知设置页
+  static const NOTIFICATION_SETTINGS = '/settings/notification';
+
+  // 跟踪设置页
+  static const TRACKING_SETTINGS = '/settings/tracking';
+
+  // 免打扰设置页
+  static const DO_NOT_DISTURB_SETTINGS = '/settings/do-not-disturb';
+
+  // 关于页
+  static const ABOUT = '/about';
 }

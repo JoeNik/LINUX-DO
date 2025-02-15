@@ -9,16 +9,18 @@ part of 'user_preferences_request.dart';
 UserPreferencesRequest _$UserPreferencesRequestFromJson(
         Map<String, dynamic> json) =>
     UserPreferencesRequest(
-      bioRaw: json['bio_raw'] as String,
-      website: json['website'] as String,
-      location: json['location'] as String,
-      customFields:
-          CustomFields.fromJson(json['custom_fields'] as Map<String, dynamic>),
-      cardBackgroundUploadUrl: json['card_background_upload_url'] as String,
-      dateOfBirth: json['date_of_birth'] as String,
-      hideProfile: json['hide_profile'] as bool,
-      timezone: json['timezone'] as String,
-      defaultCalendar: json['default_calendar'] as String,
+      bioRaw: json['bio_raw'] as String?,
+      website: json['website'] as String?,
+      location: json['location'] as String?,
+      customFields: json['custom_fields'] == null
+          ? null
+          : CustomFields.fromJson(
+              json['custom_fields'] as Map<String, dynamic>),
+      cardBackgroundUploadUrl: json['card_background_upload_url'] as String?,
+      dateOfBirth: json['date_of_birth'] as String?,
+      hideProfile: json['hide_profile'] as bool?,
+      timezone: json['timezone'] as String?,
+      defaultCalendar: json['default_calendar'] as String?,
     );
 
 Map<String, dynamic> _$UserPreferencesRequestToJson(

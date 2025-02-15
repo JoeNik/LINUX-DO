@@ -67,6 +67,7 @@ dependencies:
   flutter_markdown: ^0.6.18+2
   flutter_highlighter: ^0.1.1
   markdown: ^7.2.1
+  font_awesome_flutter: ^10.7.0
   
 
 dev_dependencies:

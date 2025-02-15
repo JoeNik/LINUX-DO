@@ -93,6 +93,14 @@ abstract class ApiService {
   Future<SuccessResponse<CurrentUser>> updateUser(
       @Path("current") String current, @Body() UserRequest userRequest);
 
+  /// 更新头像
+  @PUT('u/{current}/preferences/avatar/pick')
+  Future<SuccessResponse<dynamic>> updateUserAvatar(
+    @Path("current") String current, {
+    @Field('type') String type = 'custom',
+    @Field('upload_id') int uploadId = 0,
+  });
+
   /// 搜索话题
   @GET('search/query')
   Future<SearchResult> searchTopic({
@@ -330,7 +338,8 @@ abstract class ApiService {
 
   /// 更新自定义状态
   @PUT('user-status.json')
-  Future<SuccessResponse<dynamic>> updateUserStatus(@Field('description') String description,
+  Future<SuccessResponse<dynamic>> updateUserStatus(
+      @Field('description') String description,
       {@Field('emoji') String emoji = 'speech_balloon'});
 
   /// 删除自定义状态
@@ -402,9 +411,30 @@ abstract class ApiService {
   @GET('about.json')
   Future<AboutResponse> getAbout();
 
-  // 举报帖子
-  // @POST('post_actions')
-  // Future<dynamic> flagPost(
-  //   @Field('id') String postId,
-  // );
+  /// 解除账户关联
+  @DELETE('auth/{type}/revoke.json')
+  Future<SuccessResponse<dynamic>> unlinkAccount(
+    @Path('username') String username,
+    @Path('type') String type,
+  );
+
+  /// 撤销认证令牌
+  @POST('u/{username}/preferences/revoke-auth-token')
+  Future<SuccessResponse<dynamic>> revokeAuthToken(
+      @Path('username') String username, @Field('token_id') int id);
+
+  /// 撤销所有认证令牌
+  @DELETE('user-auth-tokens')
+  Future<SuccessResponse<dynamic>> revokeAllAuthTokens();
+
+  /// 发送重置密码的电子邮件
+  @POST('session/forgot_password')
+  Future<SuccessResponse<dynamic>> sendResetPasswordEmail(
+    @Field('login') String login,
+  );
+
+  /// 请求数据导出
+  @POST('export_csv/export_entity.json')
+  Future<SuccessResponse<dynamic>> requestDataExport(
+      {@Field('entity') String entity = 'user_archive'});
 }

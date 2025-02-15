@@ -25,7 +25,7 @@ ChatDetailMessage _$ChatDetailMessageFromJson(Map<String, dynamic> json) =>
           ?.map((e) => ChatMessageUser.fromJson(e as Map<String, dynamic>))
           .toList(),
       availableFlags: (json['available_flags'] as List<dynamic>?)
-          ?.map((e) => e as String)
+          ?.map((e) => e as String?)
           .toList(),
       blocks: json['blocks'] as List<dynamic>?,
       chatWebhookEvent: json['chat_webhook_event'],

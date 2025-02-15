@@ -6,6 +6,7 @@ import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_images.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
+import 'package:linux_do/routes/app_pages.dart';
 import 'package:linux_do/widgets/cached_image.dart';
 import 'dart:ui';
 import '../../const/app_const.dart';
@@ -68,7 +69,9 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                   });
 
                   return Container(
-                    color: Theme.of(context).primaryColor.withValues(alpha: progress),
+                    color: Theme.of(context)
+                        .primaryColor
+                        .withValues(alpha: progress),
                     child: FlexibleSpaceBar(
                       background: Stack(
                         fit: StackFit.expand,
@@ -77,10 +80,15 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                           if (progress < 1)
                             Opacity(
                               opacity: (1 - progress).clamp(0.0, 1.0),
-                              child: Image.asset(
-                                AppImages.profileHeaderBg,
-                                fit: BoxFit.cover,
-                              ),
+                              child: user?.cardBackgroundUploadUrl != null
+                                  ? CachedImage(
+                                      imageUrl:
+                                          user?.cardBackgroundUploadUrl ?? '',
+                                      fit: BoxFit.cover)
+                                  : Image.asset(
+                                      AppImages.profileHeaderBg,
+                                      fit: BoxFit.cover,
+                                    ),
                               // child: CachedImage(imageUrl:'https://linux.do/uploads/default/original/4X/7/9/e/79e6ebe94c3f457673473af837040aadc060c19c.png'),
                             ),
                           // 模糊效果
@@ -155,12 +163,15 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                               decoration: BoxDecoration(
                                   border: Border.all(
                                       color: AppColors.white, width: 1.w),
-                                  borderRadius: BorderRadius.circular(30.w)),
+                                  borderRadius: BorderRadius.circular(80.w)),
                               child: CachedImage(
                                 imageUrl: user?.getAvatar(120) ?? '',
                                 circle: true,
                                 width: 30.w,
                                 height: 30.w,
+                                borderRadius: BorderRadius.circular(80.w),
+                                showBorder: true,
+                                borderColor: AppColors.white,
                               ),
                             ),
                           )
@@ -223,8 +234,10 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                     initialIndex: controller.selectedIndex,
                     containerColor: Theme.of(context).cardColor,
                     slidersGradients: [
-                      LinearGradient(
-                          colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.6)])
+                      LinearGradient(colors: [
+                        Theme.of(context).primaryColor,
+                        Theme.of(context).primaryColor.withValues(alpha: 0.6)
+                      ])
                     ],
                     onSelect: (index) => controller.selectedIndex = index,
                     children: [
@@ -258,7 +271,8 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                      border: Border.all(color: Theme.of(context).primaryColor, width: 2.w),
+                      border: Border.all(
+                          color: Theme.of(context).primaryColor, width: 2.w),
                       borderRadius: BorderRadius.circular(45.w)),
                   child: CachedImage(
                     imageUrl: user?.getAvatar(240) ?? '',
@@ -303,9 +317,11 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                           ),
                         ),
                         IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Get.toNamed(Routes.EDIT_PROFILE);
+                            },
                             icon: Icon(
-                              Icons.edit,
+                              CupertinoIcons.pencil,
                               color: AppColors.white.withValues(alpha: .9),
                               size: 20.w,
                             ))
@@ -488,8 +504,9 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                     },
                     child: Text(
                       AppConst.cancel,
-                      style:
-                          TextStyle(color: Theme.of(context).primaryColor, fontSize: 12.sp),
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 12.sp),
                     ),
                   ),
                   8.hGap,
@@ -500,7 +517,6 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                         text: AppConst.confirm,
                         size: ButtonSize.small,
                         onPressed: () {
-                          
                           controller.updateStatus();
                           Get.back();
                         },

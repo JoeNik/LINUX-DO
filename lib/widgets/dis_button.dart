@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../const/app_colors.dart';
-
 enum ButtonType {
   primary, // 主按钮
   secondary, // 次要按钮

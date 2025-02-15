@@ -57,7 +57,7 @@ class TopicDetailController extends BaseController
   final _lastTrackTime = DateTime.now().obs;
   final _visiblePostNumbers = <int>{}.obs;
   Timer? _debounceTimer;
-  static const _debounceDelay = Duration(milliseconds: 1000); // 1秒防抖延迟
+  static const _debounceDelay = Duration(milliseconds: 1500);
 
   // 用于存储帖子树结构
   final replyTree = <PostNode>[].obs;
@@ -183,7 +183,7 @@ class TopicDetailController extends BaseController
   void _debouncedUpdateTiming() {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(_debounceDelay, () {
-    // _updateTopicTiming();
+     _updateTopicTiming();
     });
   }
 

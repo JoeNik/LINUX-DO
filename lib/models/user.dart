@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:linux_do/models/user_action.dart';
+import 'package:linux_do/models/user_auth_token.dart';
 import 'package:linux_do/models/user_status.dart';
 import 'package:linux_do/net/http_config.dart';
 
@@ -297,6 +298,8 @@ class CurrentUser {
   final bool? isFollowed;
   @JsonKey(name: 'user_title')
   final String? userTitle;
+  @JsonKey(name: 'user_auth_tokens')
+  final List<UserAuthToken>? userAuthTokens;
 
   CurrentUser({
     required this.id,
@@ -358,6 +361,7 @@ class CurrentUser {
     this.voteCount,
     this.isFollowed,
     this.userTitle,
+    this.userAuthTokens,
   });
 
   factory CurrentUser.fromJson(Map<String, dynamic> json) =>

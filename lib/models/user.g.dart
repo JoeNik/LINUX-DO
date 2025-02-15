@@ -205,6 +205,9 @@ CurrentUser _$CurrentUserFromJson(Map<String, dynamic> json) => CurrentUser(
       voteCount: (json['vote_count'] as num?)?.toInt(),
       isFollowed: json['is_followed'] as bool?,
       userTitle: json['user_title'] as String?,
+      userAuthTokens: (json['user_auth_tokens'] as List<dynamic>?)
+          ?.map((e) => UserAuthToken.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$CurrentUserToJson(CurrentUser instance) =>
@@ -268,6 +271,7 @@ Map<String, dynamic> _$CurrentUserToJson(CurrentUser instance) =>
       'vote_count': instance.voteCount,
       'is_followed': instance.isFollowed,
       'user_title': instance.userTitle,
+      'user_auth_tokens': instance.userAuthTokens,
     };
 
 UserCardBadge _$UserCardBadgeFromJson(Map<String, dynamic> json) =>

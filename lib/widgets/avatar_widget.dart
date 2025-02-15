@@ -555,7 +555,7 @@ class UserInfoCard extends GetView<UserInfoCardController> {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 6.w),
             child: HtmlWidget(
-              html: user?.bioExcerpt ?? '这个人真懒，什么都没有留下。',
+              html: user?.bioExcerpt ?? '这个人什么都没有留下~',
               fontSize: 11.w,
               customWidgetBuilder: (element) {
                 if (element.localName == 'img') {

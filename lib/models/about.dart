@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'user.dart';
+import 'package:linux_do/net/http_config.dart';
 import 'category_data.dart';
 
 part 'about.g.dart';
@@ -15,6 +15,18 @@ class AboutResponse {
     required this.categories,
     required this.about,
   });
+
+  String get avatarUrl =>
+      '${HttpConfig.baseUrl}${(findUserById(1)?.avatarTemplate ?? '').replaceAll('{size}', '80')}';
+
+  // 根据用户ID获取用户
+  AboutUser? findUserById(int userId) {
+    return users.firstWhere(
+      (user) => user.id == userId,
+      orElse: () =>
+          AboutUser(id: 0, username: '', name: '', avatarTemplate: ''),
+    );
+  }
 
   factory AboutResponse.fromJson(Map<String, dynamic> json) =>
       _$AboutResponseFromJson(json);
@@ -235,6 +247,9 @@ class AboutUser {
     this.animatedAvatar,
     this.lastSeenAt,
   });
+
+    String get avatarUrl =>
+      '${HttpConfig.baseUrl}${(avatarTemplate ?? '').replaceAll('{size}', '80')}';
 
   factory AboutUser.fromJson(Map<String, dynamic> json) =>
       _$AboutUserFromJson(json);

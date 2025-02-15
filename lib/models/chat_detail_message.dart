@@ -24,7 +24,7 @@ class ChatDetailMessage {
   @JsonKey(name: 'mentioned_users')
   final List<ChatMessageUser>? mentionedUsers;
   @JsonKey(name: 'available_flags')
-  final List<String>? availableFlags;
+  final List<String?>? availableFlags;
   final List<dynamic>? blocks;
   @JsonKey(name: 'chat_webhook_event')
   final dynamic chatWebhookEvent;

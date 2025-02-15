@@ -353,7 +353,7 @@ class LoginPage extends GetView<LoginController> {
                                 ..onTap = () => showAgreementDialog(
                                       context,
                                       AppConst.login.serviceAgreement,
-                                      'assets/html/terms-service.html',
+                                      AppConst.terms,
                                     ),
                             ),
                             TextSpan(text: ' ${AppConst.login.and} '),
@@ -366,7 +366,7 @@ class LoginPage extends GetView<LoginController> {
                                 ..onTap = () => showAgreementDialog(
                                       context,
                                       AppConst.login.privacyPolicy,
-                                      'assets/html/privacy-policy.html',
+                                      AppConst.privacy,
                                     ),
                             ),
                           ],

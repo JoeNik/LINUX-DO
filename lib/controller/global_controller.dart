@@ -24,6 +24,8 @@ class GlobalController extends BaseController with Concatenated {
 
   final _isLogin = false.obs;
 
+  final isAnonymousMode = false.obs;
+
   /// 获取是否登录
   bool get isLogin => _isLogin.value;
 

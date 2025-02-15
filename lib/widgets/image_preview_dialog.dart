@@ -11,10 +11,8 @@ import 'package:linux_do/const/app_spacing.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../const/app_colors.dart';
 import '../utils/log.dart';
 import '../utils/mixins/toast_mixin.dart';
-import '../net/http_client.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -221,28 +219,23 @@ class ImagePreviewDialog extends StatelessWidget with ToastMixin {
     try {
       PermissionStatus status;
       if (Platform.isIOS) {
-        status = await Permission.photosAddOnly.status;
-        l.d('Initial photosAddOnly permission status: $status');
+        status = await Permission.photos.status;
+        l.d('Initial photos permission status: $status');
         
         if (status.isPermanentlyDenied) {
-          // 如果权限被永久拒绝，直接显示设置对话框
           _showSettingsDialog();
           return;
         } else if (status.isDenied) {
-          // 只有在权限是 denied 状态时才请求权限
-          status = await Permission.photosAddOnly.request();
-          l.d('After request, permission status: $status');
+          status = await Permission.photos.request();
         }
       } else {
         status = await Permission.storage.status;
         l.d('Initial storage permission status: $status');
         
         if (status.isPermanentlyDenied) {
-          // 如果权限被永久拒绝，直接显示设置对话框
           _showSettingsDialog();
           return;
         } else if (status.isDenied) {
-          // 只有在权限是 denied 状态时才请求权限
           status = await Permission.storage.request();
           l.d('After request, permission status: $status');
         }
@@ -280,30 +273,111 @@ class ImagePreviewDialog extends StatelessWidget with ToastMixin {
 
   void _showSettingsDialog() {
     Get.dialog(
-      AlertDialog(
-        title: const Text('需要权限'),
-        content: const Text('保存图片需要访问相册权限，请在设置中开启权限'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('取消'),
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.w),
+        ),
+        child: Container(
+          width: 0.8.sw,
+          padding: EdgeInsets.all(20.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 60.w,
+                height: 60.w,
+                decoration: BoxDecoration(
+                  color: Theme.of(Get.context!).primaryColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Platform.isIOS ? CupertinoIcons.photo : Icons.photo_library,
+                  color: Theme.of(Get.context!).primaryColor,
+                  size: 32.w,
+                ),
+              ),
+              16.vGap,
+              Text(
+                '需要权限',
+                style: TextStyle(
+                  fontSize: 18.w,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(Get.context!).textTheme.titleLarge?.color,
+                ),
+              ),
+              12.vGap,
+              Text(
+                '保存图片需要访问${Platform.isIOS ? "相册" : "存储"}权限，\n请在设置中开启权限',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14.w,
+                  color: Theme.of(Get.context!).textTheme.bodyMedium?.color,
+                  height: 1.5,
+                ),
+              ),
+              24.vGap,
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 44.w,
+                      child: TextButton(
+                        onPressed: () => Get.back(),
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.w),
+                          ),
+                          backgroundColor: Theme.of(Get.context!).primaryColor.withValues(alpha: 0.1),
+                        ),
+                        child: Text(
+                          '取消',
+                          style: TextStyle(
+                            fontSize: 14.w,
+                            color: Theme.of(Get.context!).primaryColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  12.hGap,
+                  Expanded(
+                    child: SizedBox(
+                      height: 44.w,
+                      child: TextButton(
+                        onPressed: () async {
+                          Get.back();
+                          if (Platform.isIOS) {
+                            final url = Uri.parse('app-settings:');
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url);
+                            }
+                          } else {
+                            await openAppSettings();
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.w),
+                          ),
+                          backgroundColor: Theme.of(Get.context!).primaryColor,
+                        ),
+                        child: Text(
+                          '去设置',
+                          style: TextStyle(
+                            fontSize: 14.w,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              if (Platform.isIOS) {
-                final url = Uri.parse('app-settings:');
-                if (await canLaunchUrl(url)) {
-                  await launchUrl(url);
-                }
-              } else {
-                await openAppSettings();
-              }
-            },
-            child: const Text('去设置'),
-          ),
-        ],
+        ),
       ),
+      barrierDismissible: false,
     );
   }
 

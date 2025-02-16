@@ -2,6 +2,7 @@ import 'package:dio/dio.dart' hide Headers, MultipartFile;
 import 'package:linux_do/models/chat_direct.dart';
 import 'package:linux_do/models/docs.dart';
 import 'package:linux_do/models/leaderboard.dart';
+import 'package:linux_do/models/request/update_post.dart';
 import 'package:linux_do/net/success_response.dart';
 import 'package:retrofit/retrofit.dart';
 import 'dart:convert';
@@ -290,6 +291,14 @@ abstract class ApiService {
     @Field('image_sizes') Map<String, ImageSize>? imageSizes,
     @Field('target_recipients') String? targetRecipients,
   });
+
+  /// 修改主题
+  @PUT('posts/{id}')
+  @FormUrlEncoded()
+  Future<CreatePostResponse> updateTopic(
+    @Path('id') String id,
+    @Body() UpdatePostRequest request,
+  );
 
   /// 搜索
   @GET('search')

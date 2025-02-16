@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:linux_do/pages/topics/details/widgets/post_reply.dart';
 import 'package:linux_do/widgets/dis_button.dart';
 import '../../../const/app_const.dart';
 import '../../../const/app_spacing.dart';
@@ -47,15 +49,13 @@ class TopicDetailPage extends GetView<TopicDetailController> {
               right: controller.isReplying.value ? -50.w : 16.w,
               bottom: MediaQuery.of(context).padding.bottom + 16.w,
               child: PostsSelector(
-                postsCount: postsCount,
-                currentIndex:
-                    controller.currentPostIndex.value,
-                onIndexChanged: (index) {
-                  if (!controller.isLoading.value) {
-                    controller.scrollToPost(index);
-                  }
-                }
-              ),
+                  postsCount: postsCount,
+                  currentIndex: controller.currentPostIndex.value,
+                  onIndexChanged: (index) {
+                    if (!controller.isLoading.value) {
+                      controller.scrollToPost(index);
+                    }
+                  }),
             );
           }),
         ],
@@ -170,26 +170,42 @@ class TopicDetailPage extends GetView<TopicDetailController> {
   }
 
   Widget _buildPostItem(BuildContext context, PostNode node) {
+    final isReply = node.post.replyToPostNumber != null;
+    final barWidth = 8.w;
     return GetBuilder<TopicDetailController>(
       id: 'post_${node.post.postNumber}',
-      builder: (controller) => Card(
-        elevation: node.post.replyToPostNumber == null ? 0.7 : 0,
+      builder: (controller) => Container(
         margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12.w),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Stack(
               children: [
                 Padding(
-                  padding: EdgeInsets.all(12.w),
+                  padding: EdgeInsets.only(
+                    left: isReply ? 12.w + barWidth : 12.w,
+                    right: isReply ? 12.w + barWidth : 12.w,
+                    top: isReply ? 24.w : 12.w,
+                    bottom: 12.w,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       6.vGap,
-                      PostHeader(post: node.post, title: controller.topic.value?.title),
+                      PostHeader(
+                          post: node.post,
+                          title: controller.topic.value?.title),
                       2.vGap,
-                      PostContent(node: node),
-                      2.vGap,
+                      PostContent(node: node, isReply: isReply),
+                      Divider(
+                        height: 1.h,
+                        color: Theme.of(context).dividerColor,
+                      ),
+                      12.vGap,
                       PostFooter(post: node.post),
                     ],
                   ),
@@ -201,8 +217,9 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                     padding:
                         EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
                     decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                      color: Theme.of(context)
+                          .primaryColor
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.only(
                         topRight: Radius.circular(12.w),
                         bottomLeft: Radius.circular(12.w),
@@ -219,6 +236,20 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                     ),
                   ),
                 ),
+                isReply
+                    ? Positioned(
+                        top: 0,
+                        left: 0,
+                        child: GestureDetector(
+                          onTap: () {
+                            if (node.post.replyToPostNumber != null) {
+                              controller.scrollToPost(node.post.replyToPostNumber! - 1);
+                            }
+                          },
+                          child: PostReply(post: node.post),
+                        ),
+                      )
+                    : const SizedBox()
               ],
             ),
           ],

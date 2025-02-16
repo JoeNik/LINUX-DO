@@ -8,9 +8,9 @@ part of 'create_post_response.dart';
 
 CreatePostResponse _$CreatePostResponseFromJson(Map<String, dynamic> json) =>
     CreatePostResponse(
-      action: json['action'] as String,
+      action: json['action'] as String?,
       post: CreatePost.fromJson(json['post'] as Map<String, dynamic>),
-      success: json['success'] as bool,
+      success: json['success'] as bool?,
     );
 
 Map<String, dynamic> _$CreatePostResponseToJson(CreatePostResponse instance) =>

@@ -11,6 +11,7 @@ import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../controller/global_controller.dart';
+import '../../../models/request/update_post.dart';
 import '../../../models/topic_detail.dart';
 import '../../../models/upload_image_response.dart';
 import '../../../net/api_service.dart';
@@ -57,7 +58,7 @@ class TopicDetailController extends BaseController
   final _lastTrackTime = DateTime.now().obs;
   final _visiblePostNumbers = <int>{}.obs;
   Timer? _debounceTimer;
-  static const _debounceDelay = Duration(milliseconds: 1500);
+  static const _debounceDelay = Duration(milliseconds: 1000);
 
   // 用于存储帖子树结构
   final replyTree = <PostNode>[].obs;
@@ -1122,6 +1123,34 @@ class TopicDetailController extends BaseController
       showError(AppConst.posts.deleteFailed);
     }
 
+  }
+
+  Future<void> editPost(Post post) async {  
+    startReply(post.postNumber,post.cooked,
+            post.name?.isEmpty ?? true ? post.username : post.name);
+    /// 先去掉所有的html标签
+    final regex = RegExp(r'<[^>]*>');
+    final text = post.cooked?.replaceAll(regex, '');
+
+    contentController.text = text ?? '';
+    replyContent.value = text ?? '';
+
+    try{
+      final request = UpdatePostRequest(
+        raw: contentController.text,
+        topicId: topic.value?.id.toString() ?? '',
+        originalText: text,
+      );
+      final response = await apiService.updateTopic(
+        post.id.toString(),
+        request,
+      );
+      /// 只更新这个帖子
+      post.cooked = contentController.text;
+      update(['post_${post.postNumber}']);
+    }catch(e,s){
+      l.e('编辑帖子失败: $e -  \n$s');
+    }
   }
 }
 

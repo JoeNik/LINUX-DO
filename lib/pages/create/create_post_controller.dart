@@ -331,7 +331,7 @@ class CreatePostController extends BaseController {
         imageSizes: imageSizes,
       );
 
-      if (response.success) {
+      if (response.success == true) {
         Get.back(result: response);
         showToast(AppConst.createPost.publishSuccess);
       } else {

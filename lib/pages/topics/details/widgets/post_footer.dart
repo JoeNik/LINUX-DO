@@ -23,20 +23,64 @@ class PostFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _LikeButton(post: post),
-        16.hGap,
+        if (post.yours != true) ...[
+          _LikeButton(post: post),
+          16.hGap,
+        ],
         _CopyButton(post: post),
         16.hGap,
         _BookmarkButton(post: post),
         16.hGap,
         // 举报按钮
         _ReportButton(post: post),
+
+        // 16.hGap,
+        // if (post.canEdit == true) _EditButton(post: post),
         16.hGap,
-        if (post.canDelete == true)
-          _DeleteButton(post: post),
+        if (post.canDelete == true) _DeleteButton(post: post),
+
         const Spacer(),
         _ReplyButton(post: post),
       ],
+    );
+  }
+}
+
+class _TranslateButton extends StatelessWidget {
+  final Post post;
+  final controller = Get.find<TopicDetailController>();
+  _TranslateButton({required this.post});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      child: Row(
+        children: [
+          Icon(Icons.translate,
+              size: 16.w, color: Theme.of(context).hintColor),
+        ],
+      ),
+    );
+  }
+}
+
+/// 编辑话题按钮组件
+class _EditButton extends StatelessWidget {
+  final controller = Get.find<TopicDetailController>();
+  final Post post;
+
+  _EditButton({required this.post});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => controller.editPost(post),
+      child: Row(
+        children: [
+          Icon(CupertinoIcons.pencil,
+              size: 16.w, color: Theme.of(context).hintColor),
+        ],
+      ),
     );
   }
 }
@@ -172,7 +216,8 @@ class _ReportButton extends StatelessWidget {
                       borderRadius: BorderRadius.circular(16.w),
                     ),
                     child: Obx(() {
-                      final isOther = selectedIndex.value == AppConst.posts.reasons.length - 1;
+                      final isOther = selectedIndex.value ==
+                          AppConst.posts.reasons.length - 1;
                       if (isOther) {
                         return TextField(
                           maxLines: 3,
@@ -185,14 +230,13 @@ class _ReportButton extends StatelessWidget {
                               color: Get.theme.hintColor,
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderSide:  BorderSide(
+                              borderSide: BorderSide(
                                 color: Theme.of(Get.context!).primaryColor,
                               ),
                               borderRadius: BorderRadius.circular(8.w),
                             ),
-                            
                             border: OutlineInputBorder(
-                              borderSide:  BorderSide(
+                              borderSide: BorderSide(
                                 color: Theme.of(Get.context!).primaryColor,
                               ),
                               borderRadius: BorderRadius.circular(8.w),
@@ -221,13 +265,18 @@ class _ReportButton extends StatelessWidget {
                 20.vGap,
                 SizedBox(
                   width: 0.65.sw,
-                  child: DisButton(text: AppConst.posts.reportButton, onPressed: () {
-                    final reason = AppConst.posts.reasons[selectedIndex.value];
-                    final value = reason['value']!;
-                    final isOther = selectedIndex.value == AppConst.posts.reasons.length - 1;
-                    final desc = isOther ? customDesc.value : reason['desc']!;
-                    controller.reportPost(post, value, desc);
-                  }),
+                  child: DisButton(
+                      text: AppConst.posts.reportButton,
+                      onPressed: () {
+                        final reason =
+                            AppConst.posts.reasons[selectedIndex.value];
+                        final value = reason['value']!;
+                        final isOther = selectedIndex.value ==
+                            AppConst.posts.reasons.length - 1;
+                        final desc =
+                            isOther ? customDesc.value : reason['desc']!;
+                        controller.reportPost(post, value, desc);
+                      }),
                 ),
               ],
             ),
@@ -293,7 +342,8 @@ class _ReplyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => {
-        controller.startReply(post.postNumber, post.cooked, post.name?.isEmpty ?? true ? post.username : post.name)
+        controller.startReply(post.postNumber, post.cooked,
+            post.name?.isEmpty ?? true ? post.username : post.name)
       },
       child: Row(
         children: [
@@ -377,9 +427,10 @@ class _DeleteButton extends StatelessWidget {
       onTap: () => controller.deletePost(post),
       child: Row(
         children: [
-          Icon(CupertinoIcons.trash, size: 16.w, color: Theme.of(context).hintColor),
+          Icon(CupertinoIcons.trash,
+              size: 16.w, color: Theme.of(context).hintColor),
         ],
       ),
     );
   }
-} 
+}

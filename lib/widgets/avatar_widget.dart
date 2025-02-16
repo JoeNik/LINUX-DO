@@ -1268,7 +1268,7 @@ class UserInfoCardController extends BaseController {
         archetype: 'private_message',
       );
 
-      if (response.success) {
+      if (response.success == true) {
         showSuccess(AppConst.posts.sendSuccess);
         Get.back();
       } else {

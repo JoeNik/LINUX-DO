@@ -88,7 +88,7 @@ class _UserInfo extends StatelessWidget {
           Text(
             post.username ?? '',
             style: TextStyle(
-              fontSize: 12.w,
+              fontSize: 11.w,
               fontFamily: AppFontFamily.dinPro,
               color: Theme.of(context).hintColor,
             ),
@@ -113,7 +113,7 @@ class _PostTime extends StatelessWidget {
     return Text(
       _getRelativeTime(),
       style: TextStyle(
-        fontSize: 12.w,
+        fontSize: 10.w,
         fontFamily: AppFontFamily.dinPro,
         color: Theme.of(context).hintColor,
       ),

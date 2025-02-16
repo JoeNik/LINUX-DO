@@ -4,14 +4,14 @@ part 'create_post_response.g.dart';
 
 @JsonSerializable()
 class CreatePostResponse {
-  final String action;
+  final String? action;
   final CreatePost post;
-  final bool success;
+  final bool? success;
 
   CreatePostResponse({
-    required this.action,
+    this.action,
     required this.post,
-    required this.success,
+    this.success,
   });
 
   factory CreatePostResponse.fromJson(Map<String, dynamic> json) =>

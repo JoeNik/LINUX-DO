@@ -280,6 +280,31 @@ class Post {
     return userId == 1;
   }
 
+bool needsTranslation() {
+  // 去除 <pre> 和 <code> 标签内容
+  String sanitizedContent = cooked?.replaceAll(RegExp(r'<(pre|code)[^>]*>.*?</\1>', dotAll: true), '') ?? '';
+
+  int totalCharacters = 0;
+  int englishCharacters = 0;
+
+  // 正则表达式匹配所有字符
+  RegExp regExp = RegExp(r'[a-zA-Z]');
+  for (int i = 0; i < sanitizedContent.length; i++) {
+    String char = sanitizedContent[i];
+    totalCharacters++;
+
+    // 如果是英文字符
+    if (regExp.hasMatch(char)) {
+      englishCharacters++;
+    }
+  }
+
+  // 判断英文字符占比
+  double englishRatio = totalCharacters == 0 ? 0 : englishCharacters / totalCharacters;
+  return englishRatio > 0.7;
+}
+
+
   factory Post.fromJson(Map<String, dynamic> json) => Post(
     id: json['id'] as int?,
     name: json['name'] as String?,

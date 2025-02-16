@@ -789,7 +789,7 @@ class AboutPage extends GetView<AboutController> {
                     Text(
                       AppConst.settings.contactForCriticalIssues,
                       style: TextStyle(
-                        fontSize: 11.w,
+                        fontSize: 10.w,
                         color: AppColors.error.withValues(alpha: 0.8),
                       ),
                     ),
@@ -856,7 +856,7 @@ class AboutPage extends GetView<AboutController> {
                     Text(
                       AppConst.settings.reportInappropriateContent,
                       style: TextStyle(
-                        fontSize: 11.w,
+                        fontSize: 10.w,
                         height: 1.5,
                         color: Theme.of(context).primaryColor.withValues(alpha: 0.8),
                       ),

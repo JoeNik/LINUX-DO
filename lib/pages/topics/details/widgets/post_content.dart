@@ -13,11 +13,12 @@ import '../topic_detail_controller.dart';
 class PostContent extends StatelessWidget {
   const PostContent({
     required this.node,
+    this.isReply = false,
     Key? key,
   }) : super(key: key);
 
   final PostNode node;
-
+  final bool isReply;
   @override
   Widget build(BuildContext context) {
     if (node.post.cooked == null) {
@@ -28,14 +29,14 @@ class PostContent extends StatelessWidget {
       child: Stack(
         children: [
           Padding(
-            padding: EdgeInsets.all(12.w),
+            padding: EdgeInsets.all(2.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (node.post.replyToPostNumber != null)
-                  _ReplyQuote(post: node.post),
-                _PostBody(post: node.post),
+                // if (isReply)
+                //   _ReplyQuote(post: node.post),
+                _PostBody(post: node.post,isReply: isReply),
               ],
             ),
           ),
@@ -60,13 +61,13 @@ class _ReplyQuote extends StatelessWidget {
     
     
     return Container(
-      margin: EdgeInsets.only(bottom: 8.w),
-      padding: EdgeInsets.all(8.w),
+      margin: EdgeInsets.only(bottom: 8.w,top: 4.w),
+      padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+        color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(4.w),
         border: Border.all(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
+          color: Theme.of(context).dividerColor.withValues(alpha: 0.6),
           width: 1.w,
         ),
       ),
@@ -135,15 +136,17 @@ class _PostBody extends StatelessWidget {
   final controller = Get.find<TopicDetailController>();
   _PostBody({
     required this.post,
+    this.isReply = false,
     Key? key,
   }) : super(key: key);
 
   final Post post;
-
+  final bool isReply;
   @override
   Widget build(BuildContext context) {
     return HtmlWidget(
       html: post.cooked ?? '',
+      fontSize: isReply ? 11.sp : 14.sp,
       onLinkTap: (url) {
         controller.launchUrl(url);
       },

@@ -199,8 +199,9 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
             // Tab栏
             SliverPersistentHeader(
               pinned: true,
-              delegate: StickyTabBarDelegate(
-                height: 40.w,
+              delegate: _SliverAppBarDelegate(
+                minHeight: 40.w,
+                maxHeight: 40.w,
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.transparent,
@@ -512,5 +513,41 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
         ),
       ),
     );
+  }
+}
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  final double minHeight;
+  final double maxHeight;
+  final Widget child;
+
+  _SliverAppBarDelegate({
+    required this.minHeight,
+    required this.maxHeight,
+    required this.child,
+  });
+
+  @override
+  double get minExtent => minHeight;
+
+  @override
+  double get maxExtent => maxHeight;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    // 使用 clamp 确保不会出现精度问题
+    final double currentExtent = (maxExtent - shrinkOffset).clamp(minExtent, maxExtent);
+    
+    return SizedBox(
+      height: currentExtent,
+      child: child,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return maxHeight != oldDelegate.maxHeight ||
+        minHeight != oldDelegate.minHeight ||
+        child != oldDelegate.child;
   }
 }

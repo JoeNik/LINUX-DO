@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_spacing.dart';
+import 'package:linux_do/models/banner_settings.dart';
 import 'package:linux_do/widgets/dis_loading.dart';
 import '../../const/app_const.dart';
 import '../../const/app_images.dart';
@@ -11,6 +12,7 @@ import '../../routes/app_pages.dart';
 import '../../utils/tag.dart';
 import 'topics_controller.dart';
 import '../../utils/storage_manager.dart';
+import 'package:linux_do/pages/topics/widgets/banner_picker_dialog.dart';
 
 class TopicsPage extends StatefulWidget {
   const TopicsPage({Key? key}) : super(key: key);
@@ -69,14 +71,23 @@ class _TopicsPageState extends State<TopicsPage>
                                 left: 0,
                                 right: 0,
                                 bottom: 0,
-                                child: Container(
-                                  margin:
-                                      EdgeInsets.symmetric(horizontal: margin),
-                                  child: Opacity(
-                                    opacity: 1 - collapsedProgress,
-                                    child: Image.asset(
-                                      AppImages.getBanner(context),
-                                      fit: BoxFit.contain,
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    Get.put(BannerPickerController(controller.bannerSettings.value));
+                                    final result = await Get.dialog<BannerSettings>(
+                                      const BannerPickerDialog(),
+                                    );
+                                    Get.delete<BannerPickerController>();
+                                    if (result != null) {
+                                      await controller.saveBannerSettings(result);
+                                    }
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.symmetric(horizontal: margin),
+                                    padding: const EdgeInsets.only(bottom: 6).w,
+                                    child: Opacity(
+                                      opacity: 1 - collapsedProgress,
+                                      child: Obx(() => controller.getBannerImage(context)),
                                     ),
                                   ),
                                 ),

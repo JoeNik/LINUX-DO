@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:linux_do/const/app_images.dart';
 import '../../routes/app_pages.dart';
 import '../../models/search_result.dart';
 import '../../controller/base_controller.dart';
@@ -10,6 +13,9 @@ import 'tab_views/topic_tab_controller.dart';
 import 'tab_views/topic_tab_view.dart';
 import '../../net/api_service.dart';
 import '../../utils/log.dart';
+import 'package:linux_do/models/banner_settings.dart';
+import 'package:linux_do/utils/storage_manager.dart';
+import 'dart:io';
 
 class TopicsController extends BaseController
     with GetSingleTickerProviderStateMixin {
@@ -63,6 +69,10 @@ class TopicsController extends BaseController
   // 保存最后的搜索查询
   final lastSearchQuery = ''.obs;
 
+  // 添加banner设置
+  final Rx<BannerSettings> bannerSettings = BannerSettings().obs;
+  static const String bannerSettingsKey = 'banner_settings';
+
   // 移除 tabViews getter，改用 _buildTabView 方法
   Widget _buildTabView(int index) {
     final path = paths[index];
@@ -111,6 +121,9 @@ class TopicsController extends BaseController
 
     // 添加搜索框焦点监听
     searchFocusNode.addListener(_onSearchFocusChange);
+
+    // 加载banner设置
+    _loadBannerSettings();
   }
 
   void _handleTabChange() {
@@ -333,5 +346,59 @@ class TopicsController extends BaseController
   // 更新搜索框焦点状态
   void updateSearchFocus(bool isFocused) {
     isSearchFocused.value = isFocused;
+  }
+
+  // 加载banner设置
+  void _loadBannerSettings() {
+    final savedSettings = StorageManager.getString(bannerSettingsKey);
+    if (savedSettings != null) {
+      bannerSettings.value = BannerSettings.fromJson(json.decode(savedSettings));
+    }
+  }
+
+  // 保存banner设置
+  Future<void> saveBannerSettings(BannerSettings settings) async {
+    bannerSettings.value = settings;
+    await StorageManager.setData(bannerSettingsKey, settings.toJson());
+  }
+
+  // 获取当前banner图片Widget
+  Widget getBannerImage(BuildContext context) {
+    if (bannerSettings.value.isNetworkImage) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(6.w),
+        child: Image.network(
+          bannerSettings.value.networkUrl!,
+          fit: BoxFit.fitWidth,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(
+              AppImages.getBanner(context),
+              fit: BoxFit.contain,
+            );
+          },
+        ),
+      );
+    }
+    
+    if (bannerSettings.value.isLocalImage) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(6.w),
+        child: Image.file(
+          File(bannerSettings.value.localPath!),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(
+              AppImages.getBanner(context),
+              fit: BoxFit.contain,
+            );
+          },
+        ),
+      );
+    }
+    
+    return Image.asset(
+      AppImages.getBanner(context),
+      fit: BoxFit.contain,
+    );
   }
 }

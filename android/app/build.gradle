@@ -34,11 +34,11 @@ android {
 
     defaultConfig {
         applicationId "com.linux.linuxdo"
-        minSdkVersion flutter.minSdkVersion
-        // targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion 21
         targetSdkVersion 33
         versionCode flutter.versionCode
         versionName flutter.versionName
+        multiDexEnabled true
     }
 
     signingConfigs {

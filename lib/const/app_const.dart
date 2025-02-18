@@ -168,6 +168,7 @@ class _LoginConst {
   const _LoginConst();
 
   String get title => '登录';
+  String get scanLogin => '扫码登录';
   String get webTitle => '网页授权登录(仅支持账密)';
   String get greetingPhrase => '欢迎来到';
   String get accountHint => '请输入账号';

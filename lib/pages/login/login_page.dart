@@ -166,6 +166,16 @@ class LoginPage extends GetView<LoginController> {
                           )
                         ])),
                     SizedBox(height: MediaQuery.of(context).size.height * .18),
+
+                    Container(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                            onPressed: controller.scanLogin,
+                            color: theme.primaryColor,
+                            icon: const Icon(CupertinoIcons.qrcode),
+                          
+                      ),
+                    ),
                     // 账号输入框
                     Container(
                       height: AppSizes.spaceHuge44,

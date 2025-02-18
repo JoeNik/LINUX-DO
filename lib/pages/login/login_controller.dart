@@ -9,6 +9,13 @@ import '../../utils/log.dart';
 import '../../controller/global_controller.dart';
 import 'package:dio/dio.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'package:linux_do/net/http_config.dart';
+import 'package:linux_do/pages/qr_scanner/qr_scanner_page.dart';
+import 'package:linux_do/utils/storage_manager.dart';
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../web_page.dart';
 
@@ -133,5 +140,85 @@ class LoginController extends BaseController {
       message: AppConst.login.registerTip,
       type: SnackbarType.info,
     );
+  }
+
+  /// 扫码登录
+  Future<void> scanLogin() async {
+    try {
+      isLoading.value = true;
+      final result = await Get.to(() => const QRScannerPage());
+      
+      if (result == null) {
+        // 用户取消了扫描
+        return;
+      }
+
+      try {
+        final data = jsonDecode(result);
+        l.d('验证前的数据: $data');
+        // 验证数据结构
+        if (!data.containsKey('cf') || 
+            !data.containsKey('f') || 
+            !data.containsKey('t') ||
+            !data.containsKey('c')) {
+          showError('无效的二维码数据');
+          return;
+        }
+
+        l.d('扫描后的数据格式: $data');
+
+        // 保存 cookies
+        final directory = await getApplicationDocumentsDirectory();
+        final cookiePath = '${directory.path}/.cookies/';
+        final cookieJar = PersistCookieJar(
+          ignoreExpires: true, 
+          storage: FileStorage(cookiePath)
+        );
+
+        final uri = Uri.parse('${HttpConfig.baseUrl}login');
+        
+        // 保存 cookies
+        await cookieJar.saveFromResponse(uri, [
+          Cookie('cf_clearance', data['cf'])
+            ..domain = HttpConfig.domain
+            ..path = '/'
+            ..httpOnly = true
+            ..secure = true,
+          Cookie('_forum_session', data['f'])
+            ..domain = HttpConfig.domain
+            ..path = '/'
+            ..httpOnly = true
+            ..secure = true,
+          Cookie('_t', data['t'])
+            ..domain = HttpConfig.domain
+            ..path = '/'
+            ..httpOnly = true
+            ..secure = true,
+        ]);
+
+        // 保存 CSRF Token
+        await StorageManager.setData(
+          AppConst.identifier.csrfToken, 
+          data['c']
+        );
+
+        // 执行到这里，说明扫码登录成功
+          showSuccess('扫码登录成功');
+
+          // 获取用户信息并返回
+          await Get.find<GlobalController>().fetchUserInfo();
+          Get.offAllNamed(Routes.HOME);
+
+
+      } catch (e) {
+        l.e('扫码登录失败: $e');
+        showError('无效的二维码格式');
+      }
+    } catch (e) {
+      l.e('扫码过程出错: $e');
+      showError('扫码过程出错');
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

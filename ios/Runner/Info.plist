@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>LINUX DO</string>
+	<string>Linux Do</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -36,7 +36,7 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>需要访问相机以拍摄上传的图片</string>
+	<string>需要使用相机来扫描二维码</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>需要访问麦克风以录制视频</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

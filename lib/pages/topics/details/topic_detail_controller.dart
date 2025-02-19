@@ -8,6 +8,7 @@ import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/net/http_config.dart';
+import 'package:linux_do/utils/browser_util.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../controller/global_controller.dart';
@@ -28,6 +29,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:linux_do/const/app_spacing.dart';
+
 
 class TopicDetailController extends BaseController
     with WidgetsBindingObserver, Concatenated {
@@ -1152,10 +1154,20 @@ class TopicDetailController extends BaseController
       l.e('编辑帖子失败: $e -  \n$s');
     }
   }
+
+  // 添加打开浏览器方法
+  Future<void> handleOpenInBrowser() async {
+    final postUrl = '${HttpConfig.baseUrl}t/${topic.value?.slug}/${topic.value?.id}';
+    try{
+      await BrowserUtil.openUrlWithOptions(url: postUrl);
+    }catch(e){
+      l.e('打开浏览器失败: $e');
+      showError('打开浏览器失败');
+    }
+  }
 }
 
 // 帖子节点类
-
 class PostNode {
   final Post post;
   final List<PostNode> children;

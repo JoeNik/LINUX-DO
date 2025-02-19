@@ -78,6 +78,10 @@ class TopicDetailPage extends GetView<TopicDetailController> {
       title: _buildHeader(context),
       actions: [
         IconButton(
+          icon: const Icon(Icons.open_in_browser),
+          onPressed: () => controller.handleOpenInBrowser(),
+        ),
+        IconButton(
           icon: Obx(() => Icon(
                 controller.isFooderVisible.value
                     ? CupertinoIcons.chevron_up_circle

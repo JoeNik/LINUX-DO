@@ -132,7 +132,7 @@ flutter build ipa --release
 flutter run -d android
 
 # 发布版本
-flutter build apk --release
+flutter build apk --release --split-per-abi
 flutter build appbundle --release
 ```
 

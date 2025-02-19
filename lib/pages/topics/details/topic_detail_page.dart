@@ -360,7 +360,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
           SizedBox(
             child: IconButton(
               onPressed: () {
-                controller.startReply(topic.currentPostNumber, topic.title,
+                controller.startReply(null, topic.title,
                     topic.details?.createdBy?.username);
               },
               icon: Icon(CupertinoIcons.reply, size: 22.w),

@@ -179,11 +179,11 @@ class LoginController extends BaseController {
         
         // 保存 cookies
         await cookieJar.saveFromResponse(uri, [
-          Cookie('cf_clearance', data['cf'])
-            ..domain = HttpConfig.domain
-            ..path = '/'
-            ..httpOnly = true
-            ..secure = true,
+          // Cookie('cf_clearance', data['cf'])
+          //   ..domain = HttpConfig.domain
+          //   ..path = '/'
+          //   ..httpOnly = true
+          //   ..secure = true,
           Cookie('_forum_session', data['f'])
             ..domain = HttpConfig.domain
             ..path = '/'
@@ -207,7 +207,7 @@ class LoginController extends BaseController {
 
           // 获取用户信息并返回
           await Get.find<GlobalController>().fetchUserInfo();
-          Get.offAllNamed(Routes.HOME);
+          Get.back(result: true);
 
 
       } catch (e) {

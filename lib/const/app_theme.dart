@@ -60,9 +60,9 @@ class AppTheme {
       ),
 
       // 输入框光标
-      textSelectionTheme: const TextSelectionThemeData(
+      textSelectionTheme: TextSelectionThemeData(
         cursorColor: AppColors.primary,
-        selectionColor: AppColors.primary,
+        selectionColor: AppColors.primary.withValues(alpha: .2),
         selectionHandleColor: AppColors.primary,
       ),
 
@@ -202,9 +202,9 @@ class AppTheme {
       ),
 
       // 输入框光标
-      textSelectionTheme: const TextSelectionThemeData(
+      textSelectionTheme: TextSelectionThemeData(
         cursorColor: AppColors.primary,
-        selectionColor: AppColors.primary,
+        selectionColor: AppColors.primary.withOpacity(0.2),
         selectionHandleColor: AppColors.primary,
       ),
 

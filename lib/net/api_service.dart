@@ -371,6 +371,21 @@ abstract class ApiService {
     @Query("category") String? category,
   ]);
 
+  /// 获取分类列表
+  @GET('c/resource/{categoryId}/l/latest.json')
+  Future<TopicListResponse> getCategoriesTopics(
+    @Path('categoryId') int categoryId, {
+    @Query('page') int? page,
+    @Query('filter') String? filter = 'default',
+  });
+
+  /// 根据tag获取帖子列表
+  @GET('tag/{tag}/l/latest.json')
+  Future<TopicListResponse> getTopicsByTag(
+    @Path('tag') String tag, {
+    @Query('page') int? page,
+  });
+
   /// 获取排行榜
   @GET('leaderboard{categoryId}')
   Future<LeaderboardResponse> getLeaderboard({

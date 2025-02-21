@@ -54,4 +54,7 @@ abstract class Routes {
 
   // 关于页
   static const ABOUT = '/about';
+
+  // 分类列表
+  static const CATEGORY = '/category';
 }

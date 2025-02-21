@@ -31,6 +31,11 @@ class UserResponse {
   factory UserResponse.fromJson(Map<String, dynamic> json) =>
       _$UserResponseFromJson(json);
   Map<String, dynamic> toJson() => _$UserResponseToJson(this);
+
+  @override
+  String toString() {
+    return 'UserResponse(user: $user)';
+  }
 }
 
 @JsonSerializable()
@@ -300,6 +305,10 @@ class CurrentUser {
   final String? userTitle;
   @JsonKey(name: 'user_auth_tokens')
   final List<UserAuthToken>? userAuthTokens;
+  @JsonKey(name: 'sidebar_category_ids')
+  final List<int>? sidebarCategoryIds;
+  @JsonKey(name: 'sidebar_tags')
+  final List<Tags>? sidebarTags;
 
   CurrentUser({
     required this.id,
@@ -362,11 +371,18 @@ class CurrentUser {
     this.isFollowed,
     this.userTitle,
     this.userAuthTokens,
+    this.sidebarCategoryIds,
+    this.sidebarTags,
   });
 
   factory CurrentUser.fromJson(Map<String, dynamic> json) =>
       _$CurrentUserFromJson(json);
   Map<String, dynamic> toJson() => _$CurrentUserToJson(this);
+
+  @override
+  String toString() {
+    return 'CurrentUser(id: $id, username: $username, customFields: $customFields)';
+  }
 
   String getAvatar(int size) {
     return '${HttpConfig.baseUrl}${avatarTemplate?.replaceAll('{size}', '$size')}';
@@ -463,4 +479,24 @@ class CategoryExpert {
   factory CategoryExpert.fromJson(Map<String, dynamic> json) =>
       _$CategoryExpertFromJson(json);
   Map<String, dynamic> toJson() => _$CategoryExpertToJson(this);
+}
+
+
+@JsonSerializable()
+class Tags {
+  @JsonKey(name: 'name')
+  final String? name;
+  @JsonKey(name: 'description')
+  final String? description;
+  @JsonKey(name: 'pm_only')
+  final bool? pmOnly;
+
+  Tags({
+    this.name,
+    this.description,
+    this.pmOnly,
+  });
+
+  factory Tags.fromJson(Map<String, dynamic> json) => _$TagsFromJson(json);
+  Map<String, dynamic> toJson() => _$TagsToJson(this);
 }

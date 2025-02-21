@@ -8,6 +8,7 @@ import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:linux_do/utils/mixins/toast_mixin.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'cached_image.dart';
 import 'image_preview_dialog.dart';
 import 'code_preview_dialog.dart';
@@ -300,6 +301,77 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
               }
               // 其他 div 正常显示
               return const SizedBox.shrink();
+            },
+          ),
+          // 添加处理 iframe 的扩展
+          TagExtension(
+            tagsToExtend: {"iframe"},
+            builder: (extensionContext) {
+              final src = extensionContext.attributes['src'];
+              if (src == null) return const SizedBox();
+
+              // 处理 bilibili 视频
+              if (src.contains('player.bilibili.com')) {
+                return Container(
+                  margin: EdgeInsets.symmetric(vertical: 8.h),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.w),
+                    border: Border.all(
+                      color: Theme.of(context).dividerColor,
+                      width: 1,
+                    ),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.w),
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: InAppWebView(
+                        initialUrlRequest: URLRequest(url: WebUri(src)),
+                        initialSettings: InAppWebViewSettings(
+                          mediaPlaybackRequiresUserGesture: false,
+                          allowsInlineMediaPlayback: true,
+                          iframeAllowFullscreen: true,
+                          javaScriptEnabled: true,
+                        ),
+                        onLoadStart: (controller, url) {
+                          controller.evaluateJavascript(source: '''
+                            document.body.style.margin = '0';
+                            document.body.style.padding = '0';
+                            document.body.style.backgroundColor = 'transparent';
+                          ''');
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              // 处理其他视频源
+              return Container(
+                margin: EdgeInsets.symmetric(vertical: 8.h),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.w),
+                  border: Border.all(
+                    color: Theme.of(context).dividerColor,
+                    width: 1,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.w),
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: InAppWebView(
+                      initialUrlRequest: URLRequest(url: WebUri(src)),
+                      initialSettings: InAppWebViewSettings(
+                        mediaPlaybackRequiresUserGesture: false,
+                        allowsInlineMediaPlayback: true,
+                        iframeAllowFullscreen: true,
+                        javaScriptEnabled: true,
+                      ),
+                    ),
+                  ),
+                ),
+              );
             },
           ),
           // 添加代码块扩展

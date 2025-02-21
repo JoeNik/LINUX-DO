@@ -172,7 +172,7 @@ class TopicItem extends StatelessWidget {
                                 padding: EdgeInsets.only(top: 8.w),
                                 child: Text(
                                   topic.excerpt ?? '',
-                                  maxLines: 2,
+                                  maxLines: 3,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 13.w,

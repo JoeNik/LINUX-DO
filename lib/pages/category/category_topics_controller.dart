@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/pages/category/activities/activity_page.dart';
 import 'package:linux_do/pages/category/widgets/my_bookmarks/my_bookmarks_page.dart';
+import 'package:linux_do/widgets/drawer_menu.dart';
 import '../../const/app_const.dart';
 import '../../controller/base_controller.dart';
 import 'birthday/birthday_controller.dart';
@@ -37,6 +38,7 @@ class CategoryTopicsController extends BaseController {
     Get.put(GroupController());
     Get.put(EventController());
     Get.put(BirthdayController());
+    Get.lazyPut(() => DrawerMenuController());
   }
 
   final menuItems = [

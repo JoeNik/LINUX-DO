@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:linux_do/pages/category/category_list_controller.dart';
 import 'package:linux_do/pages/profile/edit_profile_controller.dart';
 import 'package:linux_do/pages/profile/edit_profile_page.dart';
 import 'package:linux_do/pages/settings/about_controller.dart';
@@ -35,6 +36,7 @@ import '../pages/settings/tracking_settings_controller.dart';
 import '../pages/settings/tracking_settings_page.dart';
 import '../pages/settings/do_not_disturb_controller.dart';
 import '../pages/settings/do_not_disturb_page.dart';
+import '../pages/category/category_page.dart';
 
 part 'app_routes.dart';
 
@@ -189,6 +191,14 @@ class AppPages {
         Get.lazyPut(() => AboutController());
       }),
     ),
-    
+
+    /// 分类页
+    GetPage(
+      name: Routes.CATEGORY,
+      page: () => const CategoryPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => CategoryListController());
+      }),
+    ),
   ];
 }

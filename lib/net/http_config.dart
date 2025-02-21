@@ -1,4 +1,3 @@
-
 class HttpConfig {
   /// 默认配置
   static const String baseUrl = 'https://linux.do/';
@@ -26,4 +25,9 @@ class HttpConfig {
   static const String notFoundMessage = "请求地址不存在";
   static const String networkErrorMessage = "网络连接错误";
   static const String timeoutMessage = "请求超时";
+
+  /// 代理服务器配置
+  static const String proxyBaseUrl = 'http://38.55.193.234:5000';
+  static const String proxyLoginEndpoint = '/proxy/login';
+  static const String proxyRequestEndpoint = '/proxy/request';
 }

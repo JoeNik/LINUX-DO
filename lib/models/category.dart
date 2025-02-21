@@ -24,6 +24,8 @@ class Category {
   final CategoryLogo? logo;
   @JsonKey(name: 'uploaded_logo_dark')
   final CategoryLogoDark? logoDark;
+  @JsonKey(name: 'english_name')
+  final String? englishName;
 
 
   Category({
@@ -38,10 +40,16 @@ class Category {
     this.parentCategoryId,
     this.logo,
     this.logoDark,
+    this.englishName,
   });
 
   factory Category.fromJson(Map<String, dynamic> json) => _$CategoryFromJson(json);
   Map<String, dynamic> toJson() => _$CategoryToJson(this);
+  
+  @override
+  String toString() {
+    return 'Category(id: $id, name: $name)';
+  }
 } 
 
 @JsonSerializable()

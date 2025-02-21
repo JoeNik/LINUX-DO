@@ -2,6 +2,7 @@
     {
         "id": 4,
         "name": "开发调优",
+        "english_name": "Development Optimization",
         "uploaded_logo": {
             "id": 175278,
             "url": "/uploads/default/original/3X/c/5/c59e612cafa47255927d8c73f90e8dac05f78b5c.png",
@@ -19,6 +20,7 @@
     {
         "id": 14,
         "name": "资源荟萃",
+        "english_name": "Resource Collection",
         "uploaded_logo": {
             "id": 121,
             "url": "/uploads/default/original/1X/6334a38d6a816e61423f46a0399c160eaaf07321.png",
@@ -36,6 +38,7 @@
     {
         "id": 42,
         "name": "文档共建",
+        "english_name": "Document Collaboration",
         "uploaded_logo": {
             "id": 33989,
             "url": "/uploads/default/original/3X/c/b/cb17799169729bb83cdc252271a3621885ca33a8.png",
@@ -53,6 +56,7 @@
     {
         "id": 10,
         "name": "跳蚤市场",
+        "english_name": "Flea Market",
         "uploaded_logo": {
             "id": 175239,
             "url": "/uploads/default/original/3X/d/3/d3a3955a407296311f9a9837eec17d39cfa63425.png",
@@ -70,6 +74,7 @@
     {
         "id": 27,
         "name": "非我莫属",
+        "english_name": "Not Me",
         "uploaded_logo": {
             "id": 1667,
             "url": "/uploads/default/original/2X/0/0ca85c534e813ae5ec9a86ca3334a8c4a99fcc51.png",
@@ -87,6 +92,7 @@
     {
         "id": 32,
         "name": "读书成诗",
+        "english_name": "Read and Write",
         "uploaded_logo": {
             "id": 11042,
             "url": "/uploads/default/original/2X/8/82dd6190fc33a1bcbe88a2f2d4cf24f3c7966e8c.png",
@@ -104,6 +110,7 @@
     {
         "id": 46,
         "name": "扬帆起航",
+        "english_name": "Start Up",
         "uploaded_logo": {
             "id": 92433,
             "url": "/uploads/default/original/3X/9/4/947e5009b6c84d4c3f4a335b20b557193b8fa26b.png",
@@ -121,6 +128,7 @@
     {
         "id": 34,
         "name": "前沿快讯",
+        "english_name": "Frontier News",
         "uploaded_logo": {
             "id": 16718,
             "url": "/uploads/default/original/3X/3/b/3bc85a6999925899bce84ac7feedd907c8b0be8f.png",
@@ -138,6 +146,7 @@
     {
         "id": 36,
         "name": "福利羊毛",
+        "english_name": "Welfare Sheep",
         "uploaded_logo": {
             "id": 19703,
             "url": "/uploads/default/original/3X/b/4/b445e49d3e3bdab0cb726e4469f896d001d7188b.png",
@@ -155,6 +164,7 @@
     {
         "id": 45,
         "name": "深海幽域",
+        "english_name": "Deep Sea",
         "uploaded_logo": {
             "id": 59885,
             "url": "/uploads/default/original/3X/e/a/ea7ec51e4c424915941f23a4abb083a0c899defd.png",
@@ -172,6 +182,7 @@
     {
         "id": 2,
         "name": "运营反馈",
+        "english_name": "Operation Feedback",
         "uploaded_logo": {
             "id": 129,
             "url": "/uploads/default/original/1X/078b3612909bedaf877f5b688a4b01833cc4a3cd.png",
@@ -189,6 +200,7 @@
     {
         "id": 11,
         "name": "福利羊毛",
+        "english_name": "Welfare Sheep",
         "uploaded_logo": {
             "id": 19703,
             "url": "/uploads/default/original/3X/b/4/b445e49d3e3bdab0cb726e4469f896d001d7188b.png",
@@ -206,6 +218,7 @@
     {
         "id": 58,
         "name": "搞七捻三",
+        "english_name": "Gossip",
         "uploaded_logo": {
             "id": 121,
             "url": "/uploads/default/original/1X/6334a38d6a816e61423f46a0399c160eaaf07321.png",

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../models/category.dart';
+import 'log.dart';
 
 class Tag {
   static final Map<String, TagColor> _cache = {};
@@ -76,7 +77,6 @@ class TagColor {
   });
 }
 
-
 class CategoryManager {
   static final CategoryManager _instance = CategoryManager._internal();
   factory CategoryManager() => _instance;
@@ -85,17 +85,27 @@ class CategoryManager {
   final Map<int, Category> _categories = <int, Category>{};
 
   Future<void> initialize() async {
-    if (_categories.isNotEmpty) return;
+    if (_categories.isNotEmpty) {
+      l.d('Categories already loaded: ${_categories.length} categories');
+      return;
+    }
     try {
-      final String jsonString = await rootBundle.loadString('assets/json/category.json');
+      final String jsonString =
+          await rootBundle.loadString('assets/json/category.json');
       final List<dynamic> jsonList = json.decode(jsonString);
-      
+
       for (var item in jsonList) {
-        final category = Category.fromJson(item);
+        final category = Category(
+          id: item['id'],
+          name: item['name'],
+          englishName: item['english_name'],
+          logo: CategoryLogo.fromJson(item['uploaded_logo']),
+          logoDark: CategoryLogoDark.fromJson(item['uploaded_logo_dark']),
+        );
         _categories[category.id] = category;
       }
-    } catch (e) {
-      print('Error loading categories: $e');
+    } catch (e, stack) {
+      l.e('Error loading categories: $e\n$stack');
     }
   }
 

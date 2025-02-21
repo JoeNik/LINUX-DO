@@ -208,6 +208,12 @@ CurrentUser _$CurrentUserFromJson(Map<String, dynamic> json) => CurrentUser(
       userAuthTokens: (json['user_auth_tokens'] as List<dynamic>?)
           ?.map((e) => UserAuthToken.fromJson(e as Map<String, dynamic>))
           .toList(),
+      sidebarCategoryIds: (json['sidebar_category_ids'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList(),
+      sidebarTags: (json['sidebar_tags'] as List<dynamic>?)
+          ?.map((e) => Tags.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$CurrentUserToJson(CurrentUser instance) =>
@@ -272,6 +278,8 @@ Map<String, dynamic> _$CurrentUserToJson(CurrentUser instance) =>
       'is_followed': instance.isFollowed,
       'user_title': instance.userTitle,
       'user_auth_tokens': instance.userAuthTokens,
+      'sidebar_category_ids': instance.sidebarCategoryIds,
+      'sidebar_tags': instance.sidebarTags,
     };
 
 UserCardBadge _$UserCardBadgeFromJson(Map<String, dynamic> json) =>
@@ -330,4 +338,16 @@ Map<String, dynamic> _$CategoryExpertToJson(CategoryExpert instance) =>
       'category_id': instance.categoryId,
       'created_at': instance.createdAt,
       'updated_at': instance.updatedAt,
+    };
+
+Tags _$TagsFromJson(Map<String, dynamic> json) => Tags(
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+      pmOnly: json['pm_only'] as bool?,
+    );
+
+Map<String, dynamic> _$TagsToJson(Tags instance) => <String, dynamic>{
+      'name': instance.name,
+      'description': instance.description,
+      'pm_only': instance.pmOnly,
     };

@@ -15,7 +15,9 @@
             "width": 512,
             "height": 512
         },
-        "slug": "develop"
+        "slug": "develop",
+        "color": "0xFF33FFFF",
+        "textColor": "0xFFFFFFFF"
     },
     {
         "id": 14,
@@ -33,7 +35,9 @@
             "width": 256,
             "height": 256
         },
-        "slug": "resource"
+        "slug": "resource",
+        "color": "0xFF12A89D",
+        "textColor": "0xFFFFFFFF"
     },
     {
         "id": 42,
@@ -51,7 +55,9 @@
             "width": 256,
             "height": 256
         },
-        "slug": "wiki"
+        "slug": "wiki",
+        "color": "0xFFddf2fd",
+        "textColor": "0xFFFFFFFF"
     },
     {
         "id": 10,
@@ -69,7 +75,9 @@
             "width": 256,
             "height": 256
         },
-        "slug": "trade"
+        "slug": "trade",
+        "color": "0xFFED207B",
+        "textColor": "0xFFFFFFFF"
     },
     {
         "id": 27,
@@ -87,7 +95,9 @@
             "width": 256,
             "height": 256
         },
-        "slug": "job"
+        "slug": "job",
+        "color": "0xFFa8c6fe",
+        "textColor": "0xFFFFFFFF"
     },
     {
         "id": 32,
@@ -105,7 +115,9 @@
             "width": 256,
             "height": 256
         },
-        "slug": "reading"
+        "slug": "reading",
+        "color": "0xFFf5ec00",
+        "textColor": "0xFFFFFFFF"
     },
     {
         "id": 46,
@@ -123,7 +135,9 @@
             "width": 256,
             "height": 256
         },
-        "slug": "startup"
+        "slug": "startup",
+        "color": "0xFFff9838",
+        "textColor": "0xFFFFFFFF"
     },
     {
         "id": 34,
@@ -141,7 +155,9 @@
             "width": 256,
             "height": 256
         },
-        "slug": "news"
+        "slug": "news",
+        "color": "0xFFBB8FCE",
+        "textColor": "0xFFFFFFFF"
     },
     {
         "id": 36,
@@ -159,7 +175,9 @@
             "width": 256,
             "height": 256
         },
-        "slug": "welfare"
+        "slug": "welfare",
+        "color": "0xFFE45735",
+        "textColor": "0xFFFFFFFF"
     },
     {
         "id": 45,
@@ -177,7 +195,9 @@
             "width": 256,
             "height": 256
         },
-        "slug": "muted"
+        "slug": "muted",
+        "color": "0xFF45B7D1",
+        "textColor": "0xFFFFFFFF"
     },
     {
         "id": 2,
@@ -195,28 +215,12 @@
             "width": 256,
             "height": 256
         },
-        "slug": "feedback"
+        "slug": "feedback",
+        "color": "0xFF808281",
+        "textColor": "0xFFFFFFFF"
     },
     {
         "id": 11,
-        "name": "福利羊毛",
-        "english_name": "Welfare Sheep",
-        "uploaded_logo": {
-            "id": 19703,
-            "url": "/uploads/default/original/3X/b/4/b445e49d3e3bdab0cb726e4469f896d001d7188b.png",
-            "width": 256,
-            "height": 256
-        },
-        "uploaded_logo_dark": {
-            "id": 19703,
-            "url": "/uploads/default/original/3X/b/4/b445e49d3e3bdab0cb726e4469f896d001d7188b.png",
-            "width": 256,
-            "height": 256
-        },
-        "slug": "welfare"
-    },
-    {
-        "id": 58,
         "name": "搞七捻三",
         "english_name": "Gossip",
         "uploaded_logo": {
@@ -231,6 +235,8 @@
             "width": 256,
             "height": 256
         },
-        "slug": "gossip"
+        "slug": "gossip",
+        "color": "0xFF3AB54A",
+        "textColor": "0xFFFFFFFF"
     }
 ]

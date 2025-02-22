@@ -262,7 +262,6 @@ class DrawerMenuController extends GetxController {
     final categoryManager = CategoryManager();
     for (var categoryId in sidebarCategoryIds) {
       final category = categoryManager.getCategory(categoryId);
-      l.d('Category $categoryId: $category');
       if (category != null) {
         categoryItems.add(MenuItem(
           icon: _getCategoryIcon(category.name),
@@ -272,8 +271,6 @@ class DrawerMenuController extends GetxController {
         ));
       }
     }
-
-    l.d('Final category items: $categoryItems');
   }
 
   void _loadTags() {

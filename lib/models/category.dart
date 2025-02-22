@@ -26,7 +26,7 @@ class Category {
   final CategoryLogoDark? logoDark;
   @JsonKey(name: 'english_name')
   final String? englishName;
-
+  final String? slug;
 
   Category({
     required this.id,
@@ -41,6 +41,7 @@ class Category {
     this.logo,
     this.logoDark,
     this.englishName,
+    this.slug,
   });
 
   factory Category.fromJson(Map<String, dynamic> json) => _$CategoryFromJson(json);

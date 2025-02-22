@@ -25,6 +25,7 @@ Category _$CategoryFromJson(Map<String, dynamic> json) => Category(
           : CategoryLogoDark.fromJson(
               json['uploaded_logo_dark'] as Map<String, dynamic>),
       englishName: json['english_name'] as String?,
+      slug: json['slug'] as String?,
     );
 
 Map<String, dynamic> _$CategoryToJson(Category instance) => <String, dynamic>{
@@ -40,6 +41,7 @@ Map<String, dynamic> _$CategoryToJson(Category instance) => <String, dynamic>{
       'uploaded_logo': instance.logo,
       'uploaded_logo_dark': instance.logoDark,
       'english_name': instance.englishName,
+      'slug': instance.slug,
     };
 
 CategoryLogo _$CategoryLogoFromJson(Map<String, dynamic> json) => CategoryLogo(

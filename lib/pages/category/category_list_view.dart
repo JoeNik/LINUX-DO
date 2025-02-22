@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/pages/category/category_list_controller.dart';
-import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/widgets/dis_refresh.dart';
 import 'package:linux_do/widgets/state_view.dart';
 import 'package:linux_do/widgets/topic_item.dart';
@@ -30,7 +27,6 @@ class CategoryListView extends GetView<CategoryListController> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final topic = controller.topics[index];
-                    l.d('topic: ${json.encode(topic)}');
                     return TopicItem(
                       topic: topic,
                       avatarUrl: controller.getLatestPosterAvatar(topic),

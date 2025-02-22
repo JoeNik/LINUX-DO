@@ -16,6 +16,7 @@ class CategoryListController extends BaseController {
   final RxList<Topic> topics = <Topic>[].obs;
   final refreshController = RefreshController();
   final _userCache = UserCache();
+  int? page;
 
   @override
   void onInit() {
@@ -47,7 +48,7 @@ class CategoryListController extends BaseController {
       isLoading.value = true;
       hasError.value = false;
       errorMessage.value = '';
-
+      page = 1;
       final TopicListResponse result;
       if (tag != null) {
         result = await _apiService.getTopicsByTag(tag!);
@@ -70,7 +71,7 @@ class CategoryListController extends BaseController {
 
   Future<void> onRefresh() async {
     try {
-
+      page = null;
       final TopicListResponse result;
       if (tag != null) {
         result = await _apiService.getTopicsByTag(tag!);
@@ -90,11 +91,12 @@ class CategoryListController extends BaseController {
 
   Future<void> loadMore() async {
     try {
+      page = page! + 1;
       final TopicListResponse result;
       if (tag != null) {
-        result = await _apiService.getTopicsByTag(tag!);
+        result = await _apiService.getTopicsByTag(tag!, page: page);
       } else {
-        result = await _apiService.getCategoriesTopics(categoryId!);
+        result = await _apiService.getCategoriesTopics(categoryId!, page: page);
       }
       _userCache.updateUsers(result.users);
       if (result.topicList?.topics == null || result.topicList!.topics.isEmpty) {

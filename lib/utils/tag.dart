@@ -101,6 +101,9 @@ class CategoryManager {
           englishName: item['english_name'],
           logo: CategoryLogo.fromJson(item['uploaded_logo']),
           logoDark: CategoryLogoDark.fromJson(item['uploaded_logo_dark']),
+          slug: item['slug'],
+          color: item['color'],
+          textColor: item['textColor'],
         );
         _categories[category.id] = category;
       }

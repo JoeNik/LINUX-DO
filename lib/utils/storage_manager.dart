@@ -88,17 +88,4 @@ class StorageManager {
   static bool? containsKey(String key) {
     return prefs.containsKey(key);
   }
-
-  // 获取代理服务器地址
-  static String? getProxyServer() {
-    return prefs.getString('proxy_server');
-  }
-
-  // 设置代理服务器地址
-  static Future<bool> setProxyServer(String? server) {
-    if (server == null || server.isEmpty) {
-      return prefs.remove('proxy_server');
-    }
-    return prefs.setString('proxy_server', server);
-  }
 }

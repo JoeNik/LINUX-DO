@@ -77,13 +77,6 @@ class HttpClient {
       receiveDataWhenStatusError: true,
     );
 
-    // 设置代理服务器
-    final proxyServer = StorageManager.getProxyServer();
-    if (proxyServer != null && proxyServer.isNotEmpty) {
-      l.d('使用代理服务器: $proxyServer');
-      _options.baseUrl = proxyServer;
-    }
-
     _dio = Dio(_options);
   }
 

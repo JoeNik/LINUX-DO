@@ -22,7 +22,7 @@ jobs:
       - name: Set up Flutter
         uses: flutter-actions/setup-flutter@v2
         with:
-          flutter-version: '3.x' # 指定 Flutter 版本范围
+          flutter-version: '3.0.1' # 指定 Flutter 版本范围
 
       - name: Flutter Doctor
         run: flutter doctor -v

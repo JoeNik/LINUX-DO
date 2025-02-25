@@ -29,61 +29,61 @@ jobs:
           sed -i 's/targetSdkVersion .*/targetSdkVersion 33/' android/app/build.gradle
       - name: Get dependencies
         run: flutter pub get
-      - name: Fix image_gallery_saver namespace
+      - name: Find and fix image_gallery_saver
         run: |
-          # 查找image_gallery_saver插件的位置
-          PLUGIN_PATH=$(find $HOME/.pub-cache -path "*/image_gallery_saver-*/android" -type d | head -n 1)
-          if [ -z "$PLUGIN_PATH" ]; then
-            echo "未找到image_gallery_saver插件目录，尝试备用路径..."
-            PLUGIN_PATH=$(find $HOME/.pub-cache -path "*/pub.dev/image_gallery_saver-*/android" -type d | head -n 1)
-            if [ -z "$PLUGIN_PATH" ]; then
-              PLUGIN_PATH=$(find $HOME/.pub-cache -path "*/pub.dartlang.org/image_gallery_saver-*/android" -type d | head -n 1)
+          echo "正在查找image_gallery_saver插件..."
+          # 列出pub缓存目录
+          ls -la $HOME/.pub-cache/hosted/ || echo "Hosted目录不存在"
+          
+          # 创建修复脚本
+          cat > fix_namespace.sh << 'EOF'
+          #!/bin/bash
+          for DIR in $(find $HOME/.pub-cache -type d -name "image_gallery_saver-*" 2>/dev/null); do
+            echo "检查目录: $DIR"
+            BUILD_GRADLE="$DIR/android/build.gradle"
+            if [ -f "$BUILD_GRADLE" ]; then
+              echo "找到构建文件: $BUILD_GRADLE"
+              if ! grep -q "namespace" "$BUILD_GRADLE"; then
+                echo "添加namespace到: $BUILD_GRADLE"
+                sed -i '/android {/a \\    namespace "com.example.image_gallery_saver"' "$BUILD_GRADLE"
+                echo "修复完成!"
+              else
+                echo "已存在namespace配置，无需修改"
+              fi
             fi
-          fi
+          done
+          EOF
           
-          if [ -z "$PLUGIN_PATH" ]; then
-            echo "无法找到image_gallery_saver插件目录!"
-            exit 1
-          fi
+          # 赋予执行权限
+          chmod +x fix_namespace.sh
           
-          echo "找到image_gallery_saver插件目录: $PLUGIN_PATH"
+          # 执行修复脚本
+          ./fix_namespace.sh
           
-          # 查找build.gradle文件
-          BUILD_GRADLE="$PLUGIN_PATH/build.gradle"
-          if [ ! -f "$BUILD_GRADLE" ]; then
-            echo "构建文件不存在: $BUILD_GRADLE"
-            exit 1
-          fi
-          
-          echo "找到构建文件: $BUILD_GRADLE"
-          
-          # 检查文件是否已包含namespace
-          if grep -q "namespace" "$BUILD_GRADLE"; then
-            echo "构建文件已包含namespace配置，无需修改"
-          else
-            echo "添加namespace配置到构建文件"
-            # 在android块中添加namespace配置
-            if grep -q "android {" "$BUILD_GRADLE"; then
-              # 在android {之后插入namespace行
-              sed -i '/android {/a \    namespace "com.example.image_gallery_saver"' "$BUILD_GRADLE"
-            else
-              # 如果没有android块，添加完整的android块
-              echo "
-          android {
-              namespace \"com.example.image_gallery_saver\"
-              compileSdkVersion 33
-          }" >> "$BUILD_GRADLE"
-                      fi
-                    fi
-                    
-                    echo "修改后的build.gradle内容:"
-                    cat "$BUILD_GRADLE"
-                - name: Run code generation
-                  run: flutter pub run build_runner build --delete-conflicting-outputs
-                - name: Build APK
-                  run: flutter build apk --release --split-per-abi
-                - name: Upload APK
-                  uses: actions/upload-artifact@v4
-                  with:
-                    name: app-apk
-                    path: build/app/outputs/apk/release/*
+          # 直接修改所有可能的目录
+          echo "尝试直接修改可能的路径..."
+          for PROVIDER in pub.dev pub.dartlang.org; do
+            DIR="$HOME/.pub-cache/hosted/$PROVIDER"
+            if [ -d "$DIR" ]; then
+              echo "检查提供商: $PROVIDER"
+              for PLUGIN in $(find "$DIR" -type d -name "image_gallery_saver-*" 2>/dev/null); do
+                BUILD_GRADLE="$PLUGIN/android/build.gradle"
+                if [ -f "$BUILD_GRADLE" ]; then
+                  echo "尝试修复: $BUILD_GRADLE"
+                  if ! grep -q "namespace" "$BUILD_GRADLE"; then
+                    echo "添加namespace到文件末尾"
+                    echo 'android { namespace "com.example.image_gallery_saver" }' >> "$BUILD_GRADLE"
+                  fi
+                fi
+              done
+            fi
+          done
+      - name: Run code generation
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-apk
+          path: build/app/outputs/apk/release/*

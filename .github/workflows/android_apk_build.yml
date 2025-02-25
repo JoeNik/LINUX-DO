@@ -36,15 +36,14 @@ jobs:
           sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle
           sed -i 's/targetSdkVersion .*/targetSdkVersion 33/' android/app/build.gradle
 
-      - name: Patch image_gallery_saver build.gradle
-        run: |
-          mkdir -p ~/.gradle/caches/modules-2/files-2.1/com.github.image_gallery_saver/image_gallery_saver
-          echo "android { namespace 'com.example.image_gallery_saver' }" > temp.gradle
-          find ~/.pub-cache/hosted/pub.dev -name "build.gradle" -path "*/image_gallery_saver/android/*" -exec sh -c "cat temp.gradle >> {}" \;
-          rm temp.gradle
-
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Patch image_gallery_saver build.gradle
+        run: |
+          echo "android { namespace 'com.example.image_gallery_saver' }" > temp.gradle
+          find "$HOME/.pub-cache/hosted/pub.dartlang.org" -name "build.gradle" -path "*/image_gallery_saver/android/*" -exec sh -c "cat temp.gradle >> {}" \;
+          rm temp.gradle
 
       - name: Run code generation
         run: flutter pub run build_runner build --delete-conflicting-outputs

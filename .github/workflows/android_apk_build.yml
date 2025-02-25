@@ -39,10 +39,19 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Debug pub cache location
+        run: |
+          echo "PUB_CACHE: $PUB_CACHE"
+          echo "HOME: $HOME"
+          ls -la $HOME/.pub-cache || echo "Default pub cache not found"
+          ls -la $PUB_CACHE || echo "PUB_CACHE not set or empty"
+
       - name: Patch image_gallery_saver build.gradle
         run: |
+          PUB_CACHE_DIR=${PUB_CACHE:-"$HOME/.pub-cache"}
+          echo "Using PUB_CACHE_DIR: $PUB_CACHE_DIR"
           echo "android { namespace 'com.example.image_gallery_saver' }" > temp.gradle
-          find "$HOME/.pub-cache/hosted/pub.dartlang.org" -name "build.gradle" -path "*/image_gallery_saver/android/*" -exec sh -c "cat temp.gradle >> {}" \;
+          find "$PUB_CACHE_DIR/hosted/pub.dartlang.org" -name "build.gradle" -path "*/image_gallery_saver/android/*" -exec sh -c "cat temp.gradle >> {}" \; || echo "Failed to find image_gallery_saver build.gradle"
           rm temp.gradle
 
       - name: Run code generation

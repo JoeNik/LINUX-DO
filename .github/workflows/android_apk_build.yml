@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: Ubuntu-22.04
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Check out code
@@ -19,8 +19,11 @@ jobs:
           channel: stable
           flutter-version: '3.27.2'
 
+      - name: Accept Android SDK licenses
+        run: flutter doctor --android-licenses -v
+
       - name: Install Android platform 33
-        run: yes | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-33"
+        run: flutter config --android-sdk $ANDROID_HOME && yes | flutter doctor --android-licenses && $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-33"
 
       - name: Configure build.gradle
         run: |
@@ -40,4 +43,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-apk
-          path: build/app/outputs/release/*
+          path: build/app/outputs/apk/release/*

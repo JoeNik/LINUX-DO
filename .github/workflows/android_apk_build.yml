@@ -27,22 +27,30 @@ jobs:
       - name: Flutter Doctor
         run: flutter doctor -v
 
-      - name: Install Android SDK
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y android-sdk
+      - name: Install and Configure Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          jdkRoot: /usr/lib/jvm/java-11-openjdk-amd64 # JDK 根目录
+          sdkCommandToolsVersion: "latest"
+          # 明确指定需要的组件，避免缺少
+          components: |
+            platforms;android-31
+            build-tools;31.0.0
+            cmdline-tools;latest
 
-      - name: Set up Android SDK environment
+      - name: Set up local.properties
         run: |
-          echo "sdk.dir=${ANDROID_SDK_ROOT}" > local.properties
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
           echo 'flutter.sdk=/opt/flutter' >> local.properties
-          echo yes | sdkmanager --licenses || true
 
-          # 使用 bash 的 profile 文件设置环境变量
-          echo 'export ANDROID_HOME=$ANDROID_SDK_ROOT' >> ~/.bash_profile
-          echo 'export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$ANDROID_SDK_ROOT/tools"' >> ~/.bash_profile
-          source ~/.bash_profile # 激活 profile 文件
+      - name: Get dependencies
+        run: flutter pub get
 
-          # 安装 Android SDK platform 31 和 build-tools 31.0.0
-          sdkmanager "platforms;android-31"
-          sdkmanager "build-tools;31.0.0"
+      - name: Build APK
+        run: flutter build apk --split-per-abi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/apk/release/

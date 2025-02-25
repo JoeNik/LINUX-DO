@@ -1,53 +1,43 @@
-name: Build Android APK (Forked Project)
+name: Build Android
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: Ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out code
+        uses: actions/checkout@v4
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          java-version: '11'
-          distribution: 'temurin'
+          channel: stable
+          flutter-version: '3.27.2'
 
-      - name: Install and Configure Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          jdkRoot: /usr/lib/jvm/java-11-openjdk-amd64
-          sdkCommandToolsVersion: "latest" # 或者指定一个特定版本，如 "7.0"
-          components: |
-            platforms;android-31
-            build-tools;31.0.0
-            cmdline-tools;latest
-        env:
-          SKIP_JDK_VERSION_CHECK: true  # 添加此环境变量
+      - name: Install Android platform 33
+        run: yes | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-33"
 
-      - name: Accept Android SDK Licenses
+      - name: Configure build.gradle
         run: |
-          echo yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-
-      - name: Set up local.properties
-        run: |
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
-          echo 'flutter.sdk=/opt/flutter' >> local.properties
+          sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle
+          sed -i 's/targetSdkVersion .*/targetSdkVersion 33/' android/app/build.gradle
 
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Run code generation
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
       - name: Build APK
-        run: flutter build apk --split-per-abi
+        run: flutter build apk --release --split-per-abi
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: app-release-apk
-          path: build/app/outputs/apk/release/
+          name: app-apk
+          path: build/app/outputs/release/*

@@ -2,13 +2,13 @@ name: Build Android APK (Forked Project)
 
 on:
   push:
-    branches: [ "main" ] # 或者你想要触发构建的分支名称
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest # 或者选择其他 Linux runner
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
@@ -22,21 +22,21 @@ jobs:
       - name: Set up Flutter
         uses: flutter-actions/setup-flutter@v2
         with:
-          flutter-version: '3.0.1' # 指定 Flutter 版本范围
-
-      - name: Flutter Doctor
-        run: flutter doctor -v
+          flutter-version: '3.27.2'
 
       - name: Install and Configure Android SDK
         uses: android-actions/setup-android@v3
         with:
-          jdkRoot: /usr/lib/jvm/java-11-openjdk-amd64 # JDK 根目录
-          sdkCommandToolsVersion: "latest"
-          # 明确指定需要的组件，避免缺少
+          jdkRoot: /usr/lib/jvm/java-11-openjdk-amd64
+          sdkCommandToolsVersion: "7.0" # 尝试指定的版本
           components: |
             platforms;android-31
             build-tools;31.0.0
             cmdline-tools;latest
+
+      - name: Accept Android SDK Licenses
+        run: |
+          echo yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
 
       - name: Set up local.properties
         run: |

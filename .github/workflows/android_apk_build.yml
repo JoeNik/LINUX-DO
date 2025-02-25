@@ -1,67 +1,89 @@
 name: Build Android
-
 on:
   push:
     branches:
       - main
-
 jobs:
   build:
     runs-on: ubuntu-22.04
-
     steps:
       - name: Check out code
         uses: actions/checkout@v4
-
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: '3.27.2'
-
       - name: Accept Android SDK licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-
       - name: Install Android platform 33
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-33"
-
       - name: Configure build.gradle for app
         run: |
           sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle
           sed -i 's/targetSdkVersion .*/targetSdkVersion 33/' android/app/build.gradle
-
       - name: Get dependencies
         run: flutter pub get
-
-      - name: Debug pub cache location
+      - name: Fix image_gallery_saver namespace
         run: |
-          echo "PUB_CACHE: $PUB_CACHE"
-          echo "HOME: $HOME"
-          ls -la $HOME/.pub-cache || echo "Default pub cache not found"
-          ls -la $PUB_CACHE || echo "PUB_CACHE not set or empty"
-
-      - name: Patch image_gallery_saver build.gradle
-        run: |
-          PUB_CACHE_DIR=${PUB_CACHE:-"$HOME/.pub-cache"}
-          echo "Using PUB_CACHE_DIR: $PUB_CACHE_DIR"
-          echo "android { namespace 'com.example.image_gallery_saver' }" > temp.gradle
-          find "$PUB_CACHE_DIR/hosted/pub.dartlang.org" -name "build.gradle" -path "*/image_gallery_saver/android/*" -exec sh -c "cat temp.gradle >> {}" \; || echo "Failed to find image_gallery_saver build.gradle"
-          rm temp.gradle
-
-      - name: Run code generation
-        run: flutter pub run build_runner build --delete-conflicting-outputs
-
-      - name: Build APK
-        run: flutter build apk --release --split-per-abi
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-apk
-          path: build/app/outputs/apk/release/*
+          # 查找image_gallery_saver插件的位置
+          PLUGIN_PATH=$(find $HOME/.pub-cache -path "*/image_gallery_saver-*/android" -type d | head -n 1)
+          if [ -z "$PLUGIN_PATH" ]; then
+            echo "未找到image_gallery_saver插件目录，尝试备用路径..."
+            PLUGIN_PATH=$(find $HOME/.pub-cache -path "*/pub.dev/image_gallery_saver-*/android" -type d | head -n 1)
+            if [ -z "$PLUGIN_PATH" ]; then
+              PLUGIN_PATH=$(find $HOME/.pub-cache -path "*/pub.dartlang.org/image_gallery_saver-*/android" -type d | head -n 1)
+            fi
+          fi
+          
+          if [ -z "$PLUGIN_PATH" ]; then
+            echo "无法找到image_gallery_saver插件目录!"
+            exit 1
+          fi
+          
+          echo "找到image_gallery_saver插件目录: $PLUGIN_PATH"
+          
+          # 查找build.gradle文件
+          BUILD_GRADLE="$PLUGIN_PATH/build.gradle"
+          if [ ! -f "$BUILD_GRADLE" ]; then
+            echo "构建文件不存在: $BUILD_GRADLE"
+            exit 1
+          fi
+          
+          echo "找到构建文件: $BUILD_GRADLE"
+          
+          # 检查文件是否已包含namespace
+          if grep -q "namespace" "$BUILD_GRADLE"; then
+            echo "构建文件已包含namespace配置，无需修改"
+          else
+            echo "添加namespace配置到构建文件"
+            # 在android块中添加namespace配置
+            if grep -q "android {" "$BUILD_GRADLE"; then
+              # 在android {之后插入namespace行
+              sed -i '/android {/a \    namespace "com.example.image_gallery_saver"' "$BUILD_GRADLE"
+            else
+              # 如果没有android块，添加完整的android块
+              echo "
+          android {
+              namespace \"com.example.image_gallery_saver\"
+              compileSdkVersion 33
+          }" >> "$BUILD_GRADLE"
+                      fi
+                    fi
+                    
+                    echo "修改后的build.gradle内容:"
+                    cat "$BUILD_GRADLE"
+                - name: Run code generation
+                  run: flutter pub run build_runner build --delete-conflicting-outputs
+                - name: Build APK
+                  run: flutter build apk --release --split-per-abi
+                - name: Upload APK
+                  uses: actions/upload-artifact@v4
+                  with:
+                    name: app-apk
+                    path: build/app/outputs/apk/release/*

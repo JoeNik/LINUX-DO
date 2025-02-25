@@ -34,7 +34,7 @@ jobs:
           cat > fix_plugin.sh << 'EOF'
           #!/bin/bash
           
-          PLUGIN_DIR="$HOME/.pub-cache/hosted/pub.dev/image_gallery_saver-2.0.3"
+          PLUGIN_DIR="$HOME/.pub-cache/hosted/pub.dev/image_gallery_saver-2.0.4"
           MANIFEST_FILE="$PLUGIN_DIR/android/src/main/AndroidManifest.xml"
           BUILD_GRADLE="$PLUGIN_DIR/android/build.gradle"
           

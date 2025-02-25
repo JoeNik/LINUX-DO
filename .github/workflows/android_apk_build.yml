@@ -29,75 +29,75 @@ jobs:
           sed -i 's/targetSdkVersion .*/targetSdkVersion 33/' android/app/build.gradle
       - name: Get dependencies
         run: flutter pub get
-      - name: Fix image_gallery_saver namespace issue
+      - name: Create fix script
         run: |
-          # 找到image_gallery_saver目录
-          PLUGIN_DIR="$HOME/.pub-cache/hosted/pub.dev/image_gallery_saver-2.0.3"
-          echo "插件目录: $PLUGIN_DIR"
+          cat > fix_plugin.sh << 'EOF'
+          #!/bin/bash
           
-          # 确认文件存在
+          PLUGIN_DIR="$HOME/.pub-cache/hosted/pub.dev/image_gallery_saver-2.0.3"
           MANIFEST_FILE="$PLUGIN_DIR/android/src/main/AndroidManifest.xml"
           BUILD_GRADLE="$PLUGIN_DIR/android/build.gradle"
           
+          echo "检查文件..."
           if [ ! -f "$MANIFEST_FILE" ]; then
-            echo "错误: AndroidManifest.xml 文件不存在!"
+            echo "未找到 AndroidManifest.xml"
+            find $HOME/.pub-cache -name "AndroidManifest.xml" | grep image_gallery_saver
             exit 1
           fi
           
           if [ ! -f "$BUILD_GRADLE" ]; then
-            echo "错误: build.gradle 文件不存在!"
+            echo "未找到 build.gradle"
+            find $HOME/.pub-cache -name "build.gradle" | grep image_gallery_saver
             exit 1
           fi
           
-          echo "找到AndroidManifest.xml: $MANIFEST_FILE"
-          echo "找到build.gradle: $BUILD_GRADLE"
-          
-          # 备份原始文件
+          echo "备份文件..."
           cp "$MANIFEST_FILE" "${MANIFEST_FILE}.bak"
           cp "$BUILD_GRADLE" "${BUILD_GRADLE}.bak"
           
-          # 从AndroidManifest.xml中提取package值，以防万一
-          PACKAGE_VALUE=$(grep -o 'package="[^"]*"' "$MANIFEST_FILE" | cut -d'"' -f2)
-          echo "提取的package值: $PACKAGE_VALUE"
-          
-          # 如果提取失败，使用错误消息中显示的值
-          if [ -z "$PACKAGE_VALUE" ]; then
-            PACKAGE_VALUE="com.example.imagegallerysaver"
-            echo "使用默认package值: $PACKAGE_VALUE"
-          fi
-          
-          # 从AndroidManifest.xml中移除package属性
-          echo "从AndroidManifest.xml中移除package属性..."
+          echo "修改AndroidManifest.xml..."
           sed -i 's/package="[^"]*"//g' "$MANIFEST_FILE"
           
-          # 在build.gradle中添加namespace
-          echo "在build.gradle中添加namespace..."
-          if grep -q "namespace" "$BUILD_GRADLE"; then
-            echo "build.gradle已包含namespace配置，更新其值..."
-            sed -i "s/namespace .*$/namespace \"$PACKAGE_VALUE\"/" "$BUILD_GRADLE"
-          elif grep -q "android {" "$BUILD_GRADLE"; then
-            echo "在android块中添加namespace..."
-            sed -i "/android {/a \\    namespace \"$PACKAGE_VALUE\"" "$BUILD_GRADLE"
+          echo "修改build.gradle..."
+          if grep -q "android {" "$BUILD_GRADLE"; then
+            # 检查是否已有namespace
+            if grep -q "namespace" "$BUILD_GRADLE"; then
+              echo "已存在namespace，无需修改"
+            else
+              # 在android {之后添加namespace行
+              echo "添加namespace到android块..."
+              # 创建一个临时文件
+              TEMP_FILE="${BUILD_GRADLE}.temp"
+              # 用awk添加namespace行
+              awk '/android {/ {print $0; print "    namespace \"com.example.imagegallerysaver\""; next} {print}' "$BUILD_GRADLE" > "$TEMP_FILE"
+              # 替换原文件
+              mv "$TEMP_FILE" "$BUILD_GRADLE"
+            fi
           else
-            echo "添加完整的android块到build.gradle..."
-            echo "
-          android {
-              namespace \"$PACKAGE_VALUE\"
-              compileSdkVersion 33
-          }" >> "$BUILD_GRADLE"
-                    fi
-                    
-                    echo "修改后的AndroidManifest.xml内容:"
-                    cat "$MANIFEST_FILE"
-                    
-                    echo "修改后的build.gradle内容:"
-                    cat "$BUILD_GRADLE"
-                - name: Run code generation
-                  run: flutter pub run build_runner build --delete-conflicting-outputs
-                - name: Build APK
-                  run: flutter build apk --release --split-per-abi
-                - name: Upload APK
-                  uses: actions/upload-artifact@v4
-                  with:
-                    name: app-apk
-                    path: build/app/outputs/apk/release/*
+            # 如果没有android块，添加完整块
+            echo "添加完整android块..."
+            echo "android {" >> "$BUILD_GRADLE"
+            echo "    namespace \"com.example.imagegallerysaver\"" >> "$BUILD_GRADLE"
+            echo "    compileSdkVersion 33" >> "$BUILD_GRADLE"
+            echo "}" >> "$BUILD_GRADLE"
+          fi
+          
+          echo "修改完成!"
+          echo "AndroidManifest.xml内容:"
+          cat "$MANIFEST_FILE"
+          echo "build.gradle内容:"
+          cat "$BUILD_GRADLE"
+          EOF
+          
+          chmod +x fix_plugin.sh
+      - name: Fix image_gallery_saver
+        run: ./fix_plugin.sh
+      - name: Run code generation
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-apk
+          path: build/app/outputs/apk/release/*

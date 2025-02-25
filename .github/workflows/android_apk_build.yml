@@ -82,6 +82,46 @@ jobs:
             echo "}" >> "$BUILD_GRADLE"
           fi
           
+          # 统一Java和Kotlin编译目标
+          echo "统一Java和Kotlin编译目标..."
+          
+          # 检查Kotlin插件是否应用
+          if grep -q "kotlin-android" "$BUILD_GRADLE"; then
+            echo "Kotlin插件已应用，添加kotlinOptions配置..."
+            # 添加或更新kotlinOptions
+            if grep -q "kotlinOptions" "$BUILD_GRADLE"; then
+              # 已有kotlinOptions块，更新jvmTarget
+              sed -i '/kotlinOptions {/,/}/{s/jvmTarget.*/jvmTarget = "1.8"/g}' "$BUILD_GRADLE"
+              if ! grep -q "jvmTarget" "$BUILD_GRADLE"; then
+                # 如果kotlinOptions块中没有jvmTarget，添加它
+                sed -i '/kotlinOptions {/a \        jvmTarget = "1.8"' "$BUILD_GRADLE"
+              fi
+            else
+              # 没有kotlinOptions块，添加完整块
+              if grep -q "android {" "$BUILD_GRADLE"; then
+                # 在android块末尾添加kotlinOptions
+                TEMP_FILE="${BUILD_GRADLE}.temp"
+                awk '/android {/{flag=1} flag && /}/{print $0; print "    kotlinOptions {"; print "        jvmTarget = \"1.8\""; print "    }"; flag=0; next} {print}' "$BUILD_GRADLE" > "$TEMP_FILE"
+                mv "$TEMP_FILE" "$BUILD_GRADLE"
+              fi
+            fi
+          fi
+          
+          # 确保Java编译目标也是1.8
+          if ! grep -q "compileOptions" "$BUILD_GRADLE"; then
+            # 如果没有compileOptions块，添加它
+            if grep -q "android {" "$BUILD_GRADLE"; then
+              # 在android块末尾添加compileOptions
+              TEMP_FILE="${BUILD_GRADLE}.temp"
+              awk '/android {/{flag=1} flag && /}/{print $0; print "    compileOptions {"; print "        sourceCompatibility JavaVersion.VERSION_1_8"; print "        targetCompatibility JavaVersion.VERSION_1_8"; print "    }"; flag=0; next} {print}' "$BUILD_GRADLE" > "$TEMP_FILE"
+              mv "$TEMP_FILE" "$BUILD_GRADLE"
+            fi
+          else
+            # 如果有compileOptions块，确保设置正确
+            sed -i '/compileOptions {/,/}/{s/sourceCompatibility.*/sourceCompatibility JavaVersion.VERSION_1_8/g}' "$BUILD_GRADLE"
+            sed -i '/compileOptions {/,/}/{s/targetCompatibility.*/targetCompatibility JavaVersion.VERSION_1_8/g}' "$BUILD_GRADLE"
+          fi
+          
           echo "修改完成!"
           echo "AndroidManifest.xml内容:"
           cat "$MANIFEST_FILE"

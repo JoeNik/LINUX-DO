@@ -81,23 +81,23 @@ jobs:
           else
             echo "添加完整的android块到build.gradle..."
             echo "
-android {
-    namespace \"$PACKAGE_VALUE\"
-    compileSdkVersion 33
-}" >> "$BUILD_GRADLE"
-          fi
-          
-          echo "修改后的AndroidManifest.xml内容:"
-          cat "$MANIFEST_FILE"
-          
-          echo "修改后的build.gradle内容:"
-          cat "$BUILD_GRADLE"
-      - name: Run code generation
-        run: flutter pub run build_runner build --delete-conflicting-outputs
-      - name: Build APK
-        run: flutter build apk --release --split-per-abi
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-apk
-          path: build/app/outputs/apk/release/*
+          android {
+              namespace \"$PACKAGE_VALUE\"
+              compileSdkVersion 33
+          }" >> "$BUILD_GRADLE"
+                    fi
+                    
+                    echo "修改后的AndroidManifest.xml内容:"
+                    cat "$MANIFEST_FILE"
+                    
+                    echo "修改后的build.gradle内容:"
+                    cat "$BUILD_GRADLE"
+                - name: Run code generation
+                  run: flutter pub run build_runner build --delete-conflicting-outputs
+                - name: Build APK
+                  run: flutter build apk --release --split-per-abi
+                - name: Upload APK
+                  uses: actions/upload-artifact@v4
+                  with:
+                    name: app-apk
+                    path: build/app/outputs/apk/release/*

@@ -64,7 +64,7 @@ class HomePage extends GetView<HomeController> {
                 controller.badgeCount,
                 style: TabStyle.fixed,
                 backgroundColor:
-                    Theme.of(context).canvasColor,
+                    Theme.of(context).cardColor,
                 color: Theme.of(context)
                     .bottomNavigationBarTheme
                     .unselectedItemColor,
@@ -74,8 +74,8 @@ class HomePage extends GetView<HomeController> {
                 height: 50.w,
                 curveSize: 60.w,
                 top: -20.w,
-                elevation: 0.5,
-                cornerRadius: 20.w,
+                elevation: 9.0,
+                cornerRadius: 9.w,
                 badgeMargin: EdgeInsets.only(left: 20.w, bottom: 18.w),
                 items: [
                   _buildTabItem(CupertinoIcons.square_list_fill, '帖子', context),

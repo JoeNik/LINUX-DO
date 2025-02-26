@@ -57,4 +57,7 @@ abstract class Routes {
 
   // 分类列表
   static const CATEGORY = '/category';
+
+  // 个人主页(TA)
+  static const PERSONAL = '/personal';
 }

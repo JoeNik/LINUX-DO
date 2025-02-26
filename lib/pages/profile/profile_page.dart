@@ -14,7 +14,6 @@ import '../../controller/global_controller.dart';
 import '../../models/user.dart';
 import '../../utils/mixins/toast_mixin.dart';
 import '../../widgets/dis_button.dart';
-import '../../widgets/sticky_tab_delegate.dart';
 import '../../widgets/switch.dart';
 import 'profile_controller.dart';
 import '../../widgets/dis_loading.dart';

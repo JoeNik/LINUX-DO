@@ -157,456 +157,29 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
             // 表格样式
             "table": Style(
               width: Width(100, Unit.percent),
-              
             ),
             "th": Style(
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
               fontWeight: FontWeight.bold,
-              
             ),
             "td": Style(
               padding: HtmlPaddings.all(8.w),
-              
             ),
           },
           extensions: [
-            TagExtension(
-              tagsToExtend: {"div"},
-              builder: (extensionContext) {
-                if (extensionContext.element?.className == 'md-table') {
-                  final tableElement = extensionContext.element
-                      ?.getElementsByTagName('table')
-                      .firstOrNull;
-                  if (tableElement != null) {
-                    final tableHtml = tableElement.outerHtml;
-                    // 修复表格 HTML，移除嵌套的 p 标签和处理列表元素
-                    final fixedTableHtml = _fixTableHtml(tableHtml);
 
-                    // 使用特殊的表格渲染实现，完全避免与ItemPosition相关的错误
-                    return StatefulBuilder(
-                      builder: (context, setState) {
-                        // 使用StatefulBuilder但不保存状态，避免恢复滚动位置
-                        // 每次重建时创建新的ScrollController，避免恢复之前的滚动位置
-                        final horizontalScrollCtrl = ScrollController();
-                        final verticalScrollCtrl = ScrollController();
-                        return Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height * .7,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: theme.primaryColor),
-                            borderRadius: BorderRadius.circular(8.w),
-                          ),
-                          child: Column(
-                            children: [
-                              Expanded(
-                                child: NotificationListener<ScrollNotification>(
-                                  // 拦截滚动通知，避免触发滚动位置恢复
-                                  onNotification: (notification) => true,
-                                  child: SingleChildScrollView(
-                                    controller: horizontalScrollCtrl,
-                                    scrollDirection: Axis.horizontal,
-                                    physics: const ClampingScrollPhysics(),
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxWidth: MediaQuery.of(context).size.width * 2, 
-                                      ),
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.vertical,
-                                        physics: const ClampingScrollPhysics(),
-                                        controller: verticalScrollCtrl,
-                                        child: ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxHeight: MediaQuery.of(context).size.height * 2,
-                                          ),
-                                          child: Html(
-                                            data: fixedTableHtml,
-                                            style: {
-                                              "table": Style(
-                                                backgroundColor: theme.cardColor,
-                                              ),
-                                              "th": Style(
-                                                padding: HtmlPaddings.all(8.w),
-                                                backgroundColor:
-                                                    theme.colorScheme.surfaceContainerHighest,
-                                                fontWeight: FontWeight.bold,
-                                                
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              "td": Style(
-                                                padding: HtmlPaddings.all(8.w),
-                                                border: Border.all(
-                                                  color: theme.dividerColor,
-                                                  width: .5,
-                                                ),
-                                              ),
-                                            },
-                                            extensions: const [
-                                              TableHtmlExtension(),
-                                            ],
-                                            onLinkTap: (url, _, __) {
-                                              if (onLinkTap != null) {
-                                                onLinkTap!(url);
-                                              } else {
-                                                Get.toNamed(Routes.WEBVIEW, arguments: url);
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              // 添加横屏查看按钮
-                              const Divider(height: 1),
-                              SizedBox(
-                                height: 40.h,
-                                child: TextButton.icon(
-                                  onPressed: () => _showFullScreenDialog(context, fixedTableHtml),
-                                  icon: Icon(Icons.fullscreen, size: 18.w,color: theme.primaryColor,),
-                                  label: Text('预览',style: TextStyle(fontSize: 14.w,color: theme.primaryColor),),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  }
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-            TagExtension(
-              tagsToExtend: {"img"},
-              builder: (extensionContext) {
-                final src = extensionContext.attributes['src'];
-                if (src == null) return const SizedBox();
+            // 添加图片扩展
+            _imageExtension(context, theme),
 
-                // 优先使用自定义构建器
-                if (customWidgetBuilder != null &&
-                    extensionContext.element != null) {
-                  final widget = customWidgetBuilder!(extensionContext.element!);
-                  return widget;
-                }
+            // 添加div的扩展
+            _divExtension(context, theme),
 
-                // 检查是否是回复中用户头像
-                if (src.contains('user_avatar/linux.do') ||
-                    src.contains('/letter_avatar_proxy')) {
-                  return CachedImage(
-                    imageUrl: src,
-                    width: 32.w,
-                    height: 32.w,
-                    circle: true,
-                    showBorder: true,
-                    borderColor: Theme.of(context).primaryColor,
-                  );
-                }
-
-                // 检查是否是表情
-                final isEmoji = extensionContext.classes.contains('emoji');
-                final isEmojiPath = src.contains('/uploads/default/original') ||
-                    src.contains('/images/emoji/twitter/') ||
-                    src.contains('plugins/discourse-narrative-bot/images') ||
-                    src.contains('/images/emoji/apple/');
-
-                if (isEmoji || isEmojiPath) {
-                  return Image.network(
-                    src,
-                    width: 20.sp,
-                    height: 20.sp,
-                    fit: BoxFit.contain,
-                  );
-                }
-
-                // 获取原始图片URL用于预览
-                String previewUrl = src;
-                // if (previewUrl.contains('/optimized/')) {
-                //   previewUrl = previewUrl.replaceFirst('/optimized/', '/original/');
-                // }
-
-                return GestureDetector(
-                  onTap: () => showImagePreview(context, previewUrl),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.w),
-                      border: Border.all(
-                        color: theme.dividerColor,
-                        width: 1,
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.w),
-                      child: CachedImage(
-                        imageUrl: src,
-                        width: double.infinity,
-                        placeholder: Container(
-                          color: theme.colorScheme.surfaceContainerHighest,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.w,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                        ),
-                        errorWidget: Icon(
-                          Icons.broken_image_outlined,
-                          size: 40.w,
-                          color: theme.iconTheme.color?.withValues(alpha: .5),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            // 添加处理 lightbox-wrapper 的扩展
-            TagExtension(
-              tagsToExtend: {"div"},
-              builder: (extensionContext) {
-                // 如果是 lightbox-wrapper，只返回其中的图片内容
-                if (extensionContext.classes.contains('lightbox-wrapper')) {
-                  final imgElement = extensionContext.element
-                      ?.getElementsByTagName('img')
-                      .firstOrNull;
-                  if (imgElement != null) {
-                    final src = imgElement.attributes['src'];
-                    if (src != null) {
-                      // 获取原始图片URL用于预览
-                      String previewUrl = src;
-                      // 尝试从 lightbox 链接获取原始图片 URL
-                      final lightboxElement = extensionContext.element
-                          ?.getElementsByClassName('lightbox')
-                          .firstOrNull;
-                      final originalUrl = lightboxElement?.attributes['href'];
-                      if (originalUrl != null) {
-                        previewUrl = originalUrl;
-                      }
-
-                      return GestureDetector(
-                        onTap: () => showImagePreview(context, previewUrl),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8.w),
-                            border: Border.all(
-                              color: theme.dividerColor,
-                              width: 1,
-                            ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.w),
-                            child: CachedImage(
-                              imageUrl: src,
-                              width: double.infinity,
-                              placeholder: Container(
-                                color: theme.colorScheme.surfaceContainerHighest,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.w,
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
-                              ),
-                              errorWidget: Icon(
-                                Icons.broken_image_outlined,
-                                size: 40.w,
-                                color:
-                                    theme.iconTheme.color?.withValues(alpha: .5),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                  }
-                }
-                // 如果是 meta div，不显示
-                if (extensionContext.classes.contains('meta')) {
-                  return const SizedBox();
-                }
-                // 其他 div 正常显示
-                return const SizedBox.shrink();
-              },
-            ),
             // 添加处理 iframe 的扩展
-            TagExtension(
-              tagsToExtend: {"iframe"},
-              builder: (extensionContext) {
-                final src = extensionContext.attributes['src'];
-                if (src == null) return const SizedBox();
+            _iframeExtension(context),
 
-                // 处理 bilibili 视频
-                if (src.contains('player.bilibili.com')) {
-                  return Container(
-                    margin: EdgeInsets.symmetric(vertical: 8.h),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.w),
-                      border: Border.all(
-                        color: Theme.of(context).dividerColor,
-                        width: 1,
-                      ),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.w),
-                      child: AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: InAppWebView(
-                          initialUrlRequest: URLRequest(url: WebUri(src)),
-                          initialSettings: InAppWebViewSettings(
-                            mediaPlaybackRequiresUserGesture: false,
-                            allowsInlineMediaPlayback: true,
-                            iframeAllowFullscreen: true,
-                            javaScriptEnabled: true,
-                          ),
-                          onLoadStart: (controller, url) {
-                            controller.evaluateJavascript(source: '''
-                              document.body.style.margin = '0';
-                              document.body.style.padding = '0';
-                              document.body.style.backgroundColor = 'transparent';
-                            ''');
-                          },
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                // 处理其他视频源
-                return Container(
-                  margin: EdgeInsets.symmetric(vertical: 8.h),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.w),
-                    border: Border.all(
-                      color: Theme.of(context).dividerColor,
-                      width: 1,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.w),
-                    child: AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: InAppWebView(
-                        initialUrlRequest: URLRequest(url: WebUri(src)),
-                        initialSettings: InAppWebViewSettings(
-                          mediaPlaybackRequiresUserGesture: false,
-                          allowsInlineMediaPlayback: true,
-                          iframeAllowFullscreen: true,
-                          javaScriptEnabled: true,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
             // 添加代码块扩展
-            TagExtension(
-              tagsToExtend: {"pre"},
-              builder: (extensionContext) {
-                // 获取代码内容
-                final codeElement = extensionContext.element?.children.firstWhere(
-                  (element) => element.localName == 'code',
-                  orElse: () => dom.Element.tag('code'),
-                );
-                final code = codeElement?.text ?? '';
+            _codeExtension(context),
 
-                // 获取代码语言
-                final language = codeElement?.className.split('-').last;
-
-                return Stack(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(12.w),
-                      decoration: BoxDecoration(
-                        color:
-                            Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8.w),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (language != null && language != 'null') ...[
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 8.w, vertical: 4.w),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .primaryColor
-                                    .withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(4.w),
-                              ),
-                              child: Text(
-                                language,
-                                style: TextStyle(
-                                  fontSize: 12.w,
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                              ),
-                            ),
-                            8.vGap,
-                          ],
-                          Text.rich(
-                            TextSpan(
-                              text: code,
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontFamily: 'monospace',
-                                height: 1.5,
-                                color:
-                                    Theme.of(context).textTheme.bodyMedium?.color,
-                              ),
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ],
-                      ),
-                    ),
-                    // 全屏按钮
-                    Positioned(
-                      top: 8.w,
-                      right: 8.w,
-                      child: Row(
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              Clipboard.setData(ClipboardData(text: code));
-                              showSuccess('代码已复制到剪贴板');
-                            },
-                            icon: Icon(
-                              CupertinoIcons.doc_on_doc,
-                              size: 18.w,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(
-                              minWidth: 32.w,
-                              minHeight: 32.w,
-                            ),
-                            splashRadius: 20.w,
-                          ),
-                          IconButton(
-                            onPressed: () => showCodePreview(context, code,
-                                language: language),
-                            icon: Icon(
-                              CupertinoIcons.fullscreen,
-                              size: 18.w,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(
-                              minWidth: 32.w,
-                              minHeight: 32.w,
-                            ),
-                            splashRadius: 20.w,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
             const TableHtmlExtension()
           ],
           onLinkTap: (url, _, __) {
@@ -618,6 +191,462 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
           },
         ),
       ),
+    );
+  }
+
+  TagExtension _divExtension(BuildContext context, ThemeData theme) {
+    return TagExtension(
+            tagsToExtend: {"div"},
+            builder: (extensionContext) {
+              // 如果是 lightbox-wrapper，只返回其中的图片内容
+              if (extensionContext.classes.contains('lightbox-wrapper')) {
+                final imgElement = extensionContext.element
+                    ?.getElementsByTagName('img')
+                    .firstOrNull;
+                if (imgElement != null) {
+                  final src = imgElement.attributes['src'];
+                  if (src != null) {
+                    // 获取原始图片URL用于预览
+                    String previewUrl = src;
+                    // 尝试从 lightbox 链接获取原始图片 URL
+                    final lightboxElement = extensionContext.element
+                        ?.getElementsByClassName('lightbox')
+                        .firstOrNull;
+                    final originalUrl = lightboxElement?.attributes['href'];
+                    if (originalUrl != null) {
+                      previewUrl = originalUrl;
+                    }
+
+                    return GestureDetector(
+                      onTap: () => showImagePreview(context, previewUrl),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8.w),
+                          border: Border.all(
+                            color: theme.dividerColor,
+                            width: 1,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.w),
+                          child: CachedImage(
+                            imageUrl: src,
+                            width: double.infinity,
+                            placeholder: Container(
+                              color:
+                                  theme.colorScheme.surfaceContainerHighest,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.w,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                            errorWidget: Icon(
+                              Icons.broken_image_outlined,
+                              size: 40.w,
+                              color: theme.iconTheme.color
+                                  ?.withValues(alpha: .5),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                }
+              }
+              // 如果是 meta div，不显示
+              if (extensionContext.classes.contains('meta')) {
+                return const SizedBox();
+              }
+
+              if (extensionContext.element?.className == 'md-table') {
+                final tableElement = extensionContext.element
+                    ?.getElementsByTagName('table')
+                    .firstOrNull;
+                if (tableElement != null) {
+                  final tableHtml = tableElement.outerHtml;
+                  // 修复表格 HTML，移除嵌套的 p 标签和处理列表元素
+                  final fixedTableHtml = _fixTableHtml(tableHtml);
+
+                  // 使用特殊的表格渲染实现，完全避免与ItemPosition相关的错误
+                  return StatefulBuilder(
+                    builder: (context, setState) {
+                      // 使用StatefulBuilder但不保存状态，避免恢复滚动位置
+                      // 每次重建时创建新的ScrollController，避免恢复之前的滚动位置
+                      final horizontalScrollCtrl = ScrollController();
+                      final verticalScrollCtrl = ScrollController();
+                      return Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height * .7,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: theme.primaryColor),
+                          borderRadius: BorderRadius.circular(8.w),
+                        ),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: NotificationListener<ScrollNotification>(
+                                // 拦截滚动通知，避免触发滚动位置恢复
+                                onNotification: (notification) => true,
+                                child: SingleChildScrollView(
+                                  controller: horizontalScrollCtrl,
+                                  scrollDirection: Axis.horizontal,
+                                  physics: const ClampingScrollPhysics(),
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      maxWidth:
+                                          MediaQuery.of(context).size.width *
+                                              2,
+                                    ),
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.vertical,
+                                      physics: const ClampingScrollPhysics(),
+                                      controller: verticalScrollCtrl,
+                                      child: ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxHeight: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              2,
+                                        ),
+                                        child: Html(
+                                          data: fixedTableHtml,
+                                          style: {
+                                            "table": Style(
+                                              backgroundColor:
+                                                  theme.cardColor,
+                                            ),
+                                            "th": Style(
+                                              padding: HtmlPaddings.all(8.w),
+                                              backgroundColor: theme
+                                                  .colorScheme
+                                                  .surfaceContainerHighest,
+                                              fontWeight: FontWeight.bold,
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            "td": Style(
+                                              padding: HtmlPaddings.all(8.w),
+                                              border: Border.all(
+                                                color: theme.dividerColor,
+                                                width: .5,
+                                              ),
+                                            ),
+                                          },
+                                          extensions: const [
+                                            TableHtmlExtension(),
+                                          ],
+                                          onLinkTap: (url, _, __) {
+                                            if (onLinkTap != null) {
+                                              onLinkTap!(url);
+                                            } else {
+                                              Get.toNamed(Routes.WEBVIEW,
+                                                  arguments: url);
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // 添加横屏查看按钮
+                            const Divider(height: 1),
+                            SizedBox(
+                              height: 40.h,
+                              child: TextButton.icon(
+                                onPressed: () => _showFullScreenDialog(
+                                    context, fixedTableHtml),
+                                icon: Icon(
+                                  Icons.fullscreen,
+                                  size: 18.w,
+                                  color: theme.primaryColor,
+                                ),
+                                label: Text(
+                                  '预览',
+                                  style: TextStyle(
+                                      fontSize: 14.w,
+                                      color: theme.primaryColor),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }
+              }
+              // 其他 div 正常显示
+              return const SizedBox.shrink();
+            },
+          );
+  }
+
+  TagExtension _codeExtension(BuildContext context) {
+    return TagExtension(
+      tagsToExtend: {"pre"},
+      builder: (extensionContext) {
+        // 获取代码内容
+        final codeElement = extensionContext.element?.children.firstWhere(
+          (element) => element.localName == 'code',
+          orElse: () => dom.Element.tag('code'),
+        );
+        final code = codeElement?.text ?? '';
+
+        // 获取代码语言
+        final language = codeElement?.className.split('-').last;
+
+        return Stack(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8.w),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (language != null && language != 'null') ...[
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .primaryColor
+                            .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4.w),
+                      ),
+                      child: Text(
+                        language,
+                        style: TextStyle(
+                          fontSize: 12.w,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                    8.vGap,
+                  ],
+                  Text.rich(
+                    TextSpan(
+                      text: code,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontFamily: 'monospace',
+                        height: 1.5,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                ],
+              ),
+            ),
+            // 全屏按钮
+            Positioned(
+              top: 8.w,
+              right: 8.w,
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: code));
+                      showSuccess('代码已复制到剪贴板');
+                    },
+                    icon: Icon(
+                      CupertinoIcons.doc_on_doc,
+                      size: 18.w,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(
+                      minWidth: 32.w,
+                      minHeight: 32.w,
+                    ),
+                    splashRadius: 20.w,
+                  ),
+                  IconButton(
+                    onPressed: () =>
+                        showCodePreview(context, code, language: language),
+                    icon: Icon(
+                      CupertinoIcons.fullscreen,
+                      size: 18.w,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(
+                      minWidth: 32.w,
+                      minHeight: 32.w,
+                    ),
+                    splashRadius: 20.w,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  TagExtension _iframeExtension(BuildContext context) {
+    return TagExtension(
+      tagsToExtend: {"iframe"},
+      builder: (extensionContext) {
+        final src = extensionContext.attributes['src'];
+        if (src == null) return const SizedBox();
+
+        // 处理 bilibili 视频
+        if (src.contains('player.bilibili.com')) {
+          return Container(
+            margin: EdgeInsets.symmetric(vertical: 8.h),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.w),
+              border: Border.all(
+                color: Theme.of(context).dividerColor,
+                width: 1,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.w),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: InAppWebView(
+                  initialUrlRequest: URLRequest(url: WebUri(src)),
+                  initialSettings: InAppWebViewSettings(
+                    mediaPlaybackRequiresUserGesture: false,
+                    allowsInlineMediaPlayback: true,
+                    iframeAllowFullscreen: true,
+                    javaScriptEnabled: true,
+                  ),
+                  onLoadStart: (controller, url) {
+                    controller.evaluateJavascript(source: '''
+                            document.body.style.margin = '0';
+                            document.body.style.padding = '0';
+                            document.body.style.backgroundColor = 'transparent';
+                          ''');
+                  },
+                ),
+              ),
+            ),
+          );
+        }
+
+        // 处理其他视频源
+        return Container(
+          margin: EdgeInsets.symmetric(vertical: 8.h),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8.w),
+            border: Border.all(
+              color: Theme.of(context).dividerColor,
+              width: 1,
+            ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.w),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: InAppWebView(
+                initialUrlRequest: URLRequest(url: WebUri(src)),
+                initialSettings: InAppWebViewSettings(
+                  mediaPlaybackRequiresUserGesture: false,
+                  allowsInlineMediaPlayback: true,
+                  iframeAllowFullscreen: true,
+                  javaScriptEnabled: true,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  TagExtension _imageExtension(BuildContext context, ThemeData theme) {
+    return TagExtension(
+      tagsToExtend: {"img"},
+      builder: (extensionContext) {
+        final src = extensionContext.attributes['src'];
+        if (src == null) return const SizedBox();
+
+        // 优先使用自定义构建器
+        if (customWidgetBuilder != null && extensionContext.element != null) {
+          final widget = customWidgetBuilder!(extensionContext.element!);
+          return widget;
+        }
+
+        // 检查是否是回复中用户头像
+        if (src.contains('user_avatar/linux.do') ||
+            src.contains('/letter_avatar_proxy')) {
+          return CachedImage(
+            imageUrl: src,
+            width: 32.w,
+            height: 32.w,
+            circle: true,
+            showBorder: true,
+            borderColor: Theme.of(context).primaryColor,
+          );
+        }
+
+        // 检查是否是表情
+        final isEmoji = extensionContext.classes.contains('emoji');
+        final isEmojiPath = src.contains('/uploads/default/original') ||
+            src.contains('/images/emoji/twitter/') ||
+            src.contains('plugins/discourse-narrative-bot/images') ||
+            src.contains('/images/emoji/apple/');
+
+        if (isEmoji || isEmojiPath) {
+          return Image.network(
+            src,
+            width: 20.sp,
+            height: 20.sp,
+            fit: BoxFit.contain,
+          );
+        }
+
+        // 获取原始图片URL用于预览
+        String previewUrl = src;
+        // if (previewUrl.contains('/optimized/')) {
+        //   previewUrl = previewUrl.replaceFirst('/optimized/', '/original/');
+        // }
+
+        return GestureDetector(
+          onTap: () => showImagePreview(context, previewUrl),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.w),
+              border: Border.all(
+                color: theme.dividerColor,
+                width: 1,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.w),
+              child: CachedImage(
+                imageUrl: src,
+                width: double.infinity,
+                placeholder: Container(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.w,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                errorWidget: Icon(
+                  Icons.broken_image_outlined,
+                  size: 40.w,
+                  color: theme.iconTheme.color?.withValues(alpha: .5),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -673,8 +702,8 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
         elevation: 16,
         insetPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 24.h),
         child: Container(
-          width: MediaQuery.of(context).size.width ,
-          height: MediaQuery.of(context).size.height ,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
           padding: EdgeInsets.all(12.w),
           child: Column(
             children: [
@@ -694,8 +723,9 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
                   children: [
                     Row(
                       children: [
-                        Icon(CupertinoIcons.table_fill, 
-                          size: 14.w, 
+                        Icon(
+                          CupertinoIcons.table_fill,
+                          size: 14.w,
                           color: theme.primaryColor,
                         ),
                         SizedBox(width: 8.w),
@@ -718,7 +748,8 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
                           padding: EdgeInsets.all(6.w),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.2),
+                            color: theme.colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.2),
                           ),
                           child: Icon(
                             CupertinoIcons.xmark,
@@ -732,7 +763,7 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
                 ),
               ),
               SizedBox(height: 16.h),
-              
+
               // 表格内容区
               Expanded(
                 child: StatefulBuilder(
@@ -740,10 +771,11 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
                     // 使用StatefulBuilder但不保存状态，避免恢复滚动位置问题
                     final horizontalScrollCtrl = ScrollController();
                     final verticalScrollCtrl = ScrollController();
-                    
+
                     return Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: theme.primaryColor.withValues(alpha: 0.5)),
+                        border: Border.all(
+                            color: theme.primaryColor.withValues(alpha: 0.5)),
                         borderRadius: BorderRadius.circular(8.w),
                       ),
                       child: NotificationListener<ScrollNotification>(
@@ -755,7 +787,8 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
                           physics: const ClampingScrollPhysics(),
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                              minWidth: MediaQuery.of(context).size.width - 64.w,
+                              minWidth:
+                                  MediaQuery.of(context).size.width - 64.w,
                               maxWidth: MediaQuery.of(context).size.width * 1.7,
                             ),
                             child: SingleChildScrollView(
@@ -764,7 +797,8 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
                               controller: verticalScrollCtrl,
                               child: ConstrainedBox(
                                 constraints: BoxConstraints(
-                                  maxHeight: MediaQuery.of(context).size.height * 3,
+                                  maxHeight:
+                                      MediaQuery.of(context).size.height * 3,
                                 ),
                                 child: Html(
                                   data: html,
@@ -778,7 +812,8 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
                                     ),
                                     "th": Style(
                                       padding: HtmlPaddings.all(12.w),
-                                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                                      backgroundColor: theme
+                                          .colorScheme.surfaceContainerHighest,
                                       fontWeight: FontWeight.bold,
                                       border: Border.all(
                                         color: theme.dividerColor,
@@ -799,7 +834,8 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
                                     if (onLinkTap != null) {
                                       onLinkTap!(url);
                                     } else {
-                                      Get.toNamed(Routes.WEBVIEW, arguments: url);
+                                      Get.toNamed(Routes.WEBVIEW,
+                                          arguments: url);
                                     }
                                   },
                                 ),
@@ -812,17 +848,17 @@ class HtmlWidget extends StatelessWidget with ToastMixin {
                   },
                 ),
               ),
-              
+
               // 底部按钮区
               SizedBox(height: 16.h),
               SizedBox(
                 height: 32.w,
                 width: double.infinity,
                 child: DisButton(
-                      text: '完成',
-                      type: ButtonType.outline,
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
+                  text: '完成',
+                  type: ButtonType.outline,
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
               ),
             ],
           ),

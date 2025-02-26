@@ -153,6 +153,7 @@ jobs:
           cat "$MANIFEST_FILE"
           echo "build.gradle内容:"
           cat "$BUILD_GRADLE"
+          EOF
           
           chmod +x fix_plugin.sh
       - name: Fix image_gallery_saver

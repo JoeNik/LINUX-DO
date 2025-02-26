@@ -33,21 +33,22 @@ jobs:
         run: |
           cat > fix_plugin.sh << 'EOF'
           #!/bin/bash
-          
-          PLUGIN_DIR="$HOME/.pub-cache/hosted/pub.dev/image_gallery_saver-2.0.4"
+
+          # 使用绝对路径
+          PLUGIN_DIR="/home/runner/.pub-cache/hosted/pub.dev/image_gallery_saver-2.0.3"
           MANIFEST_FILE="$PLUGIN_DIR/android/src/main/AndroidManifest.xml"
           BUILD_GRADLE="$PLUGIN_DIR/android/build.gradle"
           
           echo "检查文件..."
           if [ ! -f "$MANIFEST_FILE" ]; then
             echo "未找到 AndroidManifest.xml"
-            find $HOME/.pub-cache -name "AndroidManifest.xml" | grep image_gallery_saver
+            find /home/runner/.pub-cache -name "AndroidManifest.xml" | grep image_gallery_saver
             exit 1
           fi
           
           if [ ! -f "$BUILD_GRADLE" ]; then
             echo "未找到 build.gradle"
-            find $HOME/.pub-cache -name "build.gradle" | grep image_gallery_saver
+            find /home/runner/.pub-cache -name "build.gradle" | grep image_gallery_saver
             exit 1
           fi
           
@@ -59,6 +60,9 @@ jobs:
           sed -i 's/package="[^"]*"//g' "$MANIFEST_FILE"
           
           echo "修改build.gradle..."
+          # 修改compileSdkVersion为34
+          sed -i 's/compileSdkVersion [0-9]*/compileSdkVersion 34/g' "$BUILD_GRADLE"
+          
           if grep -q "android {" "$BUILD_GRADLE"; then
             # 检查是否已有namespace
             if grep -q "namespace" "$BUILD_GRADLE"; then
@@ -78,7 +82,16 @@ jobs:
             echo "添加完整android块..."
             echo "android {" >> "$BUILD_GRADLE"
             echo "    namespace \"com.example.imagegallerysaver\"" >> "$BUILD_GRADLE"
-            echo "    compileSdkVersion 33" >> "$BUILD_GRADLE"
+            echo "    compileSdkVersion 34" >> "$BUILD_GRADLE"
+            # 添加解决lStar问题的配置
+            echo "    defaultConfig {" >> "$BUILD_GRADLE"
+            echo "        resConfigs \"en\", \"xxhdpi\"" >> "$BUILD_GRADLE"
+            echo "    }" >> "$BUILD_GRADLE"
+            echo "    buildFeatures {" >> "$BUILD_GRADLE"
+            echo "        renderScript false" >> "$BUILD_GRADLE"
+            echo "        aidl false" >> "$BUILD_GRADLE"
+            echo "        buildConfig true" >> "$BUILD_GRADLE"
+            echo "    }" >> "$BUILD_GRADLE"
             echo "}" >> "$BUILD_GRADLE"
           fi
           
@@ -122,12 +135,20 @@ jobs:
             sed -i '/compileOptions {/,/}/{s/targetCompatibility.*/targetCompatibility JavaVersion.VERSION_1_8/g}' "$BUILD_GRADLE"
           fi
           
+          # 添加androidx依赖以解决可能的兼容性问题
+          if ! grep -q "androidx.appcompat:appcompat" "$BUILD_GRADLE"; then
+            echo "添加androidx依赖..."
+            echo "dependencies {" >> "$BUILD_GRADLE"
+            echo "    implementation \"androidx.appcompat:appcompat:1.6.1\"" >> "$BUILD_GRADLE"
+            echo "    implementation \"androidx.core:core-ktx:1.12.0\"" >> "$BUILD_GRADLE"
+            echo "}" >> "$BUILD_GRADLE"
+          fi
+          
           echo "修改完成!"
           echo "AndroidManifest.xml内容:"
           cat "$MANIFEST_FILE"
           echo "build.gradle内容:"
           cat "$BUILD_GRADLE"
-          EOF
           
           chmod +x fix_plugin.sh
       - name: Fix image_gallery_saver

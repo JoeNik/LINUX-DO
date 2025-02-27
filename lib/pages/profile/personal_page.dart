@@ -6,11 +6,12 @@ import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_images.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
-import 'package:linux_do/controller/global_controller.dart';
 import 'package:linux_do/models/user.dart';
 import 'package:linux_do/pages/profile/personal_controller.dart';
+import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/widgets/cached_image.dart';
-import 'package:linux_do/widgets/sticky_tab_delegate.dart';
+import 'package:linux_do/widgets/glowing_text_wweep.dart';
+import 'package:linux_do/widgets/topic_item.dart';
 import 'package:slide_switcher/slide_switcher.dart';
 
 class PersonalPage extends GetView<PersonalController> {
@@ -20,12 +21,27 @@ class PersonalPage extends GetView<PersonalController> {
   Widget build(BuildContext context) {
     // 创建一个 ValueNotifier 来跟踪滚动进度
     final scrollProgress = ValueNotifier<double>(0.0);
-    final expandedHeight = 280.w;
+
     return Scaffold(
       body: Obx(() {
-        final userInfo = Get.find<GlobalController>().userInfo;
+        // 检查用户信息是否已加载
+        final userInfo = controller.userInfo;
+        final expandedHeight =
+            userInfo?.user?.backgroundUrl != null ? 380.w : 280.w;
+        // 如果用户信息为空，显示加载状态
+        if (userInfo == null) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
 
-        final user = userInfo?.user;
+        final user = userInfo.user;
+        if (user == null) {
+          return const Center(
+            child: Text('无法加载用户信息'),
+          );
+        }
+
         return NestedScrollView(
           physics: const BouncingScrollPhysics(),
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -60,10 +76,9 @@ class PersonalPage extends GetView<PersonalController> {
                           if (progress < 1)
                             Opacity(
                               opacity: (1 - progress).clamp(0.0, 1.0),
-                              child: user?.cardBackgroundUploadUrl != null
+                              child: user.backgroundUrl != null
                                   ? CachedImage(
-                                      imageUrl:
-                                          user?.cardBackgroundUploadUrl ?? '',
+                                      imageUrl: user.backgroundUrl ?? '',
                                       fit: BoxFit.cover)
                                   : Image.asset(
                                       AppImages.profileHeaderBg,
@@ -74,12 +89,12 @@ class PersonalPage extends GetView<PersonalController> {
                           if (progress > 0)
                             BackdropFilter(
                               filter: ImageFilter.blur(
-                                sigmaX: progress * 10,
-                                sigmaY: progress * 10,
+                                sigmaX: progress * 50,
+                                sigmaY: progress * 50,
                               ),
                               child: Container(
                                 color: Colors.black
-                                    .withValues(alpha: progress * 0.3),
+                                    .withValues(alpha: progress * 0.7),
                               ),
                             ),
                           // 渐变遮罩
@@ -90,16 +105,37 @@ class PersonalPage extends GetView<PersonalController> {
                                 end: Alignment.bottomCenter,
                                 colors: [
                                   Colors.transparent,
-                                  Colors.black.withValues(alpha: 0.7),
+                                  Colors.black.withValues(alpha: 0.5),
                                 ],
                               ),
                             ),
                           ),
+
+                          Positioned(
+                              bottom: 6.w,
+                              left: lerpDouble(-1.w, 56.w, progress) ?? -1.w,
+                              right: 32.w,
+                              child: Container(
+                                width: MediaQuery.of(context).size.width - 16.w,
+                                height: 64.w,
+                                decoration: BoxDecoration(
+                                  color: AppColors.white.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.only(
+                                    bottomRight: const Radius.circular(100).w,
+                                    topRight: const Radius.circular(100).w,
+                                  ),
+                                  border: Border.all(
+                                      color: Theme.of(context)
+                                          .cardColor
+                                          .withValues(alpha: 0.0),
+                                      width: .4.w),
+                                ),
+                              )),
+
                           // 用户信息
                           Positioned(
-                              // 使用线性插值函数
-                              bottom: lerpDouble(10.w, 16.w, progress),
-                              left: lerpDouble(8.w, 56.w, progress),
+                              bottom: lerpDouble(10.w, 16.w, progress) ?? 10.w,
+                              left: lerpDouble(8.w, 56.w, progress) ?? 8.w,
                               right: 0,
                               child: _buildProfile(user, progress, context)),
                         ],
@@ -117,7 +153,7 @@ class PersonalPage extends GetView<PersonalController> {
                     opacity: showTitle ? 1.0 : 0.0,
                     child: showTitle
                         ? Text(
-                            user?.username ?? '',
+                            user.username,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16.sp,
@@ -144,7 +180,7 @@ class PersonalPage extends GetView<PersonalController> {
                                       color: AppColors.white, width: 1.w),
                                   borderRadius: BorderRadius.circular(80.w)),
                               child: CachedImage(
-                                imageUrl: user?.getAvatar(120) ?? '',
+                                imageUrl: user.getAvatar(120),
                                 circle: true,
                                 width: 30.w,
                                 height: 30.w,
@@ -161,23 +197,25 @@ class PersonalPage extends GetView<PersonalController> {
             ),
 
             // 统计信息
-            SliverToBoxAdapter(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 10.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    
-                  ],
-                ),
-              ),
-            ),
+            // SliverToBoxAdapter(
+            //   child: Container(
+            //     padding: EdgeInsets.symmetric(vertical: 10.w),
+            //     child: Row(
+            //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            //       children: [
+            //         _buildStatItem(context, '文章', "34" ?? '0'),
+            //         _buildStatItem(context, '回复', "34" ?? '0'),
+            //         _buildStatItem(context, '点赞', "34" ?? '0'),
+            //         _buildStatItem(context, '收到点赞', "34" ?? '0'),
+            //       ],
+            //     ),
+            //   ),
+            // ),
 
             // Tab栏
             SliverPersistentHeader(
               pinned: true,
-              delegate: StickyTabBarDelegate(
-                height: 40.w,
+              delegate: _StickyTabBarDelegate(
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppColors.transparent,
@@ -205,63 +243,211 @@ class PersonalPage extends GetView<PersonalController> {
                         Theme.of(context).primaryColor.withValues(alpha: 0.6)
                       ])
                     ],
-                    onSelect: (index) => {},
+                    onSelect: (index) => controller.changeTab(index),
                     children: [
-                      
+                      Text('热门话题', style: TextStyle(fontSize: 14.sp)),
+                      Text('热门回复', style: TextStyle(fontSize: 14.sp)),
+                      Text('热门链接', style: TextStyle(fontSize: 14.sp)),
                     ],
                   ),
                 ),
               ),
             ),
           ],
-          body: const Center(child: Text('个人主页')),
+          body: _buildTabContent(context, controller.selectedTabIndex.value),
         );
       }),
     );
   }
 
+  Widget _buildStatItem(BuildContext context, String label, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).primaryColor,
+          ),
+        ),
+        SizedBox(height: 4.w),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: Theme.of(context).textTheme.bodySmall?.color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabContent(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+        return _buildActivityTab();
+      case 1:
+        return _buildTopicsTab();
+      case 2:
+        return _buildRepliesTab();
+      case 3:
+        return _buildFavoritesTab();
+      default:
+        return const Center(child: Text('内容不可用'));
+    }
+  }
+
+  Widget _buildActivityTab() {
+    return Obx(() {
+      final topics = controller.summaryData.value?.topics;
+      final user = controller.userInfo?.user;
+      if (topics == null) {
+        return const Center(child: Text('暂无数据'));
+      }
+      return ListView.builder(
+        padding: EdgeInsets.zero,
+        itemCount: topics.length,
+        itemBuilder: (context, index) {
+          final topic = topics[index];
+          return TopicItem(
+            topic: topic,
+            avatarUrl: user?.getAvatar(120),
+            nickName: user?.name,
+            username: user?.username,
+            onTap: () {
+              controller.toTopicDetail(topic.id);
+            },
+            onDoNotDisturb: (topic) {
+              controller.doNotDisturb(topic.id);
+            },
+          );
+        },
+      );
+    });
+  }
+
+  Widget _buildTopicsTab() {
+    return const Center(child: Text('热门主题'));
+  }
+
+  Widget _buildRepliesTab() {
+    return const Center(child: Text('热门回复'));
+  }
+
+  Widget _buildFavoritesTab() {
+    return const Center(child: Text('热门链接'));
+  }
+
   Widget _buildProfile(
-      CurrentUser? user, double progress, BuildContext context) {
+      CurrentUser user, double progress, BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Stack(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Theme.of(context).primaryColor, width: 2.w),
-                      borderRadius: BorderRadius.circular(45.w)),
-                  child: CachedImage(
-                    imageUrl: user?.getAvatar(240) ?? '',
-                    circle: true,
-                    width: 70.w,
-                    height: 70.w,
-                  ),
-                ),
-                Positioned(
-                    bottom: 10.w,
-                    left: 60.w,
-                    child: Container(
-                      width: 14.w,
-                      height: 14.w,
-                      decoration: BoxDecoration(
-                          color: user?.userAction?.hidePresence == false
-                              ? AppColors.disabled
-                              : AppColors.success,
-                          border:
-                              Border.all(color: AppColors.white, width: 1.5.w),
-                          borderRadius: BorderRadius.circular(10.w)),
-                    ))
-              ],
+            Container(
+              decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Theme.of(context).primaryColor, width: 2.w),
+                  borderRadius: BorderRadius.circular(45.w)),
+              child: CachedImage(
+                imageUrl: user.getAvatar(120),
+                circle: true,
+                width: 50.w,
+                height: 50.w,
+                showInnerBorder: true,
+                innerBorderColor: Colors.white,
+                innerBorderWidth: 2.w,
+              ),
             ),
-      
+            6.hGap,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GlowingTextSweep(
+                    text: user.name != null && user.name!.isNotEmpty
+                        ? user.name!
+                        : user.username,
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontSize: 15.w,
+                      fontFamily: AppFontFamily.dinPro,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          offset: const Offset(1, 1),
+                          blurRadius: 2,
+                          color: Colors.black.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
+                    glowColor: Colors.white,
+                  ),
+                  SizedBox(height: 4.w),
+                  Text(
+                    '@${user.username}',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontFamily: AppFontFamily.dinPro,
+                      fontSize: 11.w,
+                      shadows: [
+                        Shadow(
+                          offset: const Offset(1, 1),
+                          blurRadius: 2,
+                          color: Colors.black.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            )
           ],
         ),
-        
       ],
     );
+  }
+
+  String _formatDate(String? dateString) {
+    if (dateString == null) return '未知';
+    try {
+      final date = DateTime.parse(dateString);
+      return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return '未知';
+    }
+  }
+}
+
+// 自定义StickyTabBarDelegate以避免布局错误
+class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+  final double height;
+
+  _StickyTabBarDelegate({
+    required this.child,
+    this.height = 40.0,
+  });
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: child,
+    );
+  }
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  bool shouldRebuild(covariant _StickyTabBarDelegate oldDelegate) {
+    return oldDelegate.height != height || oldDelegate.child != child;
   }
 }

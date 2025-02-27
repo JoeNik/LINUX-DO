@@ -186,12 +186,10 @@ class _WebPageState extends State<WebPage> {
           if (result != null &&
               result.toString() != '{}' &&
               result.toString().isNotEmpty) {
-            l.d('第 ${i + 1} 次尝试成功获取 CSRF Token: $result');
             await StorageManager.setData(
                 AppConst.identifier.csrfToken, result.toString());
             break;
           } else {
-            l.e('第 ${i + 1} 次尝试获取 CSRF Token 失败');
             if (i < maxRetries - 1) {
               // 在重试之前等待一段时间
               await Future.delayed(const Duration(milliseconds: 500));
@@ -202,7 +200,6 @@ class _WebPageState extends State<WebPage> {
         if (result == null ||
             result.toString() == '{}' ||
             result.toString().isEmpty) {
-          l.e('在 $maxRetries 次尝试后仍无法获取有效的 CSRF Token');
           return;
         }
 

@@ -15,6 +15,9 @@ class CachedImage extends StatelessWidget {
   final bool circle;
   final bool showBorder;
   final Color? borderColor;
+  final bool showInnerBorder;
+  final Color? innerBorderColor;
+  final double? innerBorderWidth;
 
   const CachedImage({
     super.key,
@@ -29,6 +32,9 @@ class CachedImage extends StatelessWidget {
     this.circle = false,
     this.showBorder = false,
     this.borderColor,
+    this.showInnerBorder = false,
+    this.innerBorderColor,
+    this.innerBorderWidth,
   });
 
   @override
@@ -45,14 +51,31 @@ class CachedImage extends StatelessWidget {
       placeholder: (context, url) => _buildPlaceholder(),
       errorWidget: (context, url, error) => _buildErrorWidget(),
       fadeInDuration: const Duration(milliseconds: 300),
+      
     );
 
     // 圆形或圆角
     if (circle || borderRadius != null) {
       image = ClipRRect(
         borderRadius: circle 
-          ? BorderRadius.circular(width != null ? width! / 2 : height! / 2)
+          ? BorderRadius.circular(width != null ? width! : height!)
           : borderRadius ?? BorderRadius.zero,
+        child: image,
+      );
+    }
+
+    // 添加内边框
+    if (showInnerBorder) {
+      final innerBorderW = innerBorderWidth ?? 2.w;
+      
+      // 内边框和图片组合
+      image = Container(
+        padding: EdgeInsets.all(innerBorderW),
+        decoration: BoxDecoration(
+          color: innerBorderColor ?? Colors.white,
+          shape: circle ? BoxShape.circle : BoxShape.rectangle,
+          borderRadius: !circle ? borderRadius : null,
+        ),
         child: image,
       );
     }
@@ -63,7 +86,7 @@ class CachedImage extends StatelessWidget {
       decoration: BoxDecoration(
         color: backgroundColor ?? Theme.of(context).cardColor,
         borderRadius: circle 
-          ? BorderRadius.circular(width != null ? width!.w / 2 : height!.w / 2)
+          ? BorderRadius.circular(width != null ? width!.w / 2 : height!.w)
           : borderRadius,
         border: showBorder ? Border.all(color: borderColor ?? Theme.of(context).primaryColor, width: 1.w) : null,
       ),

@@ -221,7 +221,8 @@ class TopicDetailController extends BaseController
     }
 
     _visiblePostNumbers.value = visiblePosts;
-    _debouncedUpdateTiming();
+    // 阅读时间 目前没办法更新
+    // _debouncedUpdateTiming();
 
     // 检查是否需要加载更多
     if (positions.isNotEmpty) {

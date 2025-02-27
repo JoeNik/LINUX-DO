@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:linux_do/models/topic_model.dart';
 
 part 'summary.g.dart';
 
@@ -26,67 +27,6 @@ class SummaryResponse {
   factory SummaryResponse.fromJson(Map<String, dynamic> json) =>
       _$SummaryResponseFromJson(json);
   Map<String, dynamic> toJson() => _$SummaryResponseToJson(this);
-}
-
-@JsonSerializable()
-class Topic {
-  final int? id;
-  final String? title;
-  @JsonKey(name: 'fancy_title')
-  final String? fancyTitle;
-  final String? slug;
-  @JsonKey(name: 'posts_count')
-  final int? postsCount;
-  @JsonKey(name: 'created_at')
-  final String? createdAt;
-  final int? views;
-  @JsonKey(name: 'reply_count')
-  final int? replyCount;
-  @JsonKey(name: 'like_count')
-  final int? likeCount;
-  @JsonKey(name: 'last_posted_at')
-  final String? lastPostedAt;
-  final bool? visible;
-  final bool? closed;
-  final bool? archived;
-  @JsonKey(name: 'has_summary')
-  final bool? hasSummary;
-  final String? archetype;
-  @JsonKey(name: 'category_id')
-  final int? categoryId;
-  @JsonKey(name: 'pinned_globally')
-  final bool? pinnedGlobally;
-  @JsonKey(name: 'featured_link')
-  final String? featuredLink;
-  @JsonKey(name: 'has_accepted_answer')
-  final bool? hasAcceptedAnswer;
-  final int? posters;
-
-  Topic({
-    this.id,
-    this.title,
-    this.fancyTitle,
-    this.slug,
-    this.postsCount,
-    this.createdAt,
-    this.views,
-    this.replyCount,
-    this.likeCount,
-    this.lastPostedAt,
-    this.visible,
-    this.closed,
-    this.archived,
-    this.hasSummary,
-    this.archetype,
-    this.categoryId,
-    this.pinnedGlobally,
-    this.featuredLink,
-    this.hasAcceptedAnswer,
-    this.posters,
-  });
-
-  factory Topic.fromJson(Map<String, dynamic> json) => _$TopicFromJson(json);
-  Map<String, dynamic> toJson() => _$TopicToJson(this);
 }
 
 @JsonSerializable()
@@ -155,52 +95,6 @@ class BadgeType {
   factory BadgeType.fromJson(Map<String, dynamic> json) =>
       _$BadgeTypeFromJson(json);
   Map<String, dynamic> toJson() => _$BadgeTypeToJson(this);
-}
-
-@JsonSerializable()
-class User {
-  final int id;
-  final String username;
-  final String name;
-  @JsonKey(name: 'avatar_template')
-  final String avatarTemplate;
-  @JsonKey(name: 'trust_level')
-  final int trustLevel;
-  @JsonKey(name: 'animated_avatar')
-  final String? animatedAvatar;
-  final bool? admin;
-  final bool? moderator;
-  @JsonKey(name: 'flair_name')
-  final String? flairName;
-  @JsonKey(name: 'flair_url')
-  final String? flairUrl;
-  @JsonKey(name: 'flair_bg_color')
-  final String? flairBgColor;
-  @JsonKey(name: 'flair_color')
-  final String? flairColor;
-  @JsonKey(name: 'primary_group_name')
-  final String? primaryGroupName;
-  final int? count;
-
-  User({
-    required this.id,
-    required this.username,
-    required this.name,
-    required this.avatarTemplate,
-    required this.trustLevel,
-    this.animatedAvatar,
-    this.admin,
-    this.moderator,
-    this.flairName,
-    this.flairUrl,
-    this.flairBgColor,
-    this.flairColor,
-    this.primaryGroupName,
-    this.count,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
-  Map<String, dynamic> toJson() => _$UserToJson(this);
 }
 
 @JsonSerializable()

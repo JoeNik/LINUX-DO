@@ -532,8 +532,6 @@ class HttpClient {
       final csrfToken =
             StorageManager.getString(AppConst.identifier.csrfToken) ;
 
-        l.d('没有 CSRF Token  $csrfToken');
-
       // 检查所有必要的 cookies
       for (var cookie in cookies) {
         if (cookie.name == cfClearance) hasCfClearance = true;
@@ -541,13 +539,21 @@ class HttpClient {
         if (cookie.name == tokenKey) hasToken = true;
       }
 
+      if (!hasToken){
+        hasToken = StorageManager.getString(AppConst.identifier.token) != null;
+      }
+
+      if (!hasCfClearance){
+        hasCfClearance = StorageManager.getString(AppConst.identifier.cfClearance) != null;
+      }
+
+      bool hasCsrfToken = csrfToken != null && csrfToken.isNotEmpty;
+
       // 检查网站是否使用了 Cloudflare
       final needsCfVerification = await _checkCloudflareEnabled();
       
-      l.d('Cookie 状态: CF=$hasCfClearance, Session=$hasForumSession, Token=$hasToken, NeedCF=$needsCfVerification');
-      
       // 根据是否需要 CF 验证来判断 cookies 是否有效
-      return  hasForumSession && hasToken && (!needsCfVerification || (needsCfVerification && hasCfClearance));
+      return  hasCsrfToken && hasForumSession && hasToken && (!needsCfVerification || (needsCfVerification && hasCfClearance));
     } catch (e) {
       l.e('检查 cookies 失败: $e');
       return false;

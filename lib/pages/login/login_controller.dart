@@ -179,11 +179,11 @@ class LoginController extends BaseController {
         
         // 保存 cookies
         await cookieJar.saveFromResponse(uri, [
-          // Cookie('cf_clearance', data['cf'])
-          //   ..domain = HttpConfig.domain
-          //   ..path = '/'
-          //   ..httpOnly = true
-          //   ..secure = true,
+          Cookie('cf_clearance', data['cf'])
+            ..domain = HttpConfig.domain
+            ..path = '/'
+            ..httpOnly = true
+            ..secure = true,
           Cookie('_forum_session', data['f'])
             ..domain = HttpConfig.domain
             ..path = '/'
@@ -194,6 +194,7 @@ class LoginController extends BaseController {
             ..path = '/'
             ..httpOnly = true
             ..secure = true,
+
         ]);
 
         // 保存 CSRF Token
@@ -202,12 +203,24 @@ class LoginController extends BaseController {
           data['c']
         );
 
+       // token会失效,临时的解决方案
+        await StorageManager.setData(
+          AppConst.identifier.token,
+          data['t']
+        );
+
+        await StorageManager.setData(
+          AppConst.identifier.cfClearance,
+          data['cf']
+        );
+
         // 执行到这里，说明扫码登录成功
           showSuccess('扫码登录成功');
 
           // 获取用户信息并返回
           await Get.find<GlobalController>().fetchUserInfo();
-          Get.back(result: true);
+
+          Get.offAllNamed(Routes.HOME);
 
 
       } catch (e) {

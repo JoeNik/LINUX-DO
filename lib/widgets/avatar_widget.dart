@@ -62,7 +62,10 @@ class AvatarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (!canOpenCard) return;
+        if (!canOpenCard) {
+          Get.toNamed(Routes.PERSONAL, arguments: username);
+          return;
+        }
         Get.dialog(
           Dialog(
             shape: RoundedRectangleBorder(

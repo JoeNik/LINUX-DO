@@ -147,6 +147,7 @@ class _Identifier {
   const _Identifier();
 
   String get token => 'token';
+  String get cfClearance => 'cfClearance';
   String get userInfo => 'userInfo';
   String get theme => 'theme';
   String get language => 'language';

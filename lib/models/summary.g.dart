@@ -34,52 +34,6 @@ Map<String, dynamic> _$SummaryResponseToJson(SummaryResponse instance) =>
       'user_summary': instance.userSummary,
     };
 
-Topic _$TopicFromJson(Map<String, dynamic> json) => Topic(
-      id: (json['id'] as num?)?.toInt(),
-      title: json['title'] as String?,
-      fancyTitle: json['fancy_title'] as String?,
-      slug: json['slug'] as String?,
-      postsCount: (json['posts_count'] as num?)?.toInt(),
-      createdAt: json['created_at'] as String?,
-      views: (json['views'] as num?)?.toInt(),
-      replyCount: (json['reply_count'] as num?)?.toInt(),
-      likeCount: (json['like_count'] as num?)?.toInt(),
-      lastPostedAt: json['last_posted_at'] as String?,
-      visible: json['visible'] as bool?,
-      closed: json['closed'] as bool?,
-      archived: json['archived'] as bool?,
-      hasSummary: json['has_summary'] as bool?,
-      archetype: json['archetype'] as String?,
-      categoryId: (json['category_id'] as num?)?.toInt(),
-      pinnedGlobally: json['pinned_globally'] as bool?,
-      featuredLink: json['featured_link'] as String?,
-      hasAcceptedAnswer: json['has_accepted_answer'] as bool?,
-      posters: (json['posters'] as num?)?.toInt(),
-    );
-
-Map<String, dynamic> _$TopicToJson(Topic instance) => <String, dynamic>{
-      'id': instance.id,
-      'title': instance.title,
-      'fancy_title': instance.fancyTitle,
-      'slug': instance.slug,
-      'posts_count': instance.postsCount,
-      'created_at': instance.createdAt,
-      'views': instance.views,
-      'reply_count': instance.replyCount,
-      'like_count': instance.likeCount,
-      'last_posted_at': instance.lastPostedAt,
-      'visible': instance.visible,
-      'closed': instance.closed,
-      'archived': instance.archived,
-      'has_summary': instance.hasSummary,
-      'archetype': instance.archetype,
-      'category_id': instance.categoryId,
-      'pinned_globally': instance.pinnedGlobally,
-      'featured_link': instance.featuredLink,
-      'has_accepted_answer': instance.hasAcceptedAnswer,
-      'posters': instance.posters,
-    };
-
 Badge _$BadgeFromJson(Map<String, dynamic> json) => Badge(
       id: (json['id'] as num).toInt(),
       name: json['name'] as String,
@@ -128,40 +82,6 @@ Map<String, dynamic> _$BadgeTypeToJson(BadgeType instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'sort_order': instance.sortOrder,
-    };
-
-User _$UserFromJson(Map<String, dynamic> json) => User(
-      id: (json['id'] as num).toInt(),
-      username: json['username'] as String,
-      name: json['name'] as String,
-      avatarTemplate: json['avatar_template'] as String,
-      trustLevel: (json['trust_level'] as num).toInt(),
-      animatedAvatar: json['animated_avatar'] as String?,
-      admin: json['admin'] as bool?,
-      moderator: json['moderator'] as bool?,
-      flairName: json['flair_name'] as String?,
-      flairUrl: json['flair_url'] as String?,
-      flairBgColor: json['flair_bg_color'] as String?,
-      flairColor: json['flair_color'] as String?,
-      primaryGroupName: json['primary_group_name'] as String?,
-      count: (json['count'] as num?)?.toInt(),
-    );
-
-Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
-      'id': instance.id,
-      'username': instance.username,
-      'name': instance.name,
-      'avatar_template': instance.avatarTemplate,
-      'trust_level': instance.trustLevel,
-      'animated_avatar': instance.animatedAvatar,
-      'admin': instance.admin,
-      'moderator': instance.moderator,
-      'flair_name': instance.flairName,
-      'flair_url': instance.flairUrl,
-      'flair_bg_color': instance.flairBgColor,
-      'flair_color': instance.flairColor,
-      'primary_group_name': instance.primaryGroupName,
-      'count': instance.count,
     };
 
 UserSummary _$UserSummaryFromJson(Map<String, dynamic> json) => UserSummary(

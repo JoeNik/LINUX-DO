@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 import 'package:linux_do/pages/category/category_list_controller.dart';
 import 'package:linux_do/pages/profile/edit_profile_controller.dart';
 import 'package:linux_do/pages/profile/edit_profile_page.dart';
+import 'package:linux_do/pages/profile/personal_controller.dart';
+import 'package:linux_do/pages/profile/personal_page.dart';
 import 'package:linux_do/pages/settings/about_controller.dart';
 import 'package:linux_do/pages/settings/about_page.dart';
 import 'package:linux_do/pages/settings/profile_settings_controller.dart';
@@ -48,7 +50,7 @@ class AppPages {
       name: Routes.STARTUP,
       page: () => const StartupPage(),
       binding: BindingsBuilder(() {
-        Get.lazyPut<StartupController>(() => StartupController());
+        Get.lazyPut(() => StartupController());
       }),
     ),
 
@@ -70,7 +72,7 @@ class AppPages {
       name: Routes.LOGIN,
       page: () => const LoginPage(),
       binding: BindingsBuilder(() {
-        Get.lazyPut<LoginController>(() => LoginController());
+        Get.lazyPut(() => LoginController());
       }),
     ),
 
@@ -79,7 +81,7 @@ class AppPages {
       name: Routes.SETTINGS,
       page: () => const SettingsPage(),
       binding: BindingsBuilder(() {
-        Get.lazyPut<SettingsController>(() => SettingsController());
+        Get.lazyPut(() => SettingsController());
       }),
     ),
 
@@ -198,6 +200,15 @@ class AppPages {
       page: () => const CategoryPage(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => CategoryListController());
+      }),
+    ),
+
+    /// 个人主页(TA的)
+    GetPage(
+      name: Routes.PERSONAL,
+      page: () => const PersonalPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => PersonalController());
       }),
     ),
   ];

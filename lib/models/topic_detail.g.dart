@@ -171,6 +171,7 @@ Post _$PostFromJson(Map<String, dynamic> json) => Post(
       bookmarkableType: json['bookmarkableType'] as String?,
       bookmarkReminderAt: json['bookmarkReminderAt'] as String?,
       bookmarkName: json['bookmarkName'] as String?,
+      policyAccepted: json['policyAccepted'] as bool?,
     );
 
 Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
@@ -249,6 +250,7 @@ Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
       'bookmarkableType': instance.bookmarkableType,
       'bookmarkReminderAt': instance.bookmarkReminderAt,
       'bookmarkName': instance.bookmarkName,
+      'policyAccepted': instance.policyAccepted,
     };
 
 ActionSummary _$ActionSummaryFromJson(Map<String, dynamic> json) =>

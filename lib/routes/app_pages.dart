@@ -10,6 +10,7 @@ import 'package:linux_do/pages/settings/profile_settings_controller.dart';
 import 'package:linux_do/pages/settings/profile_settings_page.dart';
 import 'package:linux_do/pages/settings/security_settings_controller.dart';
 import 'package:linux_do/pages/settings/security_settings_page.dart';
+import 'package:linux_do/widgets/html_widget.dart';
 import '../pages/chat/chat_detail_controller.dart';
 import '../pages/chat/chat_detail_page.dart';
 import '../pages/create/create_post_controller.dart';
@@ -91,6 +92,7 @@ class AppPages {
       page: () => const TopicDetailPage(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => TopicDetailController());
+        Get.lazyPut(() => HtmlController());
       }),
     ),
 

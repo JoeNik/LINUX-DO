@@ -461,4 +461,9 @@ abstract class ApiService {
   @POST('export_csv/export_entity.json')
   Future<SuccessResponse<dynamic>> requestDataExport(
       {@Field('entity') String entity = 'user_archive'});
+
+  /// 更新政策接受状态
+  @PUT('policy/{action}')
+  Future<SuccessResponse<dynamic>> updatePolicyAccepted(
+      @Path('action') String action, @Field('post_id') String postId);
 }

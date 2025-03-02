@@ -142,6 +142,7 @@ Topic _$TopicFromJson(Map<String, dynamic> json) => Topic(
       posters: (json['posters'] as List<dynamic>?)
           ?.map((e) => Poster.fromJson(e as Map<String, dynamic>))
           .toList(),
+      bookmarked: json['bookmarked'] as bool?,
     );
 
 Map<String, dynamic> _$TopicToJson(Topic instance) => <String, dynamic>{
@@ -175,6 +176,7 @@ Map<String, dynamic> _$TopicToJson(Topic instance) => <String, dynamic>{
       'featured_link': instance.featuredLink,
       'has_accepted_answer': instance.hasAcceptedAnswer,
       'posters': instance.posters,
+      'bookmarked': instance.bookmarked,
     };
 
 Poster _$PosterFromJson(Map<String, dynamic> json) => Poster(

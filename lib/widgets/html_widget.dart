@@ -14,6 +14,7 @@ import 'package:linux_do/utils/mixins/toast_mixin.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/widgets/dis_button.dart';
+import 'package:linux_do/widgets/video_player_widget.dart';
 import 'cached_image.dart';
 import 'image_preview_dialog.dart';
 import 'code_preview_dialog.dart';
@@ -407,6 +408,49 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
               ],
             ),
           );
+        }
+
+        // 检查是否包含视频相关的类名
+        final classNames = extensionContext.classes;
+        final isVideoBox = classNames.contains('onebox') && classNames.contains('video-onebox');
+        final isVideoOnebox = classNames.contains('onebox') && extensionContext.element?.outerHtml.contains('<video') == true;
+        
+        if (isVideoBox || isVideoOnebox) {
+          // 获取视频元素
+          final videoElement = extensionContext.element?.getElementsByTagName('video').firstOrNull;
+          
+          if (videoElement != null) {
+            // 获取视频源
+            final sourceElement = videoElement.getElementsByTagName('source').firstOrNull;
+            
+            final videoUrl = sourceElement?.attributes['src'];
+
+            if (videoUrl != null && videoUrl.isNotEmpty) {
+              return VideoPlayerWidget(videoUrl: videoUrl);
+            } else {
+              // 尝试从a标签获取视频URL
+              final aElement = videoElement.getElementsByTagName('a').firstOrNull;
+              
+              final linkUrl = aElement?.attributes['href'];
+
+              if (linkUrl != null && linkUrl.isNotEmpty) {
+                return VideoPlayerWidget(videoUrl: linkUrl);
+              } else {
+                l.e('No video URL found in either source or a tag');
+              }
+            }
+          } else {
+            // 如果没有找到video元素，尝试直接从div中的a标签获取URL
+            final aElement = extensionContext.element?.getElementsByTagName('a').firstOrNull;
+            if (aElement != null) {
+              final linkUrl = aElement.attributes['href'];
+              if (linkUrl != null && linkUrl.isNotEmpty) {
+                return VideoPlayerWidget(videoUrl: linkUrl);
+              }
+            }
+          }
+          
+          return const SizedBox.shrink();
         }
 
         // 其他 div 正常显示
@@ -935,3 +979,4 @@ class HtmlController extends BaseController {
     }
   }
 }
+

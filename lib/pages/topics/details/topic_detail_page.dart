@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_colors.dart';
@@ -7,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/pages/topics/details/widgets/post_reply.dart';
 import 'package:linux_do/widgets/dis_button.dart';
 import 'package:linux_do/widgets/owner_banner.dart';
+import 'package:linux_do/widgets/state_view.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../const/app_const.dart';
 import '../../../const/app_spacing.dart';
 import '../../../const/app_theme.dart';
@@ -33,8 +34,15 @@ class TopicDetailPage extends GetView<TopicDetailController> {
         children: [
           Obx(() {
             final topic = controller.topic.value;
-            if (topic == null) return const SizedBox();
-            return _buildContent(context, topic);
+            return StateView(
+              state: _getViewState(),
+              errorMessage: controller.errorMessage.value,
+              onRetry: controller.fetchTopicDetail,
+              shimmerView: const ShimmerDetails(),
+              child: topic == null
+                  ? const SizedBox()
+                  : _buildContent(context, topic),
+            );
           }),
           // 新增楼层选择器
           Obx(() {
@@ -62,6 +70,16 @@ class TopicDetailPage extends GetView<TopicDetailController> {
         ],
       ),
     );
+  }
+
+  ViewState _getViewState() {
+    if (controller.isLoading.value) {
+      return ViewState.loading;
+    }
+    if (controller.hasError.value) {
+      return ViewState.error;
+    }
+    return ViewState.content;
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {

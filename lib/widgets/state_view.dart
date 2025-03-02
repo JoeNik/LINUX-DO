@@ -61,12 +61,54 @@ class StateView extends GetView {
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
         itemCount: shimmerCount,
-        itemBuilder: (_, __) => _buildShimmerItem(context),
+        itemBuilder: (_, __) => ShimmerItem(context: context),
       ),
     );
   }
 
-  Widget _buildShimmerItem(BuildContext context) {
+  Widget _buildError(BuildContext context) {
+    return StateViewError(errorMessage: errorMessage, onRetry: onRetry,);
+  }
+
+  Widget _buildEmpty(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          30.vGap,
+          Image.asset(
+            AppImages.getEmpty(context),
+            width: 180.w,
+          ),
+          16.vGap,
+          Text(
+            AppConst.stateHint.empty,
+            style: TextStyle(
+              fontSize: 11.w,
+              color: Theme.of(context).hintColor,
+            ),
+          ),
+          if (onRetry != null) ...[
+            16.vGap,
+            DisButton(
+                text: '重试', size: ButtonSize.small, onPressed: onRetry),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class ShimmerItem extends StatelessWidget {
+  const ShimmerItem({
+    super.key,
+    required this.context,
+  });
+
+  final BuildContext context;
+
+  @override
+  Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final shimmerColor =
         isDark ? const Color(0xFF303030) : const Color(0xFFF5F5F5);
@@ -146,38 +188,6 @@ class StateView extends GetView {
               borderRadius: BorderRadius.circular(2.w),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildError(BuildContext context) {
-    return StateViewError(errorMessage: errorMessage, onRetry: onRetry,);
-  }
-
-  Widget _buildEmpty(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          30.vGap,
-          Image.asset(
-            AppImages.getEmpty(context),
-            width: 180.w,
-          ),
-          16.vGap,
-          Text(
-            AppConst.stateHint.empty,
-            style: TextStyle(
-              fontSize: 11.w,
-              color: Theme.of(context).hintColor,
-            ),
-          ),
-          if (onRetry != null) ...[
-            16.vGap,
-            DisButton(
-                text: '重试', size: ButtonSize.small, onPressed: onRetry),
-          ],
         ],
       ),
     );

@@ -178,6 +178,8 @@ class Topic {
   @JsonKey(name: 'has_accepted_answer')
   final bool? hasAcceptedAnswer;
   final List<Poster>? posters;
+  @JsonKey(name: 'bookmarked')
+  final bool? bookmarked;
 
   const Topic({
     required this.id,
@@ -210,6 +212,7 @@ class Topic {
     this.featuredLink,
     this.hasAcceptedAnswer,
     this.posters,
+    this.bookmarked,
   });
 
   factory Topic.fromJson(Map<String, dynamic> json) => _$TopicFromJson(json);
@@ -231,6 +234,11 @@ class Topic {
       orElse: () => Poster(userId: 0, extras: ''),
     );
     return latestPoster?.userId;
+  }
+
+   // 返回posters中的id 并且不包含原始发帖人
+  List<int> getAvatarUrls() {
+    return posters?.map((poster) => poster.userId).whereType<int>().toList() ?? [];
   }
 }
 

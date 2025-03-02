@@ -1285,7 +1285,7 @@ class UserInfoCardController extends BaseController {
   
   void toChatDetail() async{
     try{
-      final response = await apiService.getDirectChannel([username]);
+      final response = await apiService.getDirectChannel(username, true, true);
       if(response.channel != null){
         Get.toNamed(Routes.CHAT_DETAIL, arguments: response.channel);
       }else{

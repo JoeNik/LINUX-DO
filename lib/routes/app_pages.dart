@@ -14,7 +14,7 @@ import 'package:linux_do/widgets/html_widget.dart';
 import '../pages/chat/chat_detail_controller.dart';
 import '../pages/chat/chat_detail_page.dart';
 import '../pages/create/create_post_controller.dart';
-import '../pages/chat/chat_controller.dart';
+import '../pages/chat/chat_list_controller.dart';
 import '../pages/topics/details/topic_detail_controller.dart';
 import '../pages/topics/details/topic_detail_page.dart';
 import '../pages/settings/settings_controller.dart';
@@ -63,7 +63,7 @@ class AppPages {
         Get.lazyPut(() => HomeController());
         Get.lazyPut(() => TopicsController());
         Get.lazyPut(() => CategoryTopicsController());
-        Get.lazyPut(() => ChatController());
+        Get.lazyPut(() => ChatListController());
         Get.lazyPut(() => ProfileController());
       }),
     ),

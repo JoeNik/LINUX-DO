@@ -315,19 +315,26 @@ abstract class ApiService {
   @GET('chat/api/channels/{channelId}/messages')
   Future<ChatMessagesResponse> getChannelMessages(
     @Path('channelId') int channelId, {
-    @Query('fetch_from_last_read') bool? fetchFromLastRead,
-    @Query('page_size') int? pageSize = 50,
-    @Query('direction') String? direction,
+    @Query('page_size') int? pageSize,
     @Query('target_message_id') int? targetMessageId,
+    @Query('direction') String? direction,
     @Query('position') String? position,
   });
 
-  /// 获取个人频道信息
+  /// 标记频道消息为已读
+  @PUT('chat/api/channels/{channelId}/read')
+  Future<dynamic> markChannelAsRead(
+    @Path('channelId') int channelId,
+    @Query('message_id') int messageId,
+  );
+
+  /// 获取直接消息频道
   @POST('chat/api/direct-message-channels.json')
   Future<ChatDirect> getDirectChannel(
-    @Query('target_usernames') List<String> targetUsernames, {
-    @Query('upsert') bool? upsert = true,
-  });
+    @Field('usernames') String usernames,
+    @Field('loadChat') bool loadChat,
+    @Field('force_create') bool forceCreate,
+  );
 
   /// 发送消息
   @POST('chat/{channelId}')

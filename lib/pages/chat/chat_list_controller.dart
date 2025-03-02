@@ -7,11 +7,9 @@ import '../../net/api_service.dart';
 import '../../routes/app_pages.dart';
 import '../../utils/log.dart';
 
-class ChatController extends BaseController {
+class ChatListController extends BaseController {
   final ApiService apiService = Get.find();
   
-  ChatController();
-
   // 深色模式
   final RxBool isDarkMode = false.obs;
   // 字体大小
@@ -108,7 +106,11 @@ class ChatController extends BaseController {
   }
 
   // 点击消息
-  void onMessageTap(ChatMessage message) {
-    Get.toNamed(Routes.CHAT_DETAIL, arguments: message);
+  void onMessageTap(ChatMessage message) async {
+    // 使用 await 等待导航返回结果
+    await Get.toNamed(Routes.CHAT_DETAIL, arguments: message);
+    
+    // 直接刷新 因为进入后标记已读
+    loadChannels();
   }
 } 

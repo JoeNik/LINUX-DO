@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/controller/base_controller.dart';
+import 'package:linux_do/net/http_config.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../controller/global_controller.dart';
 import '../../models/chat_detail_message.dart';
 import '../../models/chat_message.dart';
@@ -11,6 +10,8 @@ import '../../net/api_service.dart';
 import '../../utils/log.dart';
 import 'dart:async';
 import 'package:linux_do/models/user.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:uuid/uuid.dart';
 
 class ChatDetailController extends BaseController {
   final ApiService apiService = Get.find();
@@ -25,12 +26,14 @@ class ChatDetailController extends BaseController {
   final inputController = TextEditingController();
   final focusNode = FocusNode();
 
-  // 消息列表
+  // 消息列表 - 原始数据
   final RxList<ChatDetailMessage> messages = <ChatDetailMessage>[].obs;
+  
+  // flutter_chat_ui 使用的消息列表
+  final RxList<types.Message> chatMessages = <types.Message>[].obs;
 
-  // 滚动控制器
-  final itemScrollController = ItemScrollController();
-  final itemPositionsListener = ItemPositionsListener.create();
+  // 当前用户 - flutter_chat_ui 格式
+  late types.User currentUser;
 
   // 是否可以加载更多历史消息
   bool canLoadMorePast = false;
@@ -38,80 +41,62 @@ class ChatDetailController extends BaseController {
   bool canLoadMoreFuture = false;
   
   // 是否正在加载更多
-  bool _isLoadingMore = false;
+  bool isLoadingMore = false;
   // 防抖计时器
   Timer? _scrollDebounce;
 
   final refreshController = RefreshController();
 
   // MessageBus 相关
-  int _channelMessageBusId = -1;
   Timer? _messageBusTimer;
-  bool _isSubscribed = false;
 
   @override
   void onInit() {
     super.onInit();
-    // 监听滚动位置
-    itemPositionsListener.itemPositions.addListener(_onScroll);
+    // 初始化当前用户
+    _initCurrentUser();
+    
     // 加载消息
     loadMessages();
-    
-    // 订阅 MessageBus
-    // 不知道怎么实现 去掉轮训  
-    // _subscribeToMessageBus();
+  }
+
+  void _initCurrentUser() {
+    String? avatarUrl;
+    if (_user.value?.avatarTemplate != null) {
+      final template = _user.value!.avatarTemplate;
+      if (template != null) {
+        avatarUrl = '${HttpConfig.baseUrl}${template.replaceAll('{size}', '100')}';
+      }
+    }
+        
+    currentUser = types.User(
+      id: _user.value?.id.toString() ?? '0',
+      firstName: _user.value?.name,
+      lastName: '',
+      imageUrl: avatarUrl,
+    );
   }
 
   @override
   void onClose() {
     inputController.dispose();
     focusNode.dispose();
-    itemPositionsListener.itemPositions.removeListener(_onScroll);
     _scrollDebounce?.cancel();
     _messageBusTimer?.cancel();
-    _isSubscribed = false;
     super.onClose();
   }
 
-  void _onScroll() {
-    // 取消之前的延迟执行
-    _scrollDebounce?.cancel();
-    
-    // 创建新的延迟执行
-    _scrollDebounce = Timer(const Duration(milliseconds: 200), () {
-      if (_isLoadingMore) return;
-      
-      final positions = itemPositionsListener.itemPositions.value;
-      if (positions.isEmpty) return;
-
-      // 获取第一个和最后一个可见项的位置
-      final min = positions.first.index;
-      final max = positions.last.index;
-
-      // 如果第一个可见项是列表的第一项，并且可以加载更多历史消息
-      l.d('min: $min, max: $max');
-      if (min < 10) {
-        loadMorePastMessages();
-      }
-
-      // // 如果最后一个可见项是列表的最后一项，并且可以加载更多新消息
-      // if (max == messages.length - 1 && canLoadMoreFuture) {
-      //   loadMoreFutureMessages();
-      // }
-    });
-  }
-
   // 发送消息
-  Future<void> sendMessage() async {
-    final content = inputController.text.trim();
+  Future<void> sendMessage(types.PartialText message) async {
+    final content = message.text.trim();
     if (content.isEmpty) return;
     
-    l.d('用户信息: ${_user.value?.id} ${_user.value?.username} ${_user.value?.name}');
     try {
       // 生成一个临时ID
       final stagedId = DateTime.now().millisecondsSinceEpoch.toString();
+      final messageId = const Uuid().v4();
       
-      // 创建一个临时消息对象
+      // 创建一个临时消息对象 - 原始格式
       final tempMessage = ChatDetailMessage(
         id: null,  // 服务器会返回真实ID
         message: content,
@@ -127,21 +112,21 @@ class ChatDetailController extends BaseController {
         ),
       );
 
+      // 创建一个临时消息对象 - chat_ui 格式
+      final chatMessage = types.TextMessage(
+        id: messageId,
+        author: currentUser,
+        text: content,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        status: types.Status.sending,
+      );
+
       // 先添加到消息列表
       messages.add(tempMessage);
+      chatMessages.add(chatMessage);
       
       // 清空输入框
       inputController.clear();
-
-      // 滚动到底部
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (itemScrollController.isAttached) {
-          itemScrollController.scrollTo(
-            index: messages.length - 1,
-            duration: const Duration(milliseconds: 300),
-          );
-        }
-      });
 
       // 发送消息到服务器
       final response = await apiService.sendMessage(
@@ -150,19 +135,19 @@ class ChatDetailController extends BaseController {
         stagedId,
       );
 
-      // 如果发送成功，更新消息的ID
+      // 如果发送成功，更新消息的状态
       if (response['success'] == 'OK' && response['message_id'] != null) {
-        final index = messages.indexOf(tempMessage);
+        final index = chatMessages.indexWhere((msg) => msg.id == messageId);
         if (index != -1) {
-          messages[index] = ChatDetailMessage(
-            id: response['message_id'],
-            message: content,
-            cooked: content,
-            createdAt: DateTime.now().toIso8601String(),
-            channelId: channel.id,
-            streaming: false,
-            user: tempMessage.user,
+          final updatedMessage = (chatMessages[index] as types.TextMessage).copyWith(
+            status: types.Status.delivered,
           );
+          chatMessages[index] = updatedMessage;
+        }
+        
+        // 标记新发送的消息为已读
+        if (response['message_id'] != null) {
+          markMessageAsRead(response['message_id']);
         }
       }
     } catch (e, s) {
@@ -170,7 +155,18 @@ class ChatDetailController extends BaseController {
       showError('发送失败，请重试');
       
       // 从消息列表中移除失败的消息
-      messages.removeWhere((msg) => msg.id == null && msg.message == content);
+      final index = chatMessages.indexWhere((msg) {
+        if (msg is types.TextMessage) {
+          return msg.text == content;
+        }
+        return false;
+      });
+      if (index != -1) {
+        final updatedMessage = (chatMessages[index] as types.TextMessage).copyWith(
+          status: types.Status.error,
+        );
+        chatMessages[index] = updatedMessage;
+      }
     }
   }
 
@@ -188,18 +184,19 @@ class ChatDetailController extends BaseController {
       messages.clear();
       messages.addAll(response.messages);
 
+      // 转换为 flutter_chat_ui 格式
+      _convertMessages();
+
       canLoadMorePast = response.meta.canLoadMorePast;
       canLoadMoreFuture = response.meta.canLoadMoreFuture;
-
-      // 滚动到底部
-      Future.delayed(const Duration(milliseconds: 5), () {
-        if (itemScrollController.isAttached) {
-          itemScrollController.scrollTo(
-            index: messages.length - 1,
-            duration: const Duration(milliseconds: 5),
-          );
+      
+      // 标记最后一条消息为已读
+      if (messages.isNotEmpty) {
+        final lastMessage = messages.last;
+        if (lastMessage.id != null) {
+          markMessageAsRead(lastMessage.id!);
         }
-      });
+      }
     } catch (e, s) {
       l.e('加载消息失败 $e $s');
       showError(e.toString());
@@ -208,17 +205,105 @@ class ChatDetailController extends BaseController {
     }
   }
 
+  // 标记消息为已读
+  Future<void> markMessageAsRead(int messageId) async {
+    try {
+      // 调用标记已读API
+      await apiService.markChannelAsRead(
+        channel.id,
+        messageId,
+      );
+    } catch (e, s) {
+      l.e('标记消息已读失败: $e $s');
+    }
+  }
+
+  // 转换消息 格式
+  void _convertMessages() {
+    chatMessages.clear();
+    
+    for (final message in messages) {
+      String? avatarUrl;
+      if (message.user?.avatarTemplate != null) {
+        final template = message.user!.avatarTemplate;
+        if (template != null) {
+          avatarUrl = '${HttpConfig.baseUrl}${template.replaceAll('{size}', '100')}';
+        }
+      }
+      
+      final author = types.User(
+        id: message.user?.id.toString() ?? '0',
+        firstName: message.user?.name,
+        lastName: '',
+        imageUrl: avatarUrl,
+      );
+      
+      final isCurrentUser = message.user?.id == _user.value?.id;
+      final messageId = message.id?.toString() ?? const Uuid().v4();
+      
+      // 处理创建时间
+      int createdAt = DateTime.now().millisecondsSinceEpoch;
+      if (message.createdAt != null) {
+        createdAt = DateTime.parse(message.createdAt!).millisecondsSinceEpoch;
+      }
+      
+      // 检查是否有上传的图片
+      if (message.uploads != null && message.uploads!.isNotEmpty) {
+        for (final upload in message.uploads!) {
+          String url = '';
+          if (upload['url'] != null) {
+            url = upload['url'].toString();
+          }
+          
+          // 创建图片消息
+          final imageMessage = types.ImageMessage(
+            id: '${messageId}_img_${const Uuid().v4()}',
+            author: author,
+            name: upload['original_filename']?.toString() ?? 'image',
+            size: (upload['filesize'] as int?) ?? 0,
+            uri: url,
+            createdAt: createdAt,
+            status: isCurrentUser ? types.Status.delivered : null,
+          );
+          
+          chatMessages.add(imageMessage);
+        }
+      }
+      
+      // 如果有文本消息
+      if (message.message != null && message.message!.isNotEmpty) {
+        final textMessage = types.TextMessage(
+          id: messageId,
+          author: author,
+          text: message.message!,
+          createdAt: createdAt,
+          status: isCurrentUser ? types.Status.delivered : null,
+        );
+        
+        chatMessages.add(textMessage);
+      }
+    }
+    
+    // // 按时间排序
+    // chatMessages.sort((a, b) {
+    //   final aTime = a.createdAt ?? 0;
+    //   final bTime = b.createdAt ?? 0;
+    //   return aTime.compareTo(bTime);
+    // });
+  }
+
   // 加载更多历史消息
   Future<void> loadMorePastMessages() async {
-    l.d('_isLoadingMore: $_isLoadingMore');
-    if (!canLoadMorePast || _isLoadingMore) return;
+    if (!canLoadMorePast || isLoadingMore) return;
     
-    _isLoadingMore = true;
-    l.d('加载更多历史消息');
+    isLoadingMore = true;
     
     try {
+      if (messages.isEmpty) {
+        return;
+      }
+      
       final firstMessage = messages.first;
-      final oldMessagesLength = messages.length;
       
       final response = await apiService.getChannelMessages(
         channel.id,
@@ -227,127 +312,124 @@ class ChatDetailController extends BaseController {
         pageSize: 50,
       );
 
-      messages.insertAll(0, response.messages);
-      canLoadMorePast = response.meta.canLoadMorePast;
-
-      if (messages.length > oldMessagesLength) {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          if (itemScrollController.isAttached) {
-            itemScrollController.scrollTo(
-              index: response.messages.length,
-              duration: const Duration(milliseconds: 100),
-            );
-          }
-        });
+      if (response.messages.isEmpty) {
+        canLoadMorePast = false;
+        return;
       }
+      
+      // 添加到原始消息列表
+      messages.insertAll(0, response.messages);
+      
+      // 转换新消息并插入到列表前部
+      _convertAndPrependMessages(response.messages);
+      
+      // 强制刷新UI - 重要
+      chatMessages.refresh();
+      
+      // 使用返回值更新加载状态
+      canLoadMorePast = response.meta.canLoadMorePast;
     } catch (e, s) {
       l.e('加载更多历史消息失败: $e $s');
       showError(e.toString());
     } finally {
-      _isLoadingMore = false;
+      isLoadingMore = false;
       refreshController.refreshCompleted();
     }
   }
 
-  // 加载更多新消息
-  Future<void> loadMoreFutureMessages() async {
-    if (!canLoadMoreFuture || _isLoadingMore) return;
-    
-    _isLoadingMore = true;
-    
-    try {
-      final lastMessage = messages.last;
-      final response = await apiService.getChannelMessages(
-        channel.id,
-        targetMessageId: lastMessage.id,
-        direction: 'future',
-        pageSize: 50,
-      );
-
-      messages.addAll(response.messages.reversed);
-      canLoadMoreFuture = response.meta.canLoadMoreFuture;
-    } catch (e, s) {
-      l.e('加载更多新消息失败: $e $s');
-      showError(e.toString());
-    } finally {
-      _isLoadingMore = false;
+  // 专门用于处理历史消息的转换和添加
+  void _convertAndPrependMessages(List<ChatDetailMessage> newMessages) {
+    if (newMessages.isEmpty) {
+      l.d('没有新的历史消息需要转换');
+      return;
     }
-  }
-
-  // 订阅 MessageBus
-  void _subscribeToMessageBus() {
-    if (_isSubscribed) return;
-    _isSubscribed = true;
-
-    // 获取初始的 message_bus_id
-    _channelMessageBusId = channel.meta.messageBusLastIds.channelMessageBusLastId;
     
-    // 开始监听消息
-    _pollMessages();
-  }
-
-  // 轮询消息
-  void _pollMessages() async {
-    if (!_isSubscribed) return;
-
-    try {
-      final response = await apiService.getChannelMessages(
-        channel.id,
-        fetchFromLastRead: false,
-        pageSize: 20,
-        direction: 'future',
-        targetMessageId: _channelMessageBusId,
-      );
-
-      if (response.messages.isNotEmpty) {
-        // 更新最后的消息ID
-        _channelMessageBusId = response.messages.last.id ?? _channelMessageBusId;
-        
-        // 添加新消息
-        messages.addAll(response.messages);
-        
-        // 如果用户在底部，自动滚动到最新消息
-        if (_isUserAtBottom()) {
-          _scrollToBottom();
+    final newChatMessages = <types.Message>[];
+    
+    // 按时间排序 - 确保消息是按时间顺序
+    newMessages.sort((a, b) {
+      final aTime = a.createdAt != null ? DateTime.parse(a.createdAt!).millisecondsSinceEpoch : 0;
+      final bTime = b.createdAt != null ? DateTime.parse(b.createdAt!).millisecondsSinceEpoch : 0;
+      return aTime.compareTo(bTime);
+    });
+    
+    for (final message in newMessages) {
+      String? avatarUrl;
+      if (message.user?.avatarTemplate != null) {
+        final template = message.user!.avatarTemplate;
+        if (template != null) {
+          avatarUrl = '${HttpConfig.baseUrl}${template.replaceAll('{size}', '100')}';
         }
       }
-
-      // 等待一段时间后再次轮询
-      _messageBusTimer?.cancel();
-      _messageBusTimer = Timer(const Duration(seconds: 50), _pollMessages);
       
-    } catch (e, s) {
-      l.e('消息轮询失败: $e $s');
+      final author = types.User(
+        id: message.user?.id.toString() ?? '0',
+        firstName: message.user?.name,
+        lastName: '',
+        imageUrl: avatarUrl,
+      );
       
-      // 如果失败，等待一段时间后重试
-      _messageBusTimer?.cancel();
-      _messageBusTimer = Timer(const Duration(seconds: 80), _pollMessages);
-    }
-  }
-
-  // 判断用户是否在底部
-  bool _isUserAtBottom() {
-    if (!itemPositionsListener.itemPositions.value.isNotEmpty) return true;
-    
-    final positions = itemPositionsListener.itemPositions.value;
-    final lastIndex = messages.length - 1;
-    
-    for (final position in positions) {
-      if (position.index == lastIndex) {
-        return true;
+      final isCurrentUser = message.user?.id == _user.value?.id;
+      final messageId = message.id?.toString() ?? const Uuid().v4();
+      
+      // 处理创建时间
+      int createdAt = DateTime.now().millisecondsSinceEpoch;
+      if (message.createdAt != null) {
+        createdAt = DateTime.parse(message.createdAt!).millisecondsSinceEpoch;
+      }
+      
+      // 检查是否有上传的图片
+      if (message.uploads != null && message.uploads!.isNotEmpty) {
+        for (final upload in message.uploads!) {
+          String url = '';
+          if (upload['url'] != null) {
+            url = upload['url'].toString();
+          }
+          
+          // 创建图片消息
+          final imageMessage = types.ImageMessage(
+            id: '${messageId}_img_${const Uuid().v4()}',
+            author: author,
+            name: upload['original_filename']?.toString() ?? 'image',
+            size: (upload['filesize'] as int?) ?? 0,
+            uri: url,
+            createdAt: createdAt,
+            status: isCurrentUser ? types.Status.delivered : null,
+          );
+          
+          newChatMessages.add(imageMessage);
+        }
+      }
+      
+      // 如果有文本消息
+      if (message.message != null && message.message!.isNotEmpty) {
+        final textMessage = types.TextMessage(
+          id: messageId,
+          author: author,
+          text: message.message!,
+          createdAt: createdAt,
+          status: isCurrentUser ? types.Status.delivered : null,
+        );
+        
+        newChatMessages.add(textMessage);
       }
     }
-    return false;
-  }
-  
-  // 滚动到底部
-  void _scrollToBottom() {
-    if (messages.isEmpty || !itemScrollController.isAttached) return;
     
-    itemScrollController.scrollTo(
-      index: messages.length - 1,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
+    
+    if (newChatMessages.isEmpty) {
+      return;
+    }
+    
+    // 将新消息插入到现有消息列表的前面
+    chatMessages.insertAll(0, newChatMessages);
+  }
+
+  void handleImageSelection() async {
+
+  }
+
+
+  void handleFileSelection() async {
+    
   }
 }

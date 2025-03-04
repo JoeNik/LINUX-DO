@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:lazy_load_indexed_stack/lazy_load_indexed_stack.dart';
-import '../chat/chat_page.dart';
+import '../chat/chat_list_page.dart';
 import '../topics/topics_page.dart';
 import '../category/category_topics_page.dart';
 import '../profile/profile_page.dart';
@@ -71,9 +71,9 @@ class HomePage extends GetView<HomeController> {
                 activeColor: Theme.of(context)
                     .bottomNavigationBarTheme
                     .selectedItemColor,
-                height: 50.w,
-                curveSize: 60.w,
-                top: -20.w,
+                height: 48.w,
+                curveSize: 78.w,
+                top: -18.w,
                 elevation: 9.0,
                 cornerRadius: 9.w,
                 badgeMargin: EdgeInsets.only(left: 20.w, bottom: 18.w),

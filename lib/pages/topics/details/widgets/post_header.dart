@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_spacing.dart';
@@ -67,31 +68,68 @@ class _UserInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasUserTitle = post.userTitle != null && post.userTitle!.isNotEmpty;
+    
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            post.name?.isNotEmpty == true ? post.name! : post.username ?? '',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 14.w,
-              fontFamily: AppFontFamily.dinPro,
-              fontWeight:
-                  !post.isWebMaster() ? FontWeight.w500 : FontWeight.bold,
-              color: !post.isWebMaster()
-                  ? Theme.of(context).textTheme.titleLarge?.color
-                  : Theme.of(context).primaryColor,
-            ),
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  post.name?.isNotEmpty == true
+                      ? post.name!
+                      : post.username ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14.w,
+                    fontFamily: AppFontFamily.dinPro,
+                    fontWeight:
+                        !post.isWebMaster() ? FontWeight.w500 : FontWeight.bold,
+                    color: !post.isWebMaster()
+                        ? Theme.of(context).textTheme.titleLarge?.color
+                        : Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              if (hasUserTitle) ...[
+                5.hGap,
+                Text(
+                  post.userTitle!,
+                  style: TextStyle(
+                    fontSize: 9.w,
+                    fontFamily: AppFontFamily.dinPro,
+                    color: Theme.of(context).hintColor,
+                  ),
+                ),
+              ],
+            ],
           ),
-          Text(
-            post.username ?? '',
-            style: TextStyle(
-              fontSize: 11.w,
-              fontFamily: AppFontFamily.dinPro,
-              color: Theme.of(context).hintColor,
-            ),
+          Row(
+            children: [
+              Flexible(
+                child: Text(
+                  post.username ?? '',
+                  style: TextStyle(
+                    fontSize: 11.w,
+                    fontFamily: AppFontFamily.dinPro,
+                    color: Theme.of(context).hintColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (post.isWebMaster()) ...[
+                5.hGap,
+                Icon(
+                  CupertinoIcons.shield_lefthalf_fill,
+                  size: 12.w,
+                  color: Theme.of(context).primaryColor,
+                )
+              ]
+            ],
           ),
         ],
       ),

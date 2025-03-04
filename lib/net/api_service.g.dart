@@ -1548,18 +1548,16 @@ class _ApiService implements ApiService {
   @override
   Future<ChatMessagesResponse> getChannelMessages(
     int channelId, {
-    bool? fetchFromLastRead,
-    int? pageSize = 50,
-    String? direction,
+    int? pageSize,
     int? targetMessageId,
+    String? direction,
     String? position,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      r'fetch_from_last_read': fetchFromLastRead,
       r'page_size': pageSize,
-      r'direction': direction,
       r'target_message_id': targetMessageId,
+      r'direction': direction,
       r'position': position,
     };
     queryParameters.removeWhere((k, v) => v == null);
@@ -1593,18 +1591,49 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<ChatDirect> getDirectChannel(
-    List<String> targetUsernames, {
-    bool? upsert = true,
-  }) async {
+  Future<dynamic> markChannelAsRead(
+    int channelId,
+    int messageId,
+  ) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{
-      r'target_usernames': targetUsernames,
-      r'upsert': upsert,
-    };
-    queryParameters.removeWhere((k, v) => v == null);
+    final queryParameters = <String, dynamic>{r'message_id': messageId};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<dynamic>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          'chat/api/channels/${channelId}/read',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
+  @override
+  Future<ChatDirect> getDirectChannel(
+    String usernames,
+    bool loadChat,
+    bool forceCreate,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = {
+      'usernames': usernames,
+      'loadChat': loadChat,
+      'force_create': forceCreate,
+    };
     final _options = _setStreamType<ChatDirect>(Options(
       method: 'POST',
       headers: _headers,
@@ -2434,6 +2463,45 @@ class _ApiService implements ApiService {
         .compose(
           _dio.options,
           'export_csv/export_entity.json',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late SuccessResponse<dynamic> _value;
+    try {
+      _value = SuccessResponse<dynamic>.fromJson(
+        _result.data!,
+        (json) => json as dynamic,
+      );
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<SuccessResponse<dynamic>> updatePolicyAccepted(
+    String action,
+    String postId,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = {'post_id': postId};
+    final _options = _setStreamType<SuccessResponse<dynamic>>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          'policy/${action}',
           queryParameters: queryParameters,
           data: _data,
         )

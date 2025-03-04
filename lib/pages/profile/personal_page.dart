@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -8,7 +9,6 @@ import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/models/user.dart';
 import 'package:linux_do/pages/profile/personal_controller.dart';
-import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/widgets/cached_image.dart';
 import 'package:linux_do/widgets/glowing_text_wweep.dart';
 import 'package:linux_do/widgets/topic_item.dart';
@@ -153,7 +153,7 @@ class PersonalPage extends GetView<PersonalController> {
                     opacity: showTitle ? 1.0 : 0.0,
                     child: showTitle
                         ? Text(
-                            user.username,
+                            user.name ?? user.username,
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16.sp,
@@ -164,6 +164,7 @@ class PersonalPage extends GetView<PersonalController> {
                   );
                 },
               ),
+              leadingWidth: 80.w,
               leading: ValueListenableBuilder<double>(
                 valueListenable: scrollProgress,
                 builder: (context, progress, child) {
@@ -173,21 +174,31 @@ class PersonalPage extends GetView<PersonalController> {
                     opacity: showAvatar ? 1.0 : 0.0,
                     child: showAvatar
                         ? Padding(
-                            padding: EdgeInsets.all(8.w),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: AppColors.white, width: 1.w),
-                                  borderRadius: BorderRadius.circular(80.w)),
-                              child: CachedImage(
-                                imageUrl: user.getAvatar(120),
-                                circle: true,
-                                width: 30.w,
-                                height: 30.w,
-                                borderRadius: BorderRadius.circular(80.w),
-                                showBorder: true,
-                                borderColor: AppColors.white,
-                              ),
+                            padding: const EdgeInsets.symmetric(horizontal: 1).w,
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    Get.back();
+                                  },
+                                  icon: Icon(CupertinoIcons.chevron_left,size: 20,color: Theme.of(context).cardColor,),
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: AppColors.white, width: 1.w),
+                                      borderRadius: BorderRadius.circular(80.w)),
+                                  child: CachedImage(
+                                    imageUrl: user.getAvatar(60),
+                                    circle: !user.isWebMaster(),
+                                    width: 30.w,
+                                    height: 30.w,
+                                    borderRadius: BorderRadius.circular(80.w),
+                                    showBorder: true,
+                                    borderColor: AppColors.white,
+                                  ),
+                                ),
+                              ],
                             ),
                           )
                         : const SizedBox.shrink(),

@@ -188,9 +188,7 @@ class Post {
   final String? bookmarkableType;
   final String? bookmarkReminderAt;
   final String? bookmarkName;
-
-
-
+  final bool? policyAccepted;
 
 
   Post({
@@ -268,7 +266,8 @@ class Post {
     this.bookmarkId,
     this.bookmarkableType,
     this.bookmarkReminderAt,
-    this.bookmarkName,
+    this.bookmarkName,  
+    this.policyAccepted,
   });
 
 
@@ -280,29 +279,9 @@ class Post {
     return userId == 1;
   }
 
-bool needsTranslation() {
-  // 去除 <pre> 和 <code> 标签内容
-  String sanitizedContent = cooked?.replaceAll(RegExp(r'<(pre|code)[^>]*>.*?</\1>', dotAll: true), '') ?? '';
-
-  int totalCharacters = 0;
-  int englishCharacters = 0;
-
-  // 正则表达式匹配所有字符
-  RegExp regExp = RegExp(r'[a-zA-Z]');
-  for (int i = 0; i < sanitizedContent.length; i++) {
-    String char = sanitizedContent[i];
-    totalCharacters++;
-
-    // 如果是英文字符
-    if (regExp.hasMatch(char)) {
-      englishCharacters++;
-    }
+  bool isForumMaster(int id) {
+    return id == userId;
   }
-
-  // 判断英文字符占比
-  double englishRatio = totalCharacters == 0 ? 0 : englishCharacters / totalCharacters;
-  return englishRatio > 0.7;
-}
 
 
   factory Post.fromJson(Map<String, dynamic> json) => Post(
@@ -381,6 +360,7 @@ bool needsTranslation() {
     bookmarkableType: json['bookmarkable_type'] as String?,
     bookmarkReminderAt: json['bookmark_reminder_at'] as String?,
     bookmarkName: json['bookmark_name'] as String?,
+    policyAccepted: json['policy_accepted'] as bool?,
   );
 
 
@@ -420,6 +400,7 @@ bool needsTranslation() {
       'bookmark_id': bookmarkId,
       'bookmarkable_type': bookmarkableType,
       'bookmark_reminder_at': bookmarkReminderAt,
+      'policy_accepted': policyAccepted,
     };
   }
 }

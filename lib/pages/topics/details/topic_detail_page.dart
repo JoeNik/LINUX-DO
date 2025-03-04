@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/pages/topics/details/widgets/post_reply.dart';
 import 'package:linux_do/widgets/dis_button.dart';
+import 'package:linux_do/widgets/owner_banner.dart';
+import 'package:linux_do/widgets/state_view.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../const/app_const.dart';
 import '../../../const/app_spacing.dart';
 import '../../../const/app_theme.dart';
@@ -32,8 +34,15 @@ class TopicDetailPage extends GetView<TopicDetailController> {
         children: [
           Obx(() {
             final topic = controller.topic.value;
-            if (topic == null) return const SizedBox();
-            return _buildContent(context, topic);
+            return StateView(
+              state: _getViewState(),
+              errorMessage: controller.errorMessage.value,
+              onRetry: controller.fetchTopicDetail,
+              shimmerView: const ShimmerDetails(),
+              child: topic == null
+                  ? const SizedBox()
+                  : _buildContent(context, topic),
+            );
           }),
           // 新增楼层选择器
           Obx(() {
@@ -61,6 +70,16 @@ class TopicDetailPage extends GetView<TopicDetailController> {
         ],
       ),
     );
+  }
+
+  ViewState _getViewState() {
+    if (controller.isLoading.value) {
+      return ViewState.loading;
+    }
+    if (controller.hasError.value) {
+      return ViewState.error;
+    }
+    return ViewState.content;
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
@@ -176,6 +195,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
   Widget _buildPostItem(BuildContext context, PostNode node) {
     final isReply = node.post.replyToPostNumber != null;
     final barWidth = 8.w;
+
     return GetBuilder<TopicDetailController>(
       id: 'post_${node.post.postNumber}',
       builder: (controller) => Container(
@@ -187,74 +207,85 @@ class TopicDetailPage extends GetView<TopicDetailController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: isReply ? 12.w + barWidth : 12.w,
-                    right: isReply ? 12.w + barWidth : 12.w,
-                    top: isReply ? 24.w : 12.w,
-                    bottom: 12.w,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      6.vGap,
-                      PostHeader(
-                          post: node.post,
-                          title: controller.topic.value?.title),
-                      2.vGap,
-                      PostContent(node: node, isReply: isReply),
-                      Divider(
-                        height: 1.h,
-                        color: Theme.of(context).dividerColor,
-                      ),
-                      12.vGap,
-                      PostFooter(post: node.post),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .primaryColor
-                          .withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(12.w),
-                        bottomLeft: Radius.circular(12.w),
-                      ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12.w),
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: isReply ? 12.w + barWidth : 12.w,
+                      right: isReply ? 12.w + barWidth : 12.w,
+                      top: isReply ? 24.w : 12.w,
+                      bottom: 12.w,
                     ),
-                    child: Text(
-                      '#${node.post.postNumber}',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 10.w,
-                        fontFamily: AppFontFamily.dinPro,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                isReply
-                    ? Positioned(
-                        top: 0,
-                        left: 0,
-                        child: GestureDetector(
-                          onTap: () {
-                            if (node.post.replyToPostNumber != null) {
-                              controller.scrollToPost(node.post.replyToPostNumber! - 1);
-                            }
-                          },
-                          child: PostReply(post: node.post),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        6.vGap,
+                        PostHeader(
+                            post: node.post,
+                            title: controller.topic.value?.title),
+                        2.vGap,
+                        PostContent(node: node, isReply: isReply),
+                        Divider(
+                          height: 1.h,
+                          color: Theme.of(context).dividerColor,
                         ),
-                      )
-                    : const SizedBox()
-              ],
+                        12.vGap,
+                        PostFooter(post: node.post, controller: controller),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .primaryColor
+                            .withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(12.w),
+                          bottomLeft: Radius.circular(12.w),
+                        ),
+                      ),
+                      child: Text(
+                        '#${node.post.postNumber}',
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 10.w,
+                          fontFamily: AppFontFamily.dinPro,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  isReply
+                      ? Positioned(
+                          top: 0,
+                          left: 0,
+                          child: GestureDetector(
+                            onTap: () {
+                              if (node.post.replyToPostNumber != null) {
+                                controller.scrollToPost(
+                                    node.post.replyToPostNumber! - 1);
+                              }
+                            },
+                            child: PostReply(post: node.post),
+                          ),
+                        )
+                      : const SizedBox(),
+                  node.post.isForumMaster(controller.topic.value?.userId ?? 0)
+                      ? Positioned(
+                          bottom: 14.w,
+                          right: 14.w,
+                          child: const OwnerBanner(),
+                        )
+                      : const SizedBox()
+                ],
+              ),
             ),
           ],
         ),
@@ -360,8 +391,8 @@ class TopicDetailPage extends GetView<TopicDetailController> {
           SizedBox(
             child: IconButton(
               onPressed: () {
-                controller.startReply(null, topic.title,
-                    topic.details?.createdBy?.username);
+                controller.startReply(
+                    null, topic.title, topic.details?.createdBy?.username);
               },
               icon: Icon(CupertinoIcons.reply, size: 22.w),
             ),

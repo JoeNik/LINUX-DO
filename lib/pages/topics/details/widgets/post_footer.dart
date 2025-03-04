@@ -14,11 +14,12 @@ import '../topic_detail_controller.dart';
 class PostFooter extends StatelessWidget {
   const PostFooter({
     required this.post,
+    required this.controller,
     Key? key,
   }) : super(key: key);
 
   final Post post;
-
+  final TopicDetailController controller;
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -41,6 +42,10 @@ class PostFooter extends StatelessWidget {
 
         const Spacer(),
         _ReplyButton(post: post),
+
+        post.isForumMaster(controller.topic.value?.userId ?? 0)
+            ? 10.hGap
+            : const SizedBox.shrink()
       ],
     );
   }
@@ -56,8 +61,7 @@ class _TranslateButton extends StatelessWidget {
     return InkWell(
       child: Row(
         children: [
-          Icon(Icons.translate,
-              size: 16.w, color: Theme.of(context).hintColor),
+          Icon(Icons.translate, size: 16.w, color: Theme.of(context).hintColor),
         ],
       ),
     );
@@ -78,7 +82,7 @@ class _EditButton extends StatelessWidget {
       child: Row(
         children: [
           Icon(CupertinoIcons.pencil,
-              size: 16.w, color: Theme.of(context).hintColor),
+              size: 14.w, color: Theme.of(context).hintColor),
         ],
       ),
     );
@@ -98,7 +102,7 @@ class _ReportButton extends StatelessWidget {
       child: Row(
         children: [
           Icon(CupertinoIcons.exclamationmark_triangle,
-              size: 16.w, color: Theme.of(context).hintColor),
+              size: 14.w, color: Theme.of(context).hintColor),
         ],
       ),
     );
@@ -308,7 +312,7 @@ class _LikeButton extends StatelessWidget {
                 controller.likedPosts[post.postNumber] == true
                     ? CupertinoIcons.heart_fill
                     : CupertinoIcons.heart,
-                size: 16.w,
+                size: 14.w,
                 color: controller.likedPosts[post.postNumber] == true
                     ? Theme.of(context).primaryColor
                     : Theme.of(context).hintColor,
@@ -349,7 +353,7 @@ class _ReplyButton extends StatelessWidget {
         children: [
           Icon(
             CupertinoIcons.reply,
-            size: 16.w,
+            size: 14.w,
             color: Theme.of(context).hintColor,
           ),
           4.hGap,
@@ -380,7 +384,7 @@ class _CopyButton extends StatelessWidget {
       child: Row(
         children: [
           Icon(CupertinoIcons.square_on_square,
-              size: 16.w, color: Theme.of(context).hintColor),
+              size: 14.w, color: Theme.of(context).hintColor),
         ],
       ),
     );
@@ -404,7 +408,7 @@ class _BookmarkButton extends StatelessWidget {
               controller.bookmarkedPosts[post.postNumber ?? -1] ?? false
                   ? CupertinoIcons.bookmark_fill
                   : CupertinoIcons.bookmark,
-              size: 16.w,
+              size: 14.w,
               color: controller.bookmarkedPosts[post.postNumber ?? -1] ?? false
                   ? Theme.of(context).primaryColor
                   : Theme.of(context).hintColor)),
@@ -428,7 +432,7 @@ class _DeleteButton extends StatelessWidget {
       child: Row(
         children: [
           Icon(CupertinoIcons.trash,
-              size: 16.w, color: Theme.of(context).hintColor),
+              size: 14.w, color: Theme.of(context).hintColor),
         ],
       ),
     );

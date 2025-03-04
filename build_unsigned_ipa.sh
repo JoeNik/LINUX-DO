@@ -71,6 +71,6 @@ fi
 
 
 # 打包安卓版本
-flutter build apk --release --split-per-abi 
+# flutter build apk --release --split-per-abi 
 
-print_message "✅ 打包完成"
+# print_message "✅ 打包完成"

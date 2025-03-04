@@ -394,6 +394,10 @@ class CurrentUser {
     }
     return null;
   }
+
+    bool isWebMaster() {
+    return id == 1;
+  }
 }
 
 @JsonSerializable()

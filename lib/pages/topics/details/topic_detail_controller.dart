@@ -10,6 +10,7 @@ import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/utils/browser_util.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
+import 'package:linux_do/widgets/html_widget.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../controller/global_controller.dart';
 import '../../../models/request/update_post.dart';
@@ -29,7 +30,6 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:linux_do/const/app_spacing.dart';
-
 
 class TopicDetailController extends BaseController
     with WidgetsBindingObserver, Concatenated {
@@ -96,19 +96,21 @@ class TopicDetailController extends BaseController
   final currentPostIndex = 0.obs;
   final isManualScrolling = false.obs;
 
-    // 图片列表
+  // 图片列表
   final uploadedImages = <UploadImageResponse>[].obs;
   // 正在上传图片
   final isUploading = false.obs;
   // 回复内容控制器
   final contentController = TextEditingController();
 
+  final htmlController = Get.find<HtmlController>();
+
   @override
   void onInit() {
     super.onInit();
     topicId.value = Get.arguments as int;
     final postNumber = Get.parameters['postNumber'];
-    
+
     itemPositionsListener.itemPositions.addListener(_onScroll);
 
     if (postNumber != null) {
@@ -137,7 +139,7 @@ class TopicDetailController extends BaseController
   void onClose() {
     _debounceTimer?.cancel();
     itemPositionsListener.itemPositions.removeListener(_onScroll);
-    
+
     // 优化在页面关闭时保存最后的阅读位置
     final positions = itemPositionsListener.itemPositions.value.toList();
     if (positions.isNotEmpty) {
@@ -145,7 +147,8 @@ class TopicDetailController extends BaseController
       // 找到第一个可见的帖子（可见度超过50%的）
       for (var position in positions) {
         if (position.index >= 1 && position.index - 1 < replyTree.length) {
-          if (position.itemLeadingEdge < 0.5 && position.itemTrailingEdge > 0.5) {
+          if (position.itemLeadingEdge < 0.5 &&
+              position.itemTrailingEdge > 0.5) {
             final node = replyTree[position.index - 1];
             if (node.post.postNumber != null) {
               StorageManager.setData(_topicPostKey, node.post.postNumber);
@@ -154,16 +157,17 @@ class TopicDetailController extends BaseController
           }
         }
       }
-      
+
       // 如果没有找到足够可见的帖子，使用第一个可见的帖子
-      if (positions.first.index >= 1 && positions.first.index - 1 < replyTree.length) {
+      if (positions.first.index >= 1 &&
+          positions.first.index - 1 < replyTree.length) {
         final node = replyTree[positions.first.index - 1];
         if (node.post.postNumber != null) {
           StorageManager.setData(_topicPostKey, node.post.postNumber);
         }
       }
     }
-    
+
     // 移除应用生命周期监听
     WidgetsBinding.instance.removeObserver(this);
     _presenceTimer?.cancel();
@@ -180,13 +184,12 @@ class TopicDetailController extends BaseController
       // 应用进入后台前更新
       //_updateTopicTiming();
     }
-
   }
 
   void _debouncedUpdateTiming() {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(_debounceDelay, () {
-     _updateTopicTiming();
+      _updateTopicTiming();
     });
   }
 
@@ -207,7 +210,8 @@ class TopicDetailController extends BaseController
     if (!isManualScrolling.value) {
       for (var position in positions) {
         if (position.index >= 1 && position.index - 1 < replyTree.length) {
-          if (position.itemLeadingEdge < 0.5 && position.itemTrailingEdge > 0.5) {
+          if (position.itemLeadingEdge < 0.5 &&
+              position.itemTrailingEdge > 0.5) {
             final node = replyTree[position.index - 1];
             if (node.post.postNumber != null) {
               // 使用实际的楼层号减1作为索引
@@ -403,7 +407,8 @@ class TopicDetailController extends BaseController
       initialScrollIndex.value = 0;
 
       // 使用传入的楼层号，如果没有则使用上次浏览的位置
-      final targetPostNumber = postNumber ?? StorageManager.getInt(_topicPostKey);
+      final targetPostNumber =
+          postNumber ?? StorageManager.getInt(_topicPostKey);
       final page = targetPostNumber != null ? "/$targetPostNumber" : "/1";
 
       final response = await apiService.getTopicDetail(
@@ -412,14 +417,14 @@ class TopicDetailController extends BaseController
       );
 
       topic.value = response;
-      
+
       // 设置初始滚动位置
       if (targetPostNumber != null) {
         final posts = response.postStream?.posts ?? [];
         final index = posts.indexWhere((p) => p.postNumber == targetPostNumber);
         if (index >= 0) {
-          initialScrollIndex.value = index + 1; 
-          currentPostIndex.value = index;  // 使用实际的索引而不是楼层号减1
+          initialScrollIndex.value = index + 1;
+          currentPostIndex.value = index; // 使用实际的索引而不是楼层号减1
           l.d('设置初始位置 - targetPostNumber: $targetPostNumber, index: $index');
         }
       }
@@ -428,6 +433,13 @@ class TopicDetailController extends BaseController
       final posts = response.postStream?.posts ?? [];
       final stream = response.postStream?.stream ?? [];
       loadedPostIds.addAll(posts.map((p) => p.id ?? 0));
+
+      /// 设置公约初始状态
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        htmlController.isPolicyAccepted.value =
+            posts[0].policyAccepted ?? false;
+        htmlController.postId.value = topic.value?.postStream?.stream?[0] ?? 0;
+      });
 
       // 根据stream和当前加载的posts判断是否还有更多
       hasMore.value =
@@ -441,7 +453,6 @@ class TopicDetailController extends BaseController
 
       // 初始化点赞和书签数据
       _initPostScores();
-      
     } catch (e) {
       l.e('获取帖子详情失败: $e');
       setError('获取帖子详情失败');
@@ -537,13 +548,14 @@ class TopicDetailController extends BaseController
   void launchUrl(String? url) {
     if (url == null || url.isEmpty) return;
 
-    final savedBrowserTips = StorageManager.getBool(AppConst.identifier.browserTips) ?? false;
+    final savedBrowserTips =
+        StorageManager.getBool(AppConst.identifier.browserTips) ?? false;
 
     if (!savedBrowserTips) {
       Get.toNamed(Routes.WEBVIEW, arguments: url);
       return;
     }
-    
+
     Get.bottomSheet(
       Container(
         decoration: BoxDecoration(
@@ -562,7 +574,8 @@ class TopicDetailController extends BaseController
               width: 36.w,
               height: 4.w,
               decoration: BoxDecoration(
-                color: Theme.of(Get.context!).dividerColor.withValues(alpha: 0.1),
+                color:
+                    Theme.of(Get.context!).dividerColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(2.w),
               ),
             ),
@@ -795,7 +808,6 @@ class TopicDetailController extends BaseController
     _lastTypingTime.value = _replyStartTime.value;
   }
 
-
   // 取消回复
   void cancelReply() {
     replyContent.value = '';
@@ -833,7 +845,6 @@ class TopicDetailController extends BaseController
       );
 
       showSuccess(AppConst.posts.replySuccess);
-
 
       // 清空回复内容
       replyContent.value = '';
@@ -916,7 +927,8 @@ class TopicDetailController extends BaseController
       if (!_isPostLoaded(postNumber)) {
         await fetchTopicDetail(postNumber: postNumber);
       }
-      final index = replyTree.indexWhere((node) => node.post.postNumber == postNumber);
+      final index =
+          replyTree.indexWhere((node) => node.post.postNumber == postNumber);
       if (index != -1) {
         // 保存当前阅读位置
         StorageManager.setData(_topicPostKey, postNumber);
@@ -956,7 +968,6 @@ class TopicDetailController extends BaseController
       l.e('举报失败: $e -  \n$s');
       showError(AppConst.posts.reportFailed);
     }
-
   }
 
   // 获取举报类型ID
@@ -979,7 +990,7 @@ class TopicDetailController extends BaseController
   Future<void> pickAndUploadImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    
+
     if (pickedFile != null) {
       isUploading.value = true;
       try {
@@ -988,7 +999,7 @@ class TopicDetailController extends BaseController
         final originalFileName = pickedFile.path.split('/').last;
         final shortFileName = _generateShortFileName(originalFileName);
         final sha1Checksum = _calculateSha1(bytes);
-        
+
         // 创建 FormData
         final formData = dio.FormData.fromMap({
           'upload_type': 'composer',
@@ -1001,19 +1012,20 @@ class TopicDetailController extends BaseController
             filename: shortFileName,
           ),
         });
-        
+
         final response = await apiService.uploadImage(
           GlobalController.clientId,
           formData,
         );
-        
+
         uploadedImages.add(response);
-        
+
         // 将图片插入到内容中
-        final imageMarkdown = '\n![${response.originalFilename}|${response.width}x${response.height}](${response.shortUrl})\n';
+        final imageMarkdown =
+            '\n![${response.originalFilename}|${response.width}x${response.height}](${response.shortUrl})\n';
         final currentContent = contentController.text;
         final cursorPosition = contentController.selection.baseOffset;
-        
+
         if (cursorPosition >= 0) {
           final newContent = currentContent.substring(0, cursorPosition) +
               imageMarkdown +
@@ -1025,7 +1037,7 @@ class TopicDetailController extends BaseController
         } else {
           contentController.text += imageMarkdown;
         }
-      } catch (e,s) {
+      } catch (e, s) {
         showToast(AppConst.createPost.uploadFailed);
         debugPrint('Error uploading image: $e -- $s');
       } finally {
@@ -1038,11 +1050,11 @@ class TopicDetailController extends BaseController
   void removeImage(UploadImageResponse image) {
     uploadedImages.remove(image);
     // 从内容中移除图片引用
-    final imagePattern = '\\!\\[${image.originalFilename}\\|${image.width}x${image.height}\\]\\(${image.shortUrl}\\)';
+    final imagePattern =
+        '\\!\\[${image.originalFilename}\\|${image.width}x${image.height}\\]\\(${image.shortUrl}\\)';
     final regex = RegExp(imagePattern);
     contentController.text = contentController.text.replaceAll(regex, '');
   }
-
 
   // 计算文件的SHA1
   String _calculateSha1(List<int> bytes) {
@@ -1052,12 +1064,11 @@ class TopicDetailController extends BaseController
   // 生成短文件名
   String _generateShortFileName(String originalFileName) {
     final extension = originalFileName.split('.').last;
-    final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    final timestamp =
+        DateTime.now().millisecondsSinceEpoch.toString().substring(8);
     final random = (1000 + Random().nextInt(9000)).toString();
     return 'img_${timestamp}_$random.$extension';
   }
-
-  
 
   // 添加/删除书签
   Future<void> toggleBookmark(Post post) async {
@@ -1089,16 +1100,18 @@ class TopicDetailController extends BaseController
   }
 
   bool _isPostLoaded(int postNumber) {
-    return topic.value?.postStream?.posts?.any((p) => p.postNumber == postNumber) == true;
+    return topic.value?.postStream?.posts
+            ?.any((p) => p.postNumber == postNumber) ==
+        true;
   }
 
   // 更新楼层选择器的索引
   void updatePostSelectorIndex(int index, {bool shouldScroll = true}) {
     if (index < 0 || index >= (topic.value?.postsCount ?? 0)) return;
-    
+
     // 设置当前索引
     currentPostIndex.value = index;
-    
+
     if (shouldScroll) {
       // 将索引转换为楼层号 (index + 1)
       scrollToPost(index + 1);
@@ -1106,11 +1119,12 @@ class TopicDetailController extends BaseController
   }
 
   /// 删除帖子
-  void deletePost(Post post) async{
+  void deletePost(Post post) async {
     try {
       await apiService.deletePost(post.id.toString(),
-      context: '/t/${topic.value?.id}/${post.postNumber}');
+          context: '/t/${topic.value?.id}/${post.postNumber}');
       showSuccess(AppConst.posts.deleteSuccess);
+
       /// 更新改帖子内容
 
       // final newPost = await apiService.getDeletedPosts(post.id.toString());
@@ -1120,17 +1134,16 @@ class TopicDetailController extends BaseController
       /// 本地更新cooked
       post.cooked = AppConst.posts.deletePost;
       update(['post_${post.postNumber}']);
-
     } catch (e, s) {
       l.e('删除帖子失败: $e -  \n$s');
       showError(AppConst.posts.deleteFailed);
     }
-
   }
 
-  Future<void> editPost(Post post) async {  
-    startReply(post.postNumber,post.cooked,
-            post.name?.isEmpty ?? true ? post.username : post.name);
+  Future<void> editPost(Post post) async {
+    startReply(post.postNumber, post.cooked,
+        post.name?.isEmpty ?? true ? post.username : post.name);
+
     /// 先去掉所有的html标签
     final regex = RegExp(r'<[^>]*>');
     final text = post.cooked?.replaceAll(regex, '');
@@ -1138,7 +1151,7 @@ class TopicDetailController extends BaseController
     contentController.text = text ?? '';
     replyContent.value = text ?? '';
 
-    try{
+    try {
       final request = UpdatePostRequest(
         raw: contentController.text,
         topicId: topic.value?.id.toString() ?? '',
@@ -1148,20 +1161,22 @@ class TopicDetailController extends BaseController
         post.id.toString(),
         request,
       );
+
       /// 只更新这个帖子
       post.cooked = contentController.text;
       update(['post_${post.postNumber}']);
-    }catch(e,s){
+    } catch (e, s) {
       l.e('编辑帖子失败: $e -  \n$s');
     }
   }
 
   // 添加打开浏览器方法
   Future<void> handleOpenInBrowser() async {
-    final postUrl = '${HttpConfig.baseUrl}t/${topic.value?.slug}/${topic.value?.id}';
-    try{
+    final postUrl =
+        '${HttpConfig.baseUrl}t/${topic.value?.slug}/${topic.value?.id}';
+    try {
       await BrowserUtil.openUrlWithOptions(url: postUrl);
-    }catch(e){
+    } catch (e) {
       l.e('打开浏览器失败: $e');
       showError('打开浏览器失败');
     }

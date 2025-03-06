@@ -201,6 +201,15 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                     _buildStatItem('信任等级', user?.trustLevel.toString() ?? ''),
                     _buildStatItem('徽章数', user?.badgeCount.toString() ?? ''),
                     _buildStatItem('积分', '${user?.gamificationScore ?? 0}'),
+                    Obx(() => GestureDetector(
+                          onTap: () => showWarning('关注 - 开放中'),
+                          child: _buildStatItem('关注', '${controller.following.length}'),
+                        )),
+                    Obx(() => GestureDetector(
+                          onTap: () => showWarning('关注者 - 开放中'),
+                          child: _buildStatItem('关注者', '${controller.followers.length}'),
+                        )),
+
                   ],
                 ),
               ),

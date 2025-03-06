@@ -33,6 +33,7 @@ import 'package:linux_do/const/app_spacing.dart';
 
 class TopicDetailController extends BaseController
     with WidgetsBindingObserver, Concatenated {
+
   final topicId = 0.obs;
   final topic = Rx<TopicDetail?>(null);
   final hasMore = true.obs;
@@ -44,8 +45,8 @@ class TopicDetailController extends BaseController
 
   final ApiService apiService = Get.find();
   // 添加ScrollablePositionedList需要的控制器
-  final itemScrollController = ItemScrollController();
-  final itemPositionsListener = ItemPositionsListener.create();
+  late final ItemScrollController itemScrollController;
+  late final ItemPositionsListener itemPositionsListener;
 
   // 存储上次访问的帖子编号
   String get _topicPostKey => 'topic_post_${topicId.value}';
@@ -111,6 +112,9 @@ class TopicDetailController extends BaseController
     topicId.value = Get.arguments as int;
     final postNumber = Get.parameters['postNumber'];
 
+    itemScrollController = ItemScrollController();
+    itemPositionsListener = ItemPositionsListener.create();
+
     itemPositionsListener.itemPositions.addListener(_onScroll);
 
     if (postNumber != null) {
@@ -172,6 +176,12 @@ class TopicDetailController extends BaseController
     WidgetsBinding.instance.removeObserver(this);
     _presenceTimer?.cancel();
     _draftTimer?.cancel();
+
+    try {
+      itemPositionsListener.itemPositions.removeListener(_onScroll);
+    } catch (e) {
+      l.e('释放ItemScrollController和ItemPositionsListener失败: $e');
+    }
     super.onClose();
   }
 

@@ -133,6 +133,13 @@ class MyPostsController extends BaseController
     return _userCache.getNickName(latestPosterId);
   }
 
+  // 获取用户名
+  String? getUserName(Topic topic) {
+    final id = topic.getOriginalPosterId();
+    if (id == null) return null;
+    return _userCache.getUserName(id);
+  }
+
   Future<void> doNotDisturb(int id) async {
     l.d('设置免打扰 id : $id');
     try {
@@ -163,5 +170,11 @@ class MyPostsController extends BaseController
           message: AppConst.posts.error,
           type: SnackbarType.error);
     }
+  }
+
+      List<String> getAvatarUrls(Topic topic) {
+     // 通过_userCache获取头像
+    final avatarUrls = topic.getAvatarUrls();
+    return avatarUrls.map((id) => _userCache.getAvatarUrl(id)).whereType<String>().toList();
   }
 }

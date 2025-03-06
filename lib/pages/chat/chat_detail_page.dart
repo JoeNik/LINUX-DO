@@ -54,7 +54,7 @@ class ChatDetailPage extends GetView<ChatDetailController> {
           showUserNames: true,
           dateLocale: 'zh_CN',
           onEndReached: controller.loadMorePastMessages,
-          onEndReachedThreshold: 0.3,
+          onEndReachedThreshold: 0.8,
           inputOptions: const InputOptions(
             sendButtonVisibilityMode: SendButtonVisibilityMode.always,
           ),

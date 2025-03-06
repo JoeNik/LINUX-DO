@@ -4,7 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/models/topic_model.dart';
-import 'package:linux_do/pages/topics/details/widgets/topic_item/topic_content.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/topic_content.dart';
+import 'package:linux_do/widgets/avatar_widget.dart';
 
 /// 话题项组件 - 包含滑动操作
 class TopicItem extends StatelessWidget {
@@ -15,7 +16,8 @@ class TopicItem extends StatelessWidget {
   final VoidCallback? onTap;
   final Function(Topic)? onDoNotDisturb;
   final List<String>? avatarUrls;
-
+  final AvatarActions avatarActions;
+  final bool? toPersonalPage;
   const TopicItem({
     Key? key,
     required this.topic,
@@ -25,6 +27,8 @@ class TopicItem extends StatelessWidget {
     this.onTap,
     this.onDoNotDisturb,
     this.avatarUrls,
+    this.avatarActions = AvatarActions.noAction,
+    this.toPersonalPage,
   }) : super(key: key);
 
   @override
@@ -86,6 +90,8 @@ class TopicItem extends StatelessWidget {
                     nickName: nickName,
                     username: username,
                     avatarUrls: avatarUrls,
+                    avatarActions: avatarActions,
+                    toPersonalPage: toPersonalPage,
                   ),
                 ),
               ),

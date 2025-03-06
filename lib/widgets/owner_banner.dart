@@ -5,15 +5,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_theme.dart';
 
 class OwnerBanner extends StatelessWidget {
-  const OwnerBanner({super.key});
+  final void Function()? onTap;
+  const OwnerBanner({super.key, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(100.w, 100.w),
-      painter: OwnerPainter(
-        color: Theme.of(context).primaryColor,
-        text: 'OWNER',
+    return GestureDetector(
+      onTap: onTap,
+      child: CustomPaint(
+        size: Size(50.w, 50.w),
+        painter: OwnerPainter(
+          color: Theme.of(context).primaryColor,
+          text: 'OWNER',
+        ),
       ),
     );
   }

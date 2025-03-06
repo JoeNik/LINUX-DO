@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/models/topic_detail.dart';
@@ -25,23 +24,23 @@ class PostFooter extends StatelessWidget {
     return Row(
       children: [
         if (post.yours != true) ...[
-          _LikeButton(post: post),
+          _LikeButton(post: post, controller: controller),
           16.hGap,
         ],
-        _CopyButton(post: post),
+        _CopyButton(post: post, controller: controller),
         16.hGap,
-        _BookmarkButton(post: post),
+        _BookmarkButton(post: post, controller: controller),
         16.hGap,
         // 举报按钮
-        _ReportButton(post: post),
+        _ReportButton(post: post, controller: controller),
 
         // 16.hGap,
         // if (post.canEdit == true) _EditButton(post: post),
         16.hGap,
-        if (post.canDelete == true) _DeleteButton(post: post),
+        if (post.canDelete == true) _DeleteButton(post: post, controller: controller),
 
         const Spacer(),
-        _ReplyButton(post: post),
+        _ReplyButton(post: post, controller: controller),
 
         post.isForumMaster(controller.topic.value?.userId ?? 0)
             ? 10.hGap
@@ -53,8 +52,8 @@ class PostFooter extends StatelessWidget {
 
 class _TranslateButton extends StatelessWidget {
   final Post post;
-  final controller = Get.find<TopicDetailController>();
-  _TranslateButton({required this.post});
+  final TopicDetailController controller;
+  const _TranslateButton({required this.post, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -70,10 +69,10 @@ class _TranslateButton extends StatelessWidget {
 
 /// 编辑话题按钮组件
 class _EditButton extends StatelessWidget {
-  final controller = Get.find<TopicDetailController>();
   final Post post;
+  final TopicDetailController controller;
 
-  _EditButton({required this.post});
+  const _EditButton({required this.post, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -90,10 +89,9 @@ class _EditButton extends StatelessWidget {
 }
 
 class _ReportButton extends StatelessWidget {
-  final controller = Get.find<TopicDetailController>();
   final Post post;
-
-  _ReportButton({required this.post});
+  final TopicDetailController controller;
+  const _ReportButton({required this.post, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -295,14 +293,14 @@ class _ReportButton extends StatelessWidget {
 class _LikeButton extends StatelessWidget {
   const _LikeButton({
     required this.post,
+    required this.controller,
     Key? key,
   }) : super(key: key);
 
   final Post post;
-
+  final TopicDetailController controller;
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<TopicDetailController>();
 
     return InkWell(
       onTap: () => controller.toggleLike(post),
@@ -334,9 +332,10 @@ class _LikeButton extends StatelessWidget {
 
 /// 回复按钮组件
 class _ReplyButton extends StatelessWidget {
-  final controller = Get.find<TopicDetailController>();
-  _ReplyButton({
+  final TopicDetailController controller;
+  const _ReplyButton({
     required this.post,
+    required this.controller,
     Key? key,
   }) : super(key: key);
 
@@ -372,10 +371,9 @@ class _ReplyButton extends StatelessWidget {
 
 /// 复制按钮组件
 class _CopyButton extends StatelessWidget {
-  final controller = Get.find<TopicDetailController>();
   final Post post;
-
-  _CopyButton({required this.post});
+  final TopicDetailController controller;
+  _CopyButton({required this.post, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -393,10 +391,9 @@ class _CopyButton extends StatelessWidget {
 
 /// 书签按钮组件
 class _BookmarkButton extends StatelessWidget {
-  final controller = Get.find<TopicDetailController>();
+  final TopicDetailController controller;
   final Post post;
-
-  _BookmarkButton({required this.post});
+  const _BookmarkButton({required this.post, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -420,10 +417,9 @@ class _BookmarkButton extends StatelessWidget {
 
 /// 删除按钮组件
 class _DeleteButton extends StatelessWidget {
-  final controller = Get.find<TopicDetailController>();
   final Post post;
-
-  _DeleteButton({required this.post});
+  final TopicDetailController controller;
+  _DeleteButton({required this.post, required this.controller});
 
   @override
   Widget build(BuildContext context) {

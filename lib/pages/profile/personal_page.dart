@@ -9,9 +9,11 @@ import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/models/user.dart';
 import 'package:linux_do/pages/profile/personal_controller.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/topic_item.dart';
+import 'package:linux_do/widgets/avatar_widget.dart';
 import 'package:linux_do/widgets/cached_image.dart';
+import 'package:linux_do/widgets/dis_loading.dart';
 import 'package:linux_do/widgets/glowing_text_wweep.dart';
-import 'package:linux_do/widgets/topic_item.dart';
 import 'package:slide_switcher/slide_switcher.dart';
 
 class PersonalPage extends GetView<PersonalController> {
@@ -30,8 +32,8 @@ class PersonalPage extends GetView<PersonalController> {
             userInfo?.user?.backgroundUrl != null ? 380.w : 280.w;
         // 如果用户信息为空，显示加载状态
         if (userInfo == null) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return Center(
+            child: DisRefreshLoading(),
           );
         }
 
@@ -326,6 +328,8 @@ class PersonalPage extends GetView<PersonalController> {
             avatarUrl: user?.getAvatar(120),
             nickName: user?.name,
             username: user?.username,
+            avatarUrls: controller.getAvatarUrls(topic),
+            avatarActions: AvatarActions.noAction,
             onTap: () {
               controller.toTopicDetail(topic.id);
             },

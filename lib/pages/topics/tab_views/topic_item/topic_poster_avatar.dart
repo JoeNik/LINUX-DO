@@ -9,13 +9,16 @@ class TopicPosterAvatar extends StatelessWidget {
   final String nickName;
   final String username;
   final bool isOriginalPoster;
-
+  final AvatarActions avatarActions;
+  final bool? toPersonalPage;
   const TopicPosterAvatar({
     Key? key,
     required this.avatarUrl,
     required this.nickName,
     required this.username,
     this.isOriginalPoster = false,
+    this.avatarActions = AvatarActions.noAction,
+    this.toPersonalPage = true,
   }) : super(key: key);
 
   @override
@@ -38,6 +41,8 @@ class TopicPosterAvatar extends StatelessWidget {
               backgroundColor: Theme.of(context).cardColor,
               borderColor: Theme.of(context).primaryColor,
               username: username,
+              avatarActions: avatarActions,
+              toPersonalPage: toPersonalPage,
             ),
           ),
           SizedBox(height: 8.w),

@@ -9,9 +9,8 @@ import 'package:linux_do/pages/topics/details/topic_detail_controller.dart';
 
 class PostReply extends StatelessWidget {
   final Post post;
-  final controller = Get.find<TopicDetailController>();
-
-  PostReply({super.key, required this.post});
+  final TopicDetailController controller;
+  const PostReply({super.key, required this.post, required this.controller});
 
   @override
   Widget build(BuildContext context) {

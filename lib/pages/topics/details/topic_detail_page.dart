@@ -7,7 +7,6 @@ import 'package:linux_do/pages/topics/details/widgets/post_reply.dart';
 import 'package:linux_do/widgets/dis_button.dart';
 import 'package:linux_do/widgets/owner_banner.dart';
 import 'package:linux_do/widgets/state_view.dart';
-import 'package:shimmer/shimmer.dart';
 import '../../../const/app_const.dart';
 import '../../../const/app_spacing.dart';
 import '../../../const/app_theme.dart';
@@ -25,6 +24,12 @@ import 'widgets/posts_selector.dart';
 class TopicDetailPage extends GetView<TopicDetailController> {
   const TopicDetailPage({super.key});
 
+  // @override
+  // TopicDetailController get controller {
+  //   var topicId = Get.arguments as int;
+  //   return Get.find<TopicDetailController>(tag: 'topic_$topicId');
+  // }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,6 +65,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
               child: PostsSelector(
                   postsCount: postsCount,
                   currentIndex: controller.currentPostIndex.value,
+                  controller: controller,
                   onIndexChanged: (index) {
                     if (!controller.isLoading.value) {
                       controller.scrollToPost(index);
@@ -122,7 +128,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
     return Stack(
       children: [
         Positioned.fill(
-          bottom: controller.isReplying.value ? 300.h : 0,
+          bottom: controller.isReplying.value ? 380.w : 0,
           child: Obx(() => ScrollablePositionedList.builder(
                 key: PageStorageKey('topic_detail_${topic.id}'),
                 itemScrollController: controller.itemScrollController,
@@ -180,9 +186,9 @@ class TopicDetailPage extends GetView<TopicDetailController> {
         Obx(() {
           final isReplying = controller.isReplying.value;
           return AnimatedPositioned(
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 250),
             curve: Curves.easeInOut,
-            bottom: isReplying ? 0 : -350.h,
+            bottom: isReplying ? 0 : -380.w,
             left: 0,
             right: 0,
             child: _buildReplyInput(context, topic),
@@ -226,7 +232,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                             post: node.post,
                             title: controller.topic.value?.title),
                         2.vGap,
-                        PostContent(node: node, isReply: isReply),
+                        PostContent(node: node, isReply: isReply, controller: controller),
                         Divider(
                           height: 1.h,
                           color: Theme.of(context).dividerColor,
@@ -273,7 +279,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                                     node.post.replyToPostNumber! - 1);
                               }
                             },
-                            child: PostReply(post: node.post),
+                            child: PostReply(post: node.post, controller: controller),
                           ),
                         )
                       : const SizedBox(),
@@ -281,7 +287,16 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                       ? Positioned(
                           bottom: 14.w,
                           right: 14.w,
-                          child: const OwnerBanner(),
+                          child: OwnerBanner(
+                            onTap: () {
+                              controller.startReply(
+                                  node.post.postNumber,
+                                  node.post.cooked,
+                                  node.post.name?.isEmpty ?? true
+                                      ? node.post.username
+                                      : node.post.name);
+                            },
+                          ),
                         )
                       : const SizedBox()
                 ],
@@ -428,14 +443,21 @@ class TopicDetailPage extends GetView<TopicDetailController> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // 顶部拖动条
-          Container(
-            margin: EdgeInsets.symmetric(vertical: 8.w),
-            width: 36.w,
-            height: 4.w,
-            decoration: BoxDecoration(
-              color: theme.dividerColor.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(2.w),
-            ),
+          Row(
+            children: [
+              const Spacer(),
+              IconButton(
+                onPressed: controller.cancelReply,
+                icon: Icon(
+                  CupertinoIcons.clear,
+                  size: 18.sp,
+                  color: theme.hintColor,
+                ),
+                style: IconButton.styleFrom(
+                  padding: EdgeInsets.all(4.w),
+                ),
+              ),
+            ],
           ),
           // 回复引用
           Obx(() {
@@ -457,26 +479,31 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.reply, size: 16.sp, color: theme.hintColor),
+                      Icon(CupertinoIcons.reply,
+                          size: 16.sp, color: theme.hintColor),
                       8.hGap,
-                      Text(
-                        '回复 #${controller.replyToPostNumber}',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: theme.hintColor,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: controller.cancelReply,
-                        icon: Icon(
-                          CupertinoIcons.clear,
-                          size: 18.sp,
-                          color: theme.hintColor,
-                        ),
-                        style: IconButton.styleFrom(
-                          padding: EdgeInsets.all(4.w),
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: '回复',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: theme.hintColor,
+                                fontFamily: AppFontFamily.dinPro,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            TextSpan(
+                              text: ' #${controller.replyToPostNumber}',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: theme.primaryColor,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: AppFontFamily.dinPro,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -487,6 +514,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: theme.textTheme.bodyMedium?.color,
+                      fontFamily: AppFontFamily.dinPro,
                       fontWeight: FontWeight.w600,
                       height: 1.4,
                     ),
@@ -501,6 +529,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                       style: TextStyle(
                         fontSize: 10.sp,
                         color: theme.hintColor,
+                        fontFamily: AppFontFamily.dinPro,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

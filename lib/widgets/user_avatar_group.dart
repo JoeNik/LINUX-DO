@@ -35,7 +35,7 @@ class UserAvatarGroup extends StatelessWidget {
   const UserAvatarGroup({
     super.key,
     required this.avatarUrls,
-    this.maxDisplayed = 4,
+    this.maxDisplayed = 5,
     this.avatarSize = 22,
     this.overlap = 8,
     this.backgroundColor,

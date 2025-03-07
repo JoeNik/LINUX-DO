@@ -170,4 +170,10 @@ class MyBookmarksController extends BaseController
           type: SnackbarType.error);
     }
   }
+
+      List<String> getAvatarUrls(Topic topic) {
+     // 通过_userCache获取头像
+    final avatarUrls = topic.getAvatarUrls();
+    return avatarUrls.map((id) => _userCache.getAvatarUrl(id)).whereType<String>().toList();
+  }
 }

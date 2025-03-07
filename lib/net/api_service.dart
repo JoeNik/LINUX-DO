@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart' hide Headers, MultipartFile;
 import 'package:linux_do/models/chat_direct.dart';
 import 'package:linux_do/models/docs.dart';
+import 'package:linux_do/models/follow.dart';
 import 'package:linux_do/models/leaderboard.dart';
 import 'package:linux_do/models/request/update_post.dart';
 import 'package:linux_do/net/success_response.dart';
@@ -473,4 +474,12 @@ abstract class ApiService {
   @PUT('policy/{action}')
   Future<SuccessResponse<dynamic>> updatePolicyAccepted(
       @Path('action') String action, @Field('post_id') String postId);
+
+  /// 获取用户关注者列表
+  @GET('u/{username}/follow/following')
+  Future<List<Follow>> getFollowing(@Path('username') String username);
+
+  /// 获取用户关注者列表
+  @GET('u/{username}/follow/followers')
+  Future<List<Follow>> getFollowers(@Path('username') String username);
 }

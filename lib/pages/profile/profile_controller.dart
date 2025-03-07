@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linux_do/models/follow.dart';
 import 'package:linux_do/net/api_service.dart';
 import 'package:linux_do/net/success_response.dart';
 import 'package:linux_do/pages/profile/tabs/message_controller.dart';
@@ -36,10 +39,14 @@ class ProfileController extends BaseController with Concatenated {
   final TextEditingController statusController = TextEditingController();
   final TextEditingController emojiController = TextEditingController();
   final RxBool showEmoji = false.obs;
+  final RxList<Follow> following = <Follow>[].obs;
+  final RxList<Follow> followers = <Follow>[].obs;
 
   @override
   void onInit() {
     super.onInit();
+    _getFollowing();
+    _getFollowers();
     // 初始化子控制器
     Get.lazyPut(() => SummaryController());
     Get.lazyPut(() => ActivityController());
@@ -47,6 +54,10 @@ class ProfileController extends BaseController with Concatenated {
     Get.lazyPut(() => MessageController());
     Get.lazyPut(() => BadgeController());
   }
+
+
+  
+  
 
   Widget createCurrent() {
     switch (selectedIndex) {
@@ -116,7 +127,7 @@ class ProfileController extends BaseController with Concatenated {
       } else {
         response = await _apiService.deleteUserStatus();
       }
-      if (response != null && response.isSuccess) {
+      if (response.isSuccess) {
         showSuccess(AppConst.configSuccess);
         Get.find<GlobalController>().fetchUserInfo();
       } else {
@@ -125,6 +136,26 @@ class ProfileController extends BaseController with Concatenated {
     } catch (e, s) {
       l.e('更新失败 $e --- $s');
       showError('更新失败');
+    }
+  }
+
+  void _getFollowers() async {
+    try {
+      final response = await _apiService.getFollowers(userName);
+      l.i('获取关注者 ${jsonEncode(response)}');
+      followers.value = response;
+    } catch (e, s) {
+      l.e('获取关注者失败 $e --- $s');
+    }
+  }
+
+  void _getFollowing() async {
+    try {
+      final response = await _apiService.getFollowing(userName);
+      l.i('获取关注者 ${jsonEncode(response)}');
+      following.value = response;
+    } catch (e, s) {
+      l.e('获取关注者失败 $e --- $s');
     }
   }
 }

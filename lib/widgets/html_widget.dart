@@ -6,14 +6,18 @@ import 'package:flutter_html_table/flutter_html_table.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_spacing.dart';
+import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/net/api_service.dart';
+import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:linux_do/utils/mixins/toast_mixin.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:linux_do/utils/log.dart';
+import 'package:linux_do/widgets/avatar_widget.dart';
 import 'package:linux_do/widgets/dis_button.dart';
+import 'package:linux_do/widgets/dis_loading.dart';
 import 'package:linux_do/widgets/video_player_widget.dart';
 import 'cached_image.dart';
 import 'image_preview_dialog.dart';
@@ -63,10 +67,12 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
               margin: Margins.zero,
               padding: HtmlPaddings.zero,
               color: theme.textTheme.bodyLarge?.color,
+              fontFamily: AppFontFamily.dinPro,
             ),
             "a": Style(
               color: theme.primaryColor,
               textDecoration: TextDecoration.none,
+              fontFamily: AppFontFamily.dinPro,
             ),
             "img": Style(
               width: Width(100, Unit.percent),
@@ -80,6 +86,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
               padding: HtmlPaddings.zero,
               fontSize: FontSize(fontSize ?? 14.sp),
               lineHeight: LineHeight.number(1.5),
+              fontFamily: AppFontFamily.dinPro,
             ),
             "img.emoji": Style(
               width: Width(16.sp),
@@ -94,12 +101,13 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                   Theme.of(context).primaryColor.withValues(alpha: 0.1),
               padding: HtmlPaddings.all(12.w),
               margin: Margins.symmetric(vertical: 8.h),
+              fontFamily: AppFontFamily.dinPro,
             ),
             "code": Style(
               backgroundColor:
                   Theme.of(context).primaryColor.withValues(alpha: 0),
               padding: HtmlPaddings.symmetric(horizontal: 4.w, vertical: 2.h),
-              fontFamily: 'monospace',
+              fontFamily: AppFontFamily.dinPro,
               fontSize: FontSize(13.sp),
               color: Theme.of(context).primaryColor,
             ),
@@ -122,51 +130,62 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
               fontWeight: FontWeight.bold,
               margin: Margins.only(top: 16.h, bottom: 8.h),
               lineHeight: LineHeight.number(1.2),
+              fontFamily: AppFontFamily.dinPro,
             ),
             "h2": Style(
               fontSize: FontSize(20.sp),
               fontWeight: FontWeight.bold,
               margin: Margins.only(top: 16.h, bottom: 8.h),
               lineHeight: LineHeight.number(1.2),
+              fontFamily: AppFontFamily.dinPro,
             ),
             "h3": Style(
               fontSize: FontSize(18.sp),
               fontWeight: FontWeight.bold,
               margin: Margins.only(top: 16.h, bottom: 8.h),
               lineHeight: LineHeight.number(1.2),
+              fontFamily: AppFontFamily.dinPro,
             ),
             // 加粗和强调
             "strong": Style(
               fontWeight: FontWeight.bold,
               color: theme.textTheme.bodyLarge?.color,
+              fontFamily: AppFontFamily.dinPro,
             ),
             "em": Style(
               fontStyle: FontStyle.italic,
+              fontFamily: AppFontFamily.dinPro,
             ),
             // 列表样式
             "ul": Style(
               margin: Margins.only(left: 8.w, top: 8.h, bottom: 8.h),
               padding: HtmlPaddings.only(left: 16.w),
               listStyleType: ListStyleType.disc,
+              fontFamily: AppFontFamily.dinPro,
             ),
             "ol": Style(
               margin: Margins.only(left: 8.w, top: 8.h, bottom: 8.h),
               padding: HtmlPaddings.only(left: 16.w),
               listStyleType: ListStyleType.decimal,
+              fontFamily: AppFontFamily.dinPro,
             ),
             "li": Style(
               margin: Margins.only(bottom: 4.h),
+              fontFamily: AppFontFamily.dinPro,
             ),
             // 表格样式
             "table": Style(
               width: Width(100, Unit.percent),
+              fontFamily: AppFontFamily.dinPro,
             ),
             "th": Style(
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
               fontWeight: FontWeight.bold,
+              fontFamily: AppFontFamily.dinPro,
             ),
             "td": Style(
               padding: HtmlPaddings.all(8.w),
+              fontFamily: AppFontFamily.dinPro,
             ),
           },
           extensions: [
@@ -182,13 +201,34 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
             // 添加代码块扩展
             _codeExtension(context),
 
+            // 添加处理用户提及的扩展
+            _mentionExtension(context, theme),
+
             const TableHtmlExtension()
           ],
           onLinkTap: (url, _, __) {
+            if(url == null) return;
+
+            if(url.startsWith('/u/')){
+              final username = url.split('/').last;
+              Get.dialog(
+                Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.w),
+                  ),
+                  child: UserInfoCard(
+                    toPersonalPage: false,
+                    username: username,
+                  ),
+                ),
+                barrierColor: Colors.black.withValues(alpha: 0.5),
+              );
+            } else {
             if (onLinkTap != null) {
               onLinkTap!(url);
             } else {
-              Get.toNamed(Routes.WEBVIEW, arguments: url);
+                Get.toNamed(Routes.WEBVIEW, arguments: url);
+              }
             }
           },
         ),
@@ -234,12 +274,9 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                       imageUrl: src,
                       width: double.infinity,
                       placeholder: Container(
-                        color: theme.colorScheme.surfaceContainerHighest,
+                        color: theme.primaryColor.withValues(alpha: 0.1),
                         child: Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.w,
-                            color: theme.colorScheme.primary,
-                          ),
+                          child: DisRefreshLoading(),
                         ),
                       ),
                       errorWidget: Icon(
@@ -388,7 +425,6 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
                 HtmlWidget(
                   html: innerHtml,
                 ),
@@ -397,13 +433,17 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                 6.vGap,
                 SizedBox(
                   width: double.infinity,
-                  child: Obx(()=>DisButton(
-                    text: controller.isPolicyAccepted.value ? revokeText : acceptText,
-                    onPressed: () {
-                      controller.updatePolicyAccepted();
-                    },
-                    loading: controller.isLoading.value, 
-                  ),),
+                  child: Obx(
+                    () => DisButton(
+                      text: controller.isPolicyAccepted.value
+                          ? revokeText
+                          : acceptText,
+                      onPressed: () {
+                        controller.updatePolicyAccepted();
+                      },
+                      loading: controller.isLoading.value,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -412,25 +452,31 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
 
         // 检查是否包含视频相关的类名
         final classNames = extensionContext.classes;
-        final isVideoBox = classNames.contains('onebox') && classNames.contains('video-onebox');
-        final isVideoOnebox = classNames.contains('onebox') && extensionContext.element?.outerHtml.contains('<video') == true;
-        
+        final isVideoBox = classNames.contains('onebox') &&
+            classNames.contains('video-onebox');
+        final isVideoOnebox = classNames.contains('onebox') &&
+            extensionContext.element?.outerHtml.contains('<video') == true;
+
         if (isVideoBox || isVideoOnebox) {
           // 获取视频元素
-          final videoElement = extensionContext.element?.getElementsByTagName('video').firstOrNull;
-          
+          final videoElement = extensionContext.element
+              ?.getElementsByTagName('video')
+              .firstOrNull;
+
           if (videoElement != null) {
             // 获取视频源
-            final sourceElement = videoElement.getElementsByTagName('source').firstOrNull;
-            
+            final sourceElement =
+                videoElement.getElementsByTagName('source').firstOrNull;
+
             final videoUrl = sourceElement?.attributes['src'];
 
             if (videoUrl != null && videoUrl.isNotEmpty) {
               return VideoPlayerWidget(videoUrl: videoUrl);
             } else {
               // 尝试从a标签获取视频URL
-              final aElement = videoElement.getElementsByTagName('a').firstOrNull;
-              
+              final aElement =
+                  videoElement.getElementsByTagName('a').firstOrNull;
+
               final linkUrl = aElement?.attributes['href'];
 
               if (linkUrl != null && linkUrl.isNotEmpty) {
@@ -441,7 +487,8 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
             }
           } else {
             // 如果没有找到video元素，尝试直接从div中的a标签获取URL
-            final aElement = extensionContext.element?.getElementsByTagName('a').firstOrNull;
+            final aElement =
+                extensionContext.element?.getElementsByTagName('a').firstOrNull;
             if (aElement != null) {
               final linkUrl = aElement.attributes['href'];
               if (linkUrl != null && linkUrl.isNotEmpty) {
@@ -449,7 +496,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
               }
             }
           }
-          
+
           return const SizedBox.shrink();
         }
 
@@ -673,11 +720,14 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
             src.contains('plugins/discourse-narrative-bot/images') ||
             src.contains('/images/emoji/apple/');
 
+        final width = extensionContext.attributes['width'];
+        final height = extensionContext.attributes['height'];
+
         if (isEmoji || isEmojiPath) {
           return Image.network(
             src,
-            width: 20.sp,
-            height: 20.sp,
+            width: width != null ? double.parse(width) : 20.sp,
+            height: height != null ? double.parse(height) : 20.sp,
             fit: BoxFit.contain,
           );
         }
@@ -704,12 +754,9 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                 imageUrl: src,
                 width: double.infinity,
                 placeholder: Container(
-                  color: theme.colorScheme.surfaceContainerHighest,
+                  color: theme.primaryColor.withValues(alpha: 0.1),
                   child: Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.w,
-                      color: theme.colorScheme.primary,
-                    ),
+                    child: DisRefreshLoading(),
                   ),
                 ),
                 errorWidget: Icon(
@@ -761,6 +808,62 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
       l.e('修复表格 HTML 出错: $e');
       return html; // 如果处理失败，返回原始 HTML
     }
+  }
+
+  // 用户提及链接的扩展 - 只针对@提及链接
+  TagExtension _mentionExtension(BuildContext context, ThemeData theme) {
+    return TagExtension(
+      // 只处理包含mention类的a标签，不影响其他a标签
+      tagsToExtend: {"mention"},
+      builder: (extensionContext) {
+        final href = extensionContext.attributes['href'];
+        final mentionText = extensionContext.element?.text ?? '';
+
+        // 优先使用自定义构建器
+        if (customWidgetBuilder != null && extensionContext.element != null) {
+          final widget = customWidgetBuilder!(extensionContext.element!);
+          return widget;
+        }
+
+        return GestureDetector(
+          onTap: () {
+            // 处理mention点击事件
+            if (href != null) {
+              final username = href.split('/').last;
+              Get.dialog(
+                Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.w),
+                  ),
+                  child: UserInfoCard(
+                    toPersonalPage: false,
+                    username: username,
+                  ),
+                ),
+                barrierColor: Colors.black.withValues(alpha: 0.5),
+              );
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1).w,
+            margin: const EdgeInsets.only(top: 6).w,
+            decoration: BoxDecoration(
+              color: theme.primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(3.w),
+            ),
+            child: Text(
+              mentionText,
+              style: TextStyle(
+                color: theme.primaryColor,
+                fontWeight: FontWeight.w500,
+                fontFamily: AppFontFamily.dinPro,
+                fontSize: 12.sp,
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showFullScreenDialog(BuildContext context, String html) {
@@ -943,7 +1046,6 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
   }
 }
 
-
 class HtmlController extends BaseController {
   final isPolicyAccepted = false.obs;
   final postId = 0.obs;
@@ -957,21 +1059,21 @@ class HtmlController extends BaseController {
     isPolicyAccepted.value = false;
   }
 
-  void updatePolicyAccepted() async{
+  void updatePolicyAccepted() async {
     _updatePolicyAccepted(
       isPolicyAccepted.value ? 'unaccept' : 'accept',
     );
   }
 
-  void _updatePolicyAccepted(String action) async{
+  void _updatePolicyAccepted(String action) async {
     try {
       isLoading.value = true;
-     final response = await _apiService.updatePolicyAccepted(action, postId.value.toString());
+      final response = await _apiService.updatePolicyAccepted(
+          action, postId.value.toString());
 
-     if(response.isSuccess){
-      isPolicyAccepted.value = !isPolicyAccepted.value;
-     }
-
+      if (response.isSuccess) {
+        isPolicyAccepted.value = !isPolicyAccepted.value;
+      }
     } catch (e) {
       l.e('更新政策接受状态出错: $e');
     } finally {
@@ -979,4 +1081,3 @@ class HtmlController extends BaseController {
     }
   }
 }
-

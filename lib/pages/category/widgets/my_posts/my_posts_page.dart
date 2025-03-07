@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/pages/category/widgets/my_posts/my_posts_controller.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/topic_item.dart';
 
 import '../../../../widgets/dis_refresh.dart';
 import '../../../../widgets/state_view.dart';
-import '../../../../widgets/topic_item.dart';
 
 class MyPostsPage extends StatefulWidget {
   const MyPostsPage({super.key});
@@ -47,6 +47,8 @@ class _MyPostsPageState extends State<MyPostsPage>
                       topic: topic,
                       avatarUrl: controller.getLatestPosterAvatar(topic),
                       nickName: controller.getNickName(topic),
+                      username: controller.getUserName(topic),
+                      avatarUrls: controller.getAvatarUrls(topic),
                       onTap: () => controller.toTopicDetail(topic.id),
                       onDoNotDisturb: (topic) {
                         controller.doNotDisturb(topic.id);

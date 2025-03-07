@@ -11,9 +11,11 @@ import '../topic_detail_controller.dart';
 
 /// 帖子内容组件
 class PostContent extends StatelessWidget {
+  final TopicDetailController controller;
   const PostContent({
     required this.node,
     this.isReply = false,
+    required this.controller,
     Key? key,
   }) : super(key: key);
 
@@ -36,7 +38,7 @@ class PostContent extends StatelessWidget {
               children: [
                 // if (isReply)
                 //   _ReplyQuote(post: node.post),
-                _PostBody(post: node.post,isReply: isReply),
+                _PostBody(post: node.post,isReply: isReply, controller: controller),
               ],
             ),
           ),
@@ -50,11 +52,12 @@ class PostContent extends StatelessWidget {
 class _ReplyQuote extends StatelessWidget {
   _ReplyQuote({
     required this.post,
+    required this.controller,
     Key? key,
   }) : super(key: key);
 
-  final controller = Get.find<TopicDetailController>();
   final Post post;
+  final TopicDetailController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -133,15 +136,16 @@ class _ReplyQuote extends StatelessWidget {
 
 /// 帖子主体内容组件
 class _PostBody extends StatelessWidget {
-  final controller = Get.find<TopicDetailController>();
   _PostBody({
     required this.post,
     this.isReply = false,
+    required this.controller,
     Key? key,
   }) : super(key: key);
 
   final Post post;
   final bool isReply;
+  final TopicDetailController controller;
   @override
   Widget build(BuildContext context) {
     return HtmlWidget(

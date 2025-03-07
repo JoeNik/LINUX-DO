@@ -53,6 +53,8 @@ class _UserAvatar extends StatelessWidget {
       username: post.username ?? '',
       post: post,
       title: title,
+      avatarActions: AvatarActions.noAction,
+      toPersonalPage: false,
     );
   }
 }

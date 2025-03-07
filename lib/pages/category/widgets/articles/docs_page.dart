@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/topic_item.dart';
 
 import '../../../../widgets/dis_refresh.dart';
 import '../../../../widgets/state_view.dart';
-import '../../../../widgets/topic_item.dart';
 import 'docs_controller.dart';
 
 class DocsPage extends StatefulWidget {
@@ -48,6 +48,7 @@ class _DocsPageState extends State<DocsPage>
                       avatarUrl: controller.getLatestPosterAvatar(topic),
                       username: controller.getNickName(topic),
                       onTap: () => controller.toTopicDetail(topic.id),
+                      avatarUrls: controller.getAvatarUrls(topic),
                       onDoNotDisturb: (topic) {
                         controller.doNotDisturb(topic.id);
                       },

@@ -33,7 +33,7 @@ class TopicFooter extends StatelessWidget {
               color: Theme.of(context).textTheme.bodySmall?.color,
             ),
           ),
-          
+
           // 分隔点
           Container(
             margin: EdgeInsets.symmetric(horizontal: 6.w),
@@ -44,7 +44,7 @@ class TopicFooter extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-          
+
           // 相对时间
           Text(
             _getRelativeTime(),
@@ -54,17 +54,18 @@ class TopicFooter extends StatelessWidget {
               color: Theme.of(context).textTheme.bodySmall?.color,
             ),
           ),
-          
+
           // 间隔
           6.hGap,
-          
+
           // 用户头像组
-          UserAvatarGroup(
-            avatarUrls: avatarUrls,
-          ),
-          
+          if (avatarUrls.isNotEmpty)
+            UserAvatarGroup(
+              avatarUrls: avatarUrls,
+            ),
+
           const Spacer(),
-          
+
           // 回复数
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -73,7 +74,11 @@ class TopicFooter extends StatelessWidget {
               Icon(
                 CupertinoIcons.arrowshape_turn_up_left_2_fill,
                 size: 13.w,
-                color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+                color: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.color
+                    ?.withValues(alpha: 0.5),
               ),
               SizedBox(width: 4.w),
               Text(
@@ -81,7 +86,11 @@ class TopicFooter extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13.w,
                   fontFamily: AppFontFamily.dinPro,
-                  color: Theme.of(context).textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+                  color: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.color
+                      ?.withValues(alpha: 0.5),
                 ),
               ),
             ],
@@ -97,4 +106,4 @@ class TopicFooter extends StatelessWidget {
     if (time == null) return '';
     return DateTime.parse(time).friendlyDateTime;
   }
-} 
+}

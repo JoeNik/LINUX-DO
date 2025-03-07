@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:linux_do/models/topic_model.dart';
-import 'package:linux_do/pages/topics/details/widgets/topic_item/topic_excerpt.dart';
-import 'package:linux_do/pages/topics/details/widgets/topic_item/topic_footer.dart';
-import 'package:linux_do/pages/topics/details/widgets/topic_item/topic_header.dart';
-import 'package:linux_do/pages/topics/details/widgets/topic_item/topic_poster_avatar.dart';
-import 'package:linux_do/pages/topics/details/widgets/topic_item/topic_tags.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/topic_excerpt.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/topic_footer.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/topic_header.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/topic_poster_avatar.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/topic_tags.dart';
+import 'package:linux_do/widgets/avatar_widget.dart';
 
 /// 话题内容组件 - 包含主要内容部分
 class TopicContent extends StatelessWidget {
@@ -13,6 +14,8 @@ class TopicContent extends StatelessWidget {
   final String? nickName;
   final String? username;
   final List<String>? avatarUrls;
+  final AvatarActions avatarActions;
+  final bool? toPersonalPage;
 
   const TopicContent({
     Key? key,
@@ -21,6 +24,8 @@ class TopicContent extends StatelessWidget {
     this.nickName,
     this.username,
     this.avatarUrls,
+    this.avatarActions = AvatarActions.noAction,
+    this.toPersonalPage,
   }) : super(key: key);
 
   @override
@@ -36,6 +41,8 @@ class TopicContent extends StatelessWidget {
               nickName: nickName ?? '',
               username: username ?? '',
               isOriginalPoster: topic.getOriginalPosterId() != 1,
+              avatarActions: avatarActions,
+              toPersonalPage: toPersonalPage,
             ),
             
             // 主要内容区域

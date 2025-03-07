@@ -12,12 +12,14 @@ class PostsSelector extends StatefulWidget {
   final int postsCount;
   final int currentIndex;
   final Function(int) onIndexChanged;
+  final TopicDetailController controller;
 
   const PostsSelector({
     Key? key,
     required this.postsCount,
     required this.currentIndex,
     required this.onIndexChanged,
+    required this.controller,
   }) : super(key: key);
 
   @override
@@ -25,7 +27,6 @@ class PostsSelector extends StatefulWidget {
 }
 
 class _PostsSelectorState extends State<PostsSelector> with SingleTickerProviderStateMixin {
-  final controller = Get.find<TopicDetailController>();
   late double _dragPosition;
   late int _currentIndex;
   final double _defaultHeight = 120.w;
@@ -40,7 +41,7 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
   // 获取当前已加载的帖子范围
   (int, int) _getLoadedPostsRange() {
     
-    final posts = controller.topic.value?.postStream?.posts ?? [];
+    final posts = widget.controller.topic.value?.postStream?.posts ?? [];
     if (posts.isEmpty) return (0, 0);
     
     return (
@@ -66,7 +67,7 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
     _loadDataTimer = Timer(const Duration(milliseconds: 30), () {
       if (!mounted) return;
       if (!_isPostLoaded(postNumber)) {
-        controller.fetchTopicDetail(postNumber: postNumber);
+        widget.controller.fetchTopicDetail(postNumber: postNumber);
       }
     });
   }
@@ -140,7 +141,7 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
     if (!_isLongPressed) {
       final targetIndex = _currentIndex;
       // 拖动结束时通知 controller 更新索引
-      controller.updatePostSelectorIndex(targetIndex);
+      widget.controller.updatePostSelectorIndex(targetIndex);
     }
   }
 
@@ -164,7 +165,7 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
     });
     
     // 长按结束时通知 controller 更新索引
-    controller.updatePostSelectorIndex(_currentIndex);
+    widget.controller.updatePostSelectorIndex(_currentIndex);
     _expandController.reverse();
   }
 

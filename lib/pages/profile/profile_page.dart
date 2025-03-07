@@ -39,11 +39,12 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
   Widget build(BuildContext context) {
     // 创建一个 ValueNotifier 来跟踪滚动进度
     final scrollProgress = ValueNotifier<double>(0.0);
-    final expandedHeight = 280.w;
+    
     return Scaffold(
       body: Obx(() {
         final userInfo = Get.find<GlobalController>().userInfo;
-
+        final expandedHeight =
+            userInfo?.user?.backgroundUrl != null ? 380.w : 280.w;
         final user = userInfo?.user;
         return NestedScrollView(
           physics: const BouncingScrollPhysics(),
@@ -82,13 +83,12 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                               child: user?.cardBackgroundUploadUrl != null
                                   ? CachedImage(
                                       imageUrl:
-                                          user?.cardBackgroundUploadUrl ?? '',
+                                          user?.backgroundUrl ?? '',
                                       fit: BoxFit.cover)
                                   : Image.asset(
                                       AppImages.profileHeaderBg,
                                       fit: BoxFit.cover,
                                     ),
-                              // child: CachedImage(imageUrl:'https://linux.do/uploads/default/original/4X/7/9/e/79e6ebe94c3f457673473af837040aadc060c19c.png'),
                             ),
                           // 模糊效果
                           if (progress > 0)
@@ -201,6 +201,15 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                     _buildStatItem('信任等级', user?.trustLevel.toString() ?? ''),
                     _buildStatItem('徽章数', user?.badgeCount.toString() ?? ''),
                     _buildStatItem('积分', '${user?.gamificationScore ?? 0}'),
+                    Obx(() => GestureDetector(
+                          onTap: () => showWarning('关注 - 开放中'),
+                          child: _buildStatItem('关注', '${controller.following.length}'),
+                        )),
+                    Obx(() => GestureDetector(
+                          onTap: () => showWarning('关注者 - 开放中'),
+                          child: _buildStatItem('关注者', '${controller.followers.length}'),
+                        )),
+
                   ],
                 ),
               ),

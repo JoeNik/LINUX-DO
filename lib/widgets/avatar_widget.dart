@@ -33,6 +33,12 @@ import '../utils/log.dart';
 import 'state_view.dart';
 import '../const/app_const.dart';
 
+enum AvatarActions {
+  openCard,
+  openUserInfo,
+  noAction,
+}
+
 class AvatarWidget extends StatelessWidget {
   final String avatarUrl;
   final double size;
@@ -41,9 +47,10 @@ class AvatarWidget extends StatelessWidget {
   final bool circle;
   final Color? borderColor;
   final String username;
-  final bool canOpenCard;
+  final AvatarActions avatarActions;
   final Post? post;
   final String? title;
+  final bool? toPersonalPage;
   const AvatarWidget({
     super.key,
     required this.avatarUrl,
@@ -53,19 +60,16 @@ class AvatarWidget extends StatelessWidget {
     this.circle = true,
     this.borderColor,
     this.username = '',
-    this.canOpenCard = true,
+    this.avatarActions = AvatarActions.noAction,
     this.post,
     this.title,
+    this.toPersonalPage = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (!canOpenCard) {
-          Get.toNamed(Routes.PERSONAL, arguments: username);
-          return;
-        }
         Get.dialog(
           Dialog(
             shape: RoundedRectangleBorder(
@@ -75,6 +79,7 @@ class AvatarWidget extends StatelessWidget {
               username: username,
               post: post,
               title: title,
+              toPersonalPage: toPersonalPage ?? true,
             ),
           ),
           barrierColor: Colors.black.withValues(alpha: 0.5),
@@ -97,8 +102,13 @@ class UserInfoCard extends GetView<UserInfoCardController> {
   final String username;
   final Post? post;
   final String? title;
+  final bool toPersonalPage;
   const UserInfoCard(
-      {super.key, required this.username, this.post, this.title});
+      {super.key,
+      required this.username,
+      this.post,
+      this.title,
+      this.toPersonalPage = true});
 
   @override
   Widget build(BuildContext context) {
@@ -209,19 +219,24 @@ class UserInfoCard extends GetView<UserInfoCardController> {
           left: 20.w,
           bottom: -20.w,
           child: Container(
-            padding: EdgeInsets.all(2.w),
-            decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius:
-                    BorderRadius.circular(user?.id != 1 ? 30.w : 4.w)),
-            child: AvatarWidget(
-              avatarUrl: user?.getAvatar(80) ?? '',
-              size: 60.w,
-              username: username,
-              circle: user?.id != 1,
-              canOpenCard: false,
-            ),
-          ),
+              padding: EdgeInsets.all(2.w),
+              decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius:
+                      BorderRadius.circular(user?.id != 1 ? 30.w : 4.w)),
+              child: GestureDetector(
+                onTap: () {
+                  if (toPersonalPage == true) {
+                    Get.toNamed(Routes.PERSONAL, arguments: username);
+                  }
+                },
+                child: CachedImage(
+                  imageUrl: user?.getAvatar(80) ?? '',
+                  width: 60,
+                  height: 60,
+                  circle: user?.id != 1,
+                ),
+              )),
         ),
 
         // 关闭按钮
@@ -545,12 +560,12 @@ class UserInfoCard extends GetView<UserInfoCardController> {
         horizontal: 12.w,
       ),
       decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(4.w),
-              border: Border.all(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                  width: .6.w),
-            ),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(4.w),
+        border: Border.all(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+            width: .6.w),
+      ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8.w),
         child: SingleChildScrollView(
@@ -717,7 +732,6 @@ class UserInfoCard extends GetView<UserInfoCardController> {
     });
   }
 
-
   /// 发送私信弹窗
   void _showPrivateMessageDialog() {
     final content = post?.cooked;
@@ -851,7 +865,7 @@ class UserInfoCard extends GetView<UserInfoCardController> {
                     size: 40.w,
                     username: username,
                     circle: user?.id != 1,
-                    canOpenCard: false,
+                    avatarActions: AvatarActions.noAction,
                   ),
                   12.hGap,
                   Column(
@@ -1282,16 +1296,16 @@ class UserInfoCardController extends BaseController {
       showError(AppConst.posts.sendFailed);
     }
   }
-  
-  void toChatDetail() async{
-    try{
+
+  void toChatDetail() async {
+    try {
       final response = await apiService.getDirectChannel(username, true, true);
-      if(response.channel != null){
+      if (response.channel != null) {
         Get.toNamed(Routes.CHAT_DETAIL, arguments: response.channel);
-      }else{
+      } else {
         showError(AppConst.user.failed);
       }
-    }catch(e, s){
+    } catch (e, s) {
       l.e('toChatDetail error: $e --- $s');
       showError(AppConst.user.failed);
     }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/pages/category/category_list_controller.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/topic_item.dart';
 import 'package:linux_do/widgets/dis_refresh.dart';
 import 'package:linux_do/widgets/state_view.dart';
-import 'package:linux_do/widgets/topic_item.dart';
 
 class CategoryListView extends GetView<CategoryListController> {
   const CategoryListView({super.key});
@@ -32,6 +32,7 @@ class CategoryListView extends GetView<CategoryListController> {
                       avatarUrl: controller.getLatestPosterAvatar(topic),
                       nickName: controller.getNickName(topic),
                       username: controller.getUserName(topic),
+                      avatarUrls: controller.getAvatarUrls(topic),
                       onTap: () => controller.toTopicDetail(topic.id),
                       onDoNotDisturb: (topic) => controller.doNotDisturb(topic.id),
                     );

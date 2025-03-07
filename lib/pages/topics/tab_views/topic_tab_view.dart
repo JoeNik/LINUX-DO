@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:linux_do/pages/topics/details/widgets/topic_item/topic_item.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/topic_item.dart';
+import 'package:linux_do/widgets/avatar_widget.dart';
 import '../../../widgets/dis_refresh.dart';
 import '../../../widgets/state_view.dart';
 import 'topic_tab_controller.dart';
@@ -58,6 +59,7 @@ class _TopicTabViewState extends State<TopicTabView>
                       nickName: controller.getNickName(topic),
                       username: controller.getUserName(topic),
                       avatarUrls: controller.getAvatarUrls(topic),
+                      avatarActions: AvatarActions.openCard,
                       onTap: () {
                         controller.toTopicDetail(topic.id);},
                       onDoNotDisturb: (topic) {

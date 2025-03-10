@@ -2,8 +2,14 @@ import 'package:get/get.dart';
 import 'package:linux_do/pages/category/category_list_controller.dart';
 import 'package:linux_do/pages/profile/edit_profile_controller.dart';
 import 'package:linux_do/pages/profile/edit_profile_page.dart';
+import 'package:linux_do/pages/profile/follow_controller.dart';
+import 'package:linux_do/pages/profile/follow_page.dart';
+import 'package:linux_do/pages/profile/like_controller.dart';
+import 'package:linux_do/pages/profile/like_page.dart';
 import 'package:linux_do/pages/profile/personal_controller.dart';
 import 'package:linux_do/pages/profile/personal_page.dart';
+import 'package:linux_do/pages/profile/popular_controller.dart';
+import 'package:linux_do/pages/profile/popular_page.dart';
 import 'package:linux_do/pages/settings/about_controller.dart';
 import 'package:linux_do/pages/settings/about_page.dart';
 import 'package:linux_do/pages/settings/profile_settings_controller.dart';
@@ -211,6 +217,33 @@ class AppPages {
       page: () => const PersonalPage(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => PersonalController());
+      }),
+    ),
+
+    /// 点赞信息页
+    GetPage(
+      name: Routes.LIKE_PAGE,
+      page: () => const LikePage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<LikeController>(() => LikeController());
+      }),
+    ),
+
+    /// 关注信息页
+    GetPage(
+      name: Routes.FOLLOW_PAGE,
+      page: () => const FollowPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<FollowController>(() => FollowController());
+      }),
+    ),
+
+    /// 热门页
+    GetPage(
+      name: Routes.POPULAR_PAGE,
+      page: () => const PopularPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<PopularController>(() => PopularController());
       }),
     ),
   ];

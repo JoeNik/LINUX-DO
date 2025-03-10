@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/models/follow.dart';
+import 'package:linux_do/models/summary.dart';
 import 'package:linux_do/net/api_service.dart';
 import 'package:linux_do/net/success_response.dart';
 import 'package:linux_do/pages/profile/tabs/message_controller.dart';
@@ -41,12 +42,28 @@ class ProfileController extends BaseController with Concatenated {
   final RxBool showEmoji = false.obs;
   final RxList<Follow> following = <Follow>[].obs;
   final RxList<Follow> followers = <Follow>[].obs;
+  final summaryData = Rxn<SummaryResponse>();
+
+  // 功能按钮当前页面索引
+  final RxInt featurePageIndex = 0.obs;
+
+  late final PageController featurePageController;
 
   @override
   void onInit() {
     super.onInit();
-    _getFollowing();
-    _getFollowers();
+    _getSummaryData();
+    // 初始化PageController
+    featurePageController = PageController(initialPage: 0);
+    // 监听页面变化
+    featurePageController.addListener(() {
+      if (featurePageController.page != null) {
+        final currentPage = featurePageController.page!.round();
+        if (featurePageIndex.value != currentPage) {
+          featurePageIndex.value = currentPage;
+        }
+      }
+    });
     // 初始化子控制器
     Get.lazyPut(() => SummaryController());
     Get.lazyPut(() => ActivityController());
@@ -55,9 +72,27 @@ class ProfileController extends BaseController with Concatenated {
     Get.lazyPut(() => BadgeController());
   }
 
+  // 切换到下一页
+  void nextPage() {
+    if (featurePageIndex.value < 2) {
+      featurePageController.animateToPage(
+        featurePageIndex.value + 1,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
-  
-  
+  // 切换到上一页
+  void previousPage() {
+    if (featurePageIndex.value > 0) {
+      featurePageController.animateToPage(
+        featurePageIndex.value - 1,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
   Widget createCurrent() {
     switch (selectedIndex) {
@@ -111,6 +146,7 @@ class ProfileController extends BaseController with Concatenated {
 
   @override
   void onClose() {
+    featurePageController.dispose();
     statusController.dispose();
     super.onClose();
   }
@@ -139,23 +175,41 @@ class ProfileController extends BaseController with Concatenated {
     }
   }
 
-  void _getFollowers() async {
+  void _getSummaryData() async {
     try {
-      final response = await _apiService.getFollowers(userName);
-      l.i('获取关注者 ${jsonEncode(response)}');
-      followers.value = response;
+      isLoading.value = true;
+      final data = await _apiService.getUserSummary(userName);
+      summaryData.value = data;
     } catch (e, s) {
-      l.e('获取关注者失败 $e --- $s');
+      l.e('获取统计数据失败 $e --- $s');
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  void _getFollowing() async {
-    try {
-      final response = await _apiService.getFollowing(userName);
-      l.i('获取关注者 ${jsonEncode(response)}');
-      following.value = response;
-    } catch (e, s) {
-      l.e('获取关注者失败 $e --- $s');
+  // 访问点赞信息页面
+  void toLikePage() async {
+    if (summaryData.value != null) {
+      Get.toNamed(Routes.LIKE_PAGE, arguments: summaryData.value);
+    } else {
+      showError('获取数据失败');
+    }
+  }
+
+  // 访问Follow页面
+  void toFollowPage() async {
+    Get.toNamed(Routes.FOLLOW_PAGE);
+  }
+
+  // 访问收藏页面
+  void toCollectPage() {}
+
+  // 访问热门页面
+  void toPopularPage() {
+     if (summaryData.value != null) {
+      Get.toNamed(Routes.POPULAR_PAGE, arguments: summaryData.value);
+    } else {
+      showError('获取数据失败');
     }
   }
 }

@@ -54,7 +54,7 @@ class ChatDetailPage extends GetView<ChatDetailController> {
           showUserNames: true,
           dateLocale: 'zh_CN',
           onEndReached: controller.loadMorePastMessages,
-          onEndReachedThreshold: 0.8,
+          onEndReachedThreshold: 0.3,
           inputOptions: const InputOptions(
             sendButtonVisibilityMode: SendButtonVisibilityMode.always,
           ),
@@ -157,7 +157,7 @@ class ChatDetailPage extends GetView<ChatDetailController> {
         hintText: '发送消息',
         hintStyle: TextStyle(
               fontSize: 14.w,
-              color: Theme.of(context).hintColor,
+                      color: Theme.of(context).hintColor,
               fontFamily: AppFontFamily.dinPro,
             ),
         contentPadding: 
@@ -183,7 +183,7 @@ class ChatDetailPage extends GetView<ChatDetailController> {
       ),
     );
   }
-  
+
   // 获取暗色聊天主题
   DarkChatTheme _getDarkChatTheme(BuildContext context) {
     return DarkChatTheme(

@@ -21,6 +21,7 @@ class AppImages {
   static const String crown = 'assets/images/crown.png';
   static const String lOther = 'assets/images/l-other.png';
   static const String lMe = 'assets/images/l-me.png';
+  static const String batteryQuarter = 'battery-quarter';
 
 
   // 状态Icon

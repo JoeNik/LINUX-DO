@@ -60,4 +60,16 @@ abstract class Routes {
 
   // 个人主页(TA)
   static const PERSONAL = '/personal';
+
+  // 点赞页面
+  static const LIKE_PAGE = '/like';
+
+  // 关注页面
+  static const FOLLOW_PAGE = '/follow';
+
+  // 收藏页面
+  static const COLLECT_PAGE = '/collect';
+
+  // 热门页面
+  static const POPULAR_PAGE = '/popular';
 }

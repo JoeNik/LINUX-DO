@@ -182,7 +182,7 @@ class ChatDetailController extends BaseController {
       );
 
       messages.clear();
-      messages.addAll(response.messages);
+      messages.addAll(response.messages.reversed);
 
       // 转换为 flutter_chat_ui 格式
       _convertMessages();
@@ -318,7 +318,7 @@ class ChatDetailController extends BaseController {
       }
       
       // 添加到原始消息列表
-      messages.insertAll(0, response.messages);
+      messages.insertAll(0, response.messages.reversed);
       
       // 转换新消息并插入到列表前部
       _convertAndPrependMessages(response.messages);
@@ -347,13 +347,13 @@ class ChatDetailController extends BaseController {
     final newChatMessages = <types.Message>[];
     
     // 按时间排序 - 确保消息是按时间顺序
-    newMessages.sort((a, b) {
-      final aTime = a.createdAt != null ? DateTime.parse(a.createdAt!).millisecondsSinceEpoch : 0;
-      final bTime = b.createdAt != null ? DateTime.parse(b.createdAt!).millisecondsSinceEpoch : 0;
-      return aTime.compareTo(bTime);
-    });
+    // newMessages.sort((a, b) {
+    //   final aTime = a.createdAt != null ? DateTime.parse(a.createdAt!).millisecondsSinceEpoch : 0;
+    //   final bTime = b.createdAt != null ? DateTime.parse(b.createdAt!).millisecondsSinceEpoch : 0;
+    //   return aTime.compareTo(bTime);
+    // });
     
-    for (final message in newMessages) {
+    for (final message in newMessages.reversed) {
       String? avatarUrl;
       if (message.user?.avatarTemplate != null) {
         final template = message.user!.avatarTemplate;
@@ -421,7 +421,7 @@ class ChatDetailController extends BaseController {
     }
     
     // 将新消息插入到现有消息列表的前面
-    chatMessages.insertAll(0, newChatMessages);
+    chatMessages.insertAll(0, newChatMessages.reversed);
   }
 
   void handleImageSelection() async {

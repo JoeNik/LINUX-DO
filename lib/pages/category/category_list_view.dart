@@ -35,6 +35,7 @@ class CategoryListView extends GetView<CategoryListController> {
                       avatarUrls: controller.getAvatarUrls(topic),
                       onTap: () => controller.toTopicDetail(topic.id),
                       onDoNotDisturb: (topic) => controller.doNotDisturb(topic.id),
+                      onDelete: (topic) => controller.deleteTopic(topic.id),
                     );
                   },
                   childCount: controller.topics.length,

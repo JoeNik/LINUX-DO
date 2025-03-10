@@ -1,3 +1,4 @@
+import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/controller/base_controller.dart';
@@ -159,5 +160,20 @@ class CategoryListController extends BaseController {
      // 通过_userCache获取头像
     final avatarUrls = topic.getAvatarUrls();
     return avatarUrls.map((id) => _userCache.getAvatarUrl(id)).whereType<String>().toList();
+  }
+
+  Future<void> deleteTopic(int id) async {
+    try {
+      final response = await _apiService.deleteTopic(id.toString());
+      l.i('删除帖子: $response');
+      if (response is Map) {
+        showSuccess(AppConst.posts.deleteSuccess);
+        topics.removeWhere((topic) => topic.id == id);
+      } else {
+        showError(AppConst.posts.error);
+      }
+    } catch (e) {
+      showError(AppConst.posts.error);
+    }
   }
 } 

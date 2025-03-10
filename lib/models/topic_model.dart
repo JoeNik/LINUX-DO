@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:linux_do/net/http_config.dart';
 
 part 'topic_model.g.dart';
 
@@ -50,6 +51,10 @@ class User {
   final bool? moderator;
   @JsonKey(name: 'trust_level')
   final int? trustLevel;
+  @JsonKey(name: 'count')
+  final int? count;
+  @JsonKey(name: 'animated_avatar')
+  final String? animatedAvatar;
 
   User({
     required this.id,
@@ -64,7 +69,23 @@ class User {
     this.admin,
     this.moderator,
     this.trustLevel,
+    this.count, 
+    this.animatedAvatar,
   });
+
+  String getAvatarUrl() {
+    if (animatedAvatar != null) {
+      return '${HttpConfig.baseUrl}${animatedAvatar?.replaceFirst('{size}', '100')}';
+    }
+    return '${HttpConfig.baseUrl}${avatarTemplate?.replaceFirst('{size}', '100')}';
+  }
+
+  String? getFlairUrl() {
+    if(flairUrl == null) {
+      return null;
+    }
+    return '${HttpConfig.baseUrl}${flairUrl?.replaceFirst('{size}', '100')}';
+  }
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
   Map<String, dynamic> toJson() => _$UserToJson(this);
@@ -181,7 +202,11 @@ class Topic {
   @JsonKey(name: 'bookmarked')
   final bool? bookmarked;
 
-  const Topic({
+  // 楼层编号, 用于定位到具体楼层
+  @JsonKey(name: 'post_number')
+  int? postNumber;
+
+  Topic({
     required this.id,
     this.title,
     this.fancyTitle,
@@ -213,6 +238,7 @@ class Topic {
     this.hasAcceptedAnswer,
     this.posters,
     this.bookmarked,
+    this.postNumber,
   });
 
   factory Topic.fromJson(Map<String, dynamic> json) => _$TopicFromJson(json);

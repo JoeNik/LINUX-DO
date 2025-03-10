@@ -76,6 +76,9 @@ dependencies:
   flutter_chat_ui: ^1.6.15
   flutter_chat_types: ^3.6.2
   uuid: ^4.3.3
+  expandable_page_view: ^1.0.17
+  flutter_svg: ^2.0.17
+  timeago: ^3.7.0
 
 dev_dependencies:
   flutter_test:
@@ -96,6 +99,7 @@ flutter:
     - assets/images/dark/
     - assets/json/
     - assets/html/
+    - assets/icons/
   fonts:
     - family: DINPro
       fonts:

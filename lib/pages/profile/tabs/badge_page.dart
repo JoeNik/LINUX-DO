@@ -130,7 +130,7 @@ class BadgePage extends GetView<BadgeController> {
                       itemCount: groupBadges.length,
                       itemBuilder: (context, index) {
                         final badge = groupBadges[index];
-                        return _BadgeCard(badge: badge);
+                        return BadgeCard(badge: badge);
                       },
                     ),
                   ),
@@ -145,10 +145,10 @@ class BadgePage extends GetView<BadgeController> {
   }
 }
 
-class _BadgeCard extends GetView<BadgeController> {
+class BadgeCard extends GetView<BadgeController> {
   final BadgeDetail badge;
 
-  const _BadgeCard({required this.badge});
+  const BadgeCard({required this.badge});
 
   @override
   Widget build(BuildContext context) {

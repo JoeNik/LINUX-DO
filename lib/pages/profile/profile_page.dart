@@ -6,6 +6,7 @@ import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_images.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
+import 'package:linux_do/pages/profile/widget/profile_menu.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import 'package:linux_do/widgets/cached_image.dart';
 import 'dart:ui';
@@ -18,6 +19,8 @@ import '../../widgets/switch.dart';
 import 'profile_controller.dart';
 import '../../widgets/dis_loading.dart';
 import 'package:slide_switcher/slide_switcher.dart';
+
+
 
 class ProfilePage extends GetView<ProfileController> with ToastMixin {
   const ProfilePage({super.key});
@@ -82,8 +85,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                               opacity: (1 - progress).clamp(0.0, 1.0),
                               child: user?.cardBackgroundUploadUrl != null
                                   ? CachedImage(
-                                      imageUrl:
-                                          user?.backgroundUrl ?? '',
+                                      imageUrl: user?.backgroundUrl ?? '',
                                       fit: BoxFit.cover)
                                   : Image.asset(
                                       AppImages.profileHeaderBg,
@@ -191,28 +193,9 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
               ],
             ),
 
-            // 统计信息
+            // 统计信息及菜单按钮
             SliverToBoxAdapter(
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 10.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildStatItem('信任等级', user?.trustLevel.toString() ?? ''),
-                    _buildStatItem('徽章数', user?.badgeCount.toString() ?? ''),
-                    _buildStatItem('积分', '${user?.gamificationScore ?? 0}'),
-                    Obx(() => GestureDetector(
-                          onTap: () => showWarning('关注 - 开放中'),
-                          child: _buildStatItem('关注', '${controller.following.length}'),
-                        )),
-                    Obx(() => GestureDetector(
-                          onTap: () => showWarning('关注者 - 开放中'),
-                          child: _buildStatItem('关注者', '${controller.followers.length}'),
-                        )),
-
-                  ],
-                ),
-              ),
+              child: ProfileMenu(controller: controller),
             ),
 
             // Tab栏
@@ -410,32 +393,10 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 20.w,
-            fontFamily: AppFontFamily.dinPro,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: Colors.grey,
-          ),
-        ),
-      ],
-    );
-  }
-
   void showCustomStatusDialog(BuildContext context) {
     Get.dialog(
       Dialog(
-        insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
+        insetPadding: EdgeInsets.symmetric(horizontal: 12.w),
         child: Container(
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
@@ -447,28 +408,6 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
             children: [
               Row(
                 children: [
-                  // ConstrainedBox(
-                  //   constraints: BoxConstraints(
-                  //     maxHeight: 42.w,
-                  //     maxWidth: 42.w,
-                  //   ),
-                  //   child: TextField(
-                  //     controller: controller.emojiController,
-                  //     style: TextStyle(fontSize: 28.sp),
-                  //     decoration: InputDecoration(
-                  //       filled: true,
-                  //       fillColor: Theme.of(Get.context!).cardColor,
-
-                  //       border: OutlineInputBorder(
-                  //         borderSide:
-                  //             BorderSide(color: Theme.of(context).primaryColor, width: .5.w),
-                  //       ),
-                  //       hintStyle: TextStyle(
-                  //           color: Theme.of(Get.context!).hintColor,
-                  //           fontSize: 12.sp),
-                  //     ),
-                  //   ),
-                  // ),
                   Expanded(
                     child: TextField(
                       controller: controller.statusController,
@@ -482,27 +421,8 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                       ),
                     ),
                   ),
-                  // DisEmojiButton(
-                  //   controller: controller.emojiController,
-                  //   showEmoji: controller.showEmoji.value,
-                  //   onPressed: () {
-                  //     // controller.showEmoji.value = !controller.showEmoji.value;
-                  //     showWarning('表情暂时不可用');
-                  //   },
-                  // ),
                 ],
               ),
-
-              /// 先移除表情
-              // Obx(() => controller.showEmoji.value
-              //     ? DisEmojiPicker(
-              //         height: 256.w,
-              //         emojiSize: 24.w,
-              //         onEmojiSelected: (emoji) {
-              //           controller.emojiController.text += emoji;
-              //         },
-              //       )
-              //     : const SizedBox()),
               16.hGap,
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -558,10 +478,12 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => maxHeight;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     // 使用 clamp 确保不会出现精度问题
-    final double currentExtent = (maxExtent - shrinkOffset).clamp(minExtent, maxExtent);
-    
+    final double currentExtent =
+        (maxExtent - shrinkOffset).clamp(minExtent, maxExtent);
+
     return SizedBox(
       height: currentExtent,
       child: child,

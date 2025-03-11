@@ -121,18 +121,18 @@ class BadgeWidget extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                2.vGap,
-                Flexible(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return SizedBox(
-                          height: 32.w,
-                          child: HtmlWidget(
-                              html: badge.description, onLinkTap: (url) {}));
-                    },
-                  ),
-                ),
-                4.vGap,
+                // 2.vGap,
+                // Flexible(
+                //   child: LayoutBuilder(
+                //     builder: (context, constraints) {
+                //       return SizedBox(
+                //           height: 32.w,
+                //           child: HtmlWidget(
+                //               html: badge.description, onLinkTap: (url) {}));
+                //     },
+                //   ),
+                // ),
+                6.vGap,
                 Row(
                   children: [
                     Flexible(

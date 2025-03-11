@@ -34,6 +34,36 @@ class StateView extends GetView {
     this.shimmerView,
     required this.child,
   });
+  
+  /// 创建加载状态视图的工厂方法
+  static Widget loading({int shimmerCount = 7, Widget? shimmerView}) {
+    return StateView(
+      state: ViewState.loading,
+      shimmerCount: shimmerCount,
+      shimmerView: shimmerView,
+      child: const SizedBox(),
+    );
+  }
+  
+  /// 创建空状态视图的工厂方法
+  static Widget empty({String? message, VoidCallback? onRetry}) {
+    return StateView(
+      state: ViewState.empty,
+      emptyMessage: message,
+      onRetry: onRetry,
+      child: const SizedBox(),
+    );
+  }
+  
+  /// 创建错误状态视图的工厂方法
+  static Widget error({String? message, VoidCallback? onRetry}) {
+    return StateView(
+      state: ViewState.error,
+      errorMessage: message,
+      onRetry: onRetry,
+      child: const SizedBox(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

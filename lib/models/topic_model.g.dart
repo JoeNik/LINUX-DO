@@ -43,6 +43,8 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       admin: json['admin'] as bool?,
       moderator: json['moderator'] as bool?,
       trustLevel: (json['trust_level'] as num?)?.toInt(),
+      count: (json['count'] as num?)?.toInt(),
+      animatedAvatar: json['animated_avatar'] as String?,
     );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -58,6 +60,8 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'admin': instance.admin,
       'moderator': instance.moderator,
       'trust_level': instance.trustLevel,
+      'count': instance.count,
+      'animated_avatar': instance.animatedAvatar,
     };
 
 Group _$GroupFromJson(Map<String, dynamic> json) => Group(
@@ -143,6 +147,7 @@ Topic _$TopicFromJson(Map<String, dynamic> json) => Topic(
           ?.map((e) => Poster.fromJson(e as Map<String, dynamic>))
           .toList(),
       bookmarked: json['bookmarked'] as bool?,
+      postNumber: (json['post_number'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$TopicToJson(Topic instance) => <String, dynamic>{
@@ -177,6 +182,7 @@ Map<String, dynamic> _$TopicToJson(Topic instance) => <String, dynamic>{
       'has_accepted_answer': instance.hasAcceptedAnswer,
       'posters': instance.posters,
       'bookmarked': instance.bookmarked,
+      'post_number': instance.postNumber,
     };
 
 Poster _$PosterFromJson(Map<String, dynamic> json) => Poster(

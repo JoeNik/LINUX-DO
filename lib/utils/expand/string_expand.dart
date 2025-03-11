@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 extension StringExpand on String {
   /// 判断字符串是否为空白
   bool get isNullOrBlank => trim().isEmpty;
@@ -21,4 +23,12 @@ extension StringExpand on String {
   /// 是否是URL
   bool get isUrl =>
       RegExp(r'^https?:\/\/([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$').hasMatch(this);
+
+  // 将十六进制颜色字符串转换为 Color 对象
+  Color fromHex() {
+    if (length == 6) {
+      return Color(int.parse('FF$this', radix: 16));
+    }
+    return Colors.blue;
+  }
 }

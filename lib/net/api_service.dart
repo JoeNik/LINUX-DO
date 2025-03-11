@@ -31,6 +31,7 @@ import '../models/tag_data.dart';
 import '../models/search_result.dart';
 import '../models/chat_response.dart';
 import '../models/chat_messages_response.dart';
+import '../models/user_post.dart';
 import 'http_config.dart';
 
 part 'api_service.g.dart';
@@ -477,9 +478,28 @@ abstract class ApiService {
 
   /// 获取用户关注者列表
   @GET('u/{username}/follow/following')
-  Future<List<Follow>> getFollowing(@Path('username') String username);
+  Future<List<Follow>> getFollowing(
+    @Path('username') String username, {
+    @Query('offset') int? offset,
+    @Query('limit') int? limit,
+  });
 
   /// 获取用户关注者列表
   @GET('u/{username}/follow/followers')
-  Future<List<Follow>> getFollowers(@Path('username') String username);
+  Future<List<Follow>> getFollowers(
+    @Path('username') String username, {
+    @Query('offset') int? offset,
+    @Query('limit') int? limit,
+  });
+
+  /// 获取用户的帖子（动态）
+  @GET('follow/posts/{username}')
+  Future<UserPostResponse> getUserPosts(
+    @Path('username') String username, {
+    @Query('created_before') String? createdBefore,
+  });
+
+  /// 删除话题
+  @DELETE('t/{topic_id}.json')
+  Future<SuccessResponse<dynamic>> deleteTopic(@Path('topic_id') String topicId);
 }

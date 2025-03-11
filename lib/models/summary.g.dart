@@ -9,7 +9,7 @@ part of 'summary.dart';
 SummaryResponse _$SummaryResponseFromJson(Map<String, dynamic> json) =>
     SummaryResponse(
       topics: (json['topics'] as List<dynamic>?)
-          ?.map((e) => Topic.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => t.Topic.fromJson(e as Map<String, dynamic>))
           .toList(),
       badges: (json['badges'] as List<dynamic>?)
           ?.map((e) => Badge.fromJson(e as Map<String, dynamic>))
@@ -18,7 +18,7 @@ SummaryResponse _$SummaryResponseFromJson(Map<String, dynamic> json) =>
           ?.map((e) => BadgeType.fromJson(e as Map<String, dynamic>))
           .toList(),
       users: (json['users'] as List<dynamic>?)
-          ?.map((e) => User.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => t.User.fromJson(e as Map<String, dynamic>))
           .toList(),
       userSummary: json['user_summary'] == null
           ? null
@@ -108,19 +108,19 @@ UserSummary _$UserSummaryFromJson(Map<String, dynamic> json) => UserSummary(
           ?.map((e) => Link.fromJson(e as Map<String, dynamic>))
           .toList(),
       mostLikedByUsers: (json['most_liked_by_users'] as List<dynamic>?)
-          ?.map((e) => User.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => t.User.fromJson(e as Map<String, dynamic>))
           .toList(),
       mostLikedUsers: (json['most_liked_users'] as List<dynamic>?)
-          ?.map((e) => User.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => t.User.fromJson(e as Map<String, dynamic>))
           .toList(),
       mostRepliedToUsers: (json['most_replied_to_users'] as List<dynamic>?)
-          ?.map((e) => User.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => t.User.fromJson(e as Map<String, dynamic>))
           .toList(),
       badges: (json['badges'] as List<dynamic>?)
           ?.map((e) => UserBadge.fromJson(e as Map<String, dynamic>))
           .toList(),
       topCategories: (json['top_categories'] as List<dynamic>?)
-          ?.map((e) => TopCategory.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => Category.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
@@ -197,29 +197,4 @@ Map<String, dynamic> _$UserBadgeToJson(UserBadge instance) => <String, dynamic>{
       'badge_id': instance.badgeId,
       'user_id': instance.userId,
       'granted_by_id': instance.grantedById,
-    };
-
-TopCategory _$TopCategoryFromJson(Map<String, dynamic> json) => TopCategory(
-      topicCount: (json['topic_count'] as num).toInt(),
-      postCount: (json['post_count'] as num).toInt(),
-      id: (json['id'] as num).toInt(),
-      name: json['name'] as String,
-      color: json['color'] as String,
-      textColor: json['text_color'] as String,
-      slug: json['slug'] as String,
-      readRestricted: json['read_restricted'] as bool,
-      parentCategoryId: (json['parent_category_id'] as num?)?.toInt(),
-    );
-
-Map<String, dynamic> _$TopCategoryToJson(TopCategory instance) =>
-    <String, dynamic>{
-      'topic_count': instance.topicCount,
-      'post_count': instance.postCount,
-      'id': instance.id,
-      'name': instance.name,
-      'color': instance.color,
-      'text_color': instance.textColor,
-      'slug': instance.slug,
-      'read_restricted': instance.readRestricted,
-      'parent_category_id': instance.parentCategoryId,
     };

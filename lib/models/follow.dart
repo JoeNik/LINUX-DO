@@ -48,9 +48,14 @@ class Follow {
 
   // 获取指定尺寸的头像URL
   String getAvatarUrl({int size = 100}) {
+    if (animatedAvatar != null && animatedAvatar!.isNotEmpty) {
+      return '${HttpConfig.baseUrl}${animatedAvatar!.replaceAll('{size}', size.toString())}';
+    }
     if (avatarTemplate == null) return '';
     return '${HttpConfig.baseUrl}${avatarTemplate!.replaceAll('{size}', size.toString())}';
   }
+
+  bool get isWebMaster => id == 1;
 
   bool hasAnimatedAvatar() {
     return animatedAvatar != null && animatedAvatar!.isNotEmpty;

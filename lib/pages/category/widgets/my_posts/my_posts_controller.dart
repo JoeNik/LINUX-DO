@@ -172,9 +172,25 @@ class MyPostsController extends BaseController
     }
   }
 
-      List<String> getAvatarUrls(Topic topic) {
-     // 通过_userCache获取头像
+  List<String> getAvatarUrls(Topic topic) {
+    // 通过_userCache获取头像
     final avatarUrls = topic.getAvatarUrls();
-    return avatarUrls.map((id) => _userCache.getAvatarUrl(id)).whereType<String>().toList();
+    return avatarUrls
+        .map((id) => _userCache.getAvatarUrl(id))
+        .whereType<String>()
+        .toList();
+  }
+
+  Future<void> deleteTopic(int id) async {
+    try {
+      final response = await apiService.deleteTopic(id.toString());
+      if (response is Map) {
+        showSuccess(AppConst.posts.deleteSuccess);
+      } else {
+        showError(AppConst.posts.error);
+      }
+    } catch (e) {
+      showError(AppConst.posts.error);
+    }
   }
 }

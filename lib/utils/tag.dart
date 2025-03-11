@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:linux_do/models/badge_detail.dart';
 
 import '../models/category.dart';
 import 'log.dart';
@@ -120,5 +121,52 @@ class CategoryManager {
   Category? getCategory(int? categoryId) {
     if (categoryId == null) return null;
     return _categories[categoryId];
+  }
+}
+
+
+class BadgeManager {
+  static final BadgeManager _instance = BadgeManager._internal();
+  factory BadgeManager() => _instance;
+  BadgeManager._internal();
+
+  final Map<int, BadgeDetail> _badges = <int, BadgeDetail>{};
+
+  Future<void> initialize() async {
+    if (_badges.isNotEmpty) return;
+
+    try {
+      final String jsonString =
+          await rootBundle.loadString('assets/json/badge.json');
+      final List<dynamic> jsonList = json.decode(jsonString);
+      for (var item in jsonList) {
+        final badge = BadgeDetail(
+          id: item['id'],
+          name: item['name'],
+          description: item['description'],
+          grantCount: item['grant_count'],
+          allowTitle: item['allow_title'],
+          multipleGrant: item['multiple_grant'],
+          listable: item['listable'],
+          enabled: item['enabled'],
+          badgeGroupingId: item['badge_grouping_id'],
+          system: item['system'],
+          slug: item['slug'],
+          hasBadge: item['has_badge'],
+          manuallyGrantable: item['manually_grantable'],
+          showInPostHeader: item['show_in_post_header'],
+          badgeTypeId: item['badge_type_id'],
+        );
+        _badges[badge.id] = badge;
+      }
+    } catch (e, stack) {  
+      l.e('Error loading badges: $e\n$stack');
+    }
+  }
+
+  BadgeDetail? getBadge(int? badgeId) {
+    l.d('getBadge: $badgeId');
+    if (badgeId == null) return null;
+    return _badges[badgeId];
   }
 }

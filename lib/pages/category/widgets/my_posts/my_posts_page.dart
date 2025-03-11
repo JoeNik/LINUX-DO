@@ -53,6 +53,9 @@ class _MyPostsPageState extends State<MyPostsPage>
                       onDoNotDisturb: (topic) {
                         controller.doNotDisturb(topic.id);
                       },
+                      onDelete: (topic) {
+                        controller.deleteTopic(topic.id);
+                      },
                     );
                   },
                   childCount: controller.topics.length,

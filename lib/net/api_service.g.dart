@@ -2525,9 +2525,17 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<List<Follow>> getFollowing(String username) async {
+  Future<List<Follow>> getFollowing(
+    String username, {
+    int? offset,
+    int? limit,
+  }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'offset': offset,
+      r'limit': limit,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<List<Follow>>(Options(
@@ -2560,9 +2568,17 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<List<Follow>> getFollowers(String username) async {
+  Future<List<Follow>> getFollowers(
+    String username, {
+    int? offset,
+    int? limit,
+  }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'offset': offset,
+      r'limit': limit,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<List<Follow>>(Options(
@@ -2587,6 +2603,79 @@ class _ApiService implements ApiService {
       _value = _result.data!
           .map((dynamic i) => Follow.fromJson(i as Map<String, dynamic>))
           .toList();
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<UserPostResponse> getUserPosts(
+    String username, {
+    String? createdBefore,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'created_before': createdBefore};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<UserPostResponse>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          'follow/posts/${username}',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late UserPostResponse _value;
+    try {
+      _value = UserPostResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<SuccessResponse<dynamic>> deleteTopic(String topicId) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<SuccessResponse<dynamic>>(Options(
+      method: 'DELETE',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          't/${topicId}.json',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late SuccessResponse<dynamic> _value;
+    try {
+      _value = SuccessResponse<dynamic>.fromJson(
+        _result.data!,
+        (json) => json as dynamic,
+      );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options);
       rethrow;

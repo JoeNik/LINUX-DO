@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_spacing.dart';
+import 'package:linux_do/utils/expand/string_expand.dart';
 import '../const/app_colors.dart';
 import '../models/category_data.dart';
 import 'cached_image.dart';
@@ -19,19 +20,9 @@ class CategoryItem extends StatelessWidget {
     required this.onTap,
   }) : super(key: key);
 
-  // 将十六进制颜色字符串转换为 Color 对象
-  Color _getColorFromHex(String? hexColor) {
-    if (hexColor == null) return Colors.blue;
-    // 确保颜色字符串是6位
-    if (hexColor.length == 6) {
-      return Color(int.parse('FF$hexColor', radix: 16));
-    }
-    return Colors.blue; // 默认颜色
-  }
-
   @override
   Widget build(BuildContext context) {
-    final categoryColor = _getColorFromHex(category.color);
+    final categoryColor = category.color?.fromHex() ?? Colors.blue;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

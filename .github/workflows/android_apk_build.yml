@@ -25,7 +25,6 @@ jobs:
         run: |
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-33"
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34"
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-35"
       
       - name: Configure build.gradle for app
         run: |
@@ -163,8 +162,24 @@ jobs:
         run: flutter pub run build_runner build --delete-conflicting-outputs
       - name: Build APK
         run: flutter build apk --release --split-per-abi
-      - name: Upload APK
+      - name: Upload APK as workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-apk
           path: build/app/outputs/apk/release/*
+          
+      # 新增步骤：生成版本号
+      - name: Generate version number
+        id: version
+        run: echo "version=$(date +'%Y.%m.%d.%H%M')" >> $GITHUB_OUTPUT
+        
+      # 新增步骤：创建Release并上传APK
+      - name: Create Release and Upload APK
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.version.outputs.version }}
+          tag_name: v${{ steps.version.outputs.version }}
+          files: build/app/outputs/apk/release/*.apk
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

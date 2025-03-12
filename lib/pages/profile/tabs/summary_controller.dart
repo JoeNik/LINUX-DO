@@ -10,18 +10,14 @@ class SummaryController extends BaseController with Concatenated {
   final Rxn<List<StatItem>> bottomStats = Rxn();
   final summaryData = Rxn<SummaryResponse>();
 
-  @override
-  void onInit() {
-    super.onInit();
-    _initData();
-  }
 
-  void _initData() async {
-    final data = Get.arguments as SummaryResponse?;
+  void updateData(SummaryResponse? data) async {
+    
     if (data == null) {
       _setDefaultValues();
       return;
     }
+    summaryData.value = data;
 
     try {
       final summary = data.userSummary!;

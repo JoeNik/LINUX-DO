@@ -15,12 +15,12 @@ class PostReply extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4).w,
         decoration: BoxDecoration(
           color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(12.w),
-            bottomRight: Radius.circular(12.w),
+          borderRadius:  BorderRadius.only(
+            topLeft: const Radius.circular(12).w,
+            bottomRight: const Radius.circular(12).w,
           ),
         ),
         child: Row(

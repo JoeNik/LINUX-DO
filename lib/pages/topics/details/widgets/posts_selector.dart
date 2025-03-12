@@ -226,12 +226,12 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
             height: _heightAnimation.value,
             decoration: BoxDecoration(
               color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(16.w),
+              borderRadius: const BorderRadius.all(Radius.circular(16)).w,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 4.w,
-                  offset: Offset(0, 2.w),
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
@@ -246,7 +246,7 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
                     height: _handleHeight,
                     decoration: BoxDecoration(
                       color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.circular(16.w),
+                      borderRadius: const BorderRadius.all(Radius.circular(16)).w,
                     ),
                     child: Center(
                       child: Text(

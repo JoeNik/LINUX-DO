@@ -186,7 +186,7 @@ class ProfileMenu extends StatelessWidget with ToastMixin {
         height: 86.w,
         margin: const EdgeInsets.only(bottom: 4).w,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(Get.context!).cardColor,
           borderRadius: BorderRadius.circular(4).w,
           boxShadow: [
             BoxShadow(

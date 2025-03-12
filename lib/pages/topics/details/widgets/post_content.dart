@@ -31,7 +31,7 @@ class PostContent extends StatelessWidget {
       child: Stack(
         children: [
           Padding(
-            padding: EdgeInsets.all(2.w),
+            padding: const EdgeInsets.all(2).w,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -64,11 +64,11 @@ class _ReplyQuote extends StatelessWidget {
     
     
     return Container(
-      margin: EdgeInsets.only(bottom: 8.w,top: 4.w),
-      padding: EdgeInsets.all(4.w),
+      margin: const EdgeInsets.only(bottom: 8,top: 4).w,
+      padding: const EdgeInsets.all(4).w,
       decoration: BoxDecoration(
         color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(4.w),
+        borderRadius: const BorderRadius.all(Radius.circular(4)).w,
         border: Border.all(
           color: Theme.of(context).dividerColor.withValues(alpha: 0.6),
           width: 1.w,

@@ -194,8 +194,7 @@ class LikePage extends GetView<LikeController> {
                   fontSize: 11.sp,
                   fontWeight: FontWeight.bold,
                   fontFamily: AppFontFamily.dinPro,
-                  color: item.flairBgColor?.fromHex() ??
-                      Theme.of(context).textTheme.bodyLarge?.color,
+                  color: Theme.of(context).textTheme.bodySmall?.color,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -207,8 +206,7 @@ class LikePage extends GetView<LikeController> {
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
                   fontFamily: AppFontFamily.dinPro,
-                  color: item.flairBgColor?.fromHex() ??
-                      Theme.of(context).textTheme.bodyLarge?.color,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

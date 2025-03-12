@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_spacing.dart';
-import 'package:linux_do/widgets/html_widget.dart';
 
 import '../const/app_colors.dart';
 import '../const/app_theme.dart';

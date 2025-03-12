@@ -115,17 +115,17 @@ class _ReportButton extends StatelessWidget {
       Dialog(
         backgroundColor: Theme.of(Get.context!).cardColor,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.w),
+          borderRadius: const BorderRadius.all(Radius.circular(16)).w,
         ),
         child: Container(
           width: 0.8.sw,
           constraints: BoxConstraints(
             maxHeight: 0.7.sh,
           ),
-          padding: EdgeInsets.all(20.w),
+          padding: const EdgeInsets.all(20).w,
           decoration: BoxDecoration(
             color: Theme.of(Get.context!).cardColor,
-            borderRadius: BorderRadius.circular(16.w),
+            borderRadius: const BorderRadius.all(Radius.circular(16)).w,
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -158,7 +158,7 @@ class _ReportButton extends StatelessWidget {
                       SizedBox(
                         width: 0.65.sw,
                         child: ListView.separated(
-                          padding: EdgeInsets.symmetric(vertical: 8.w),
+                          padding: const EdgeInsets.symmetric(vertical: 8).w,
                           itemCount: AppConst.posts.reasons.length,
                           separatorBuilder: (context, index) => 8.vGap,
                           itemBuilder: (context, index) {
@@ -167,15 +167,15 @@ class _ReportButton extends StatelessWidget {
                               return InkWell(
                                 onTap: () => selectedIndex.value = index,
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 12.w,
-                                    vertical: 12.w,
-                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 12,
+                                  ).w,
                                   decoration: BoxDecoration(
                                     color: isSelected
                                         ? Get.theme.primaryColor
                                         : Colors.white,
-                                    borderRadius: BorderRadius.circular(8.w),
+                                    borderRadius: const BorderRadius.all(Radius.circular(8)).w,
                                     boxShadow: [
                                       BoxShadow(
                                         color:
@@ -373,7 +373,7 @@ class _ReplyButton extends StatelessWidget {
 class _CopyButton extends StatelessWidget {
   final Post post;
   final TopicDetailController controller;
-  _CopyButton({required this.post, required this.controller});
+  const _CopyButton({required this.post, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -419,7 +419,7 @@ class _BookmarkButton extends StatelessWidget {
 class _DeleteButton extends StatelessWidget {
   final Post post;
   final TopicDetailController controller;
-  _DeleteButton({required this.post, required this.controller});
+  const _DeleteButton({required this.post, required this.controller});
 
   @override
   Widget build(BuildContext context) {

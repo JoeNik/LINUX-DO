@@ -81,7 +81,7 @@ dependencies:
   uuid: ^4.3.3
   expandable_page_view: ^1.0.17
   flutter_svg: ^2.0.17
-  timeago: ^3.7.0
+  get_storage: ^2.1.1
 
 dev_dependencies:
   flutter_test:

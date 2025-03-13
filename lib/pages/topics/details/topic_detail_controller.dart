@@ -5,13 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linux_do/const/app_const.dart';
-import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/utils/browser_util.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:linux_do/widgets/browser_tips_sheet.dart';
-import 'package:linux_do/widgets/dis_popup.dart';
 import 'package:linux_do/widgets/html_widget.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../controller/global_controller.dart';
@@ -28,10 +26,9 @@ import 'package:dio/dio.dart' as dio;
 import 'dart:math';
 import 'dart:async';
 import 'dart:convert';
-import 'package:url_launcher/url_launcher_string.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:linux_do/const/app_spacing.dart';
+import '../../../models/bookmark_item.dart';
+import '../../../utils/bookmark_service.dart';
 
 class TopicDetailController extends BaseController
     with WidgetsBindingObserver, Concatenated {
@@ -107,6 +104,9 @@ class TopicDetailController extends BaseController
   final contentController = TextEditingController();
 
   final htmlController = Get.find<HtmlController>();
+
+  // 书签服务
+  final BookmarkService _bookmarkService = Get.find<BookmarkService>();
 
   @override
   void onInit() {
@@ -1064,10 +1064,34 @@ class TopicDetailController extends BaseController
       showError('打开浏览器失败');
     }
   }
+  
+  
+  // 收藏主题到指定分类
+  Future<bool> bookmarkTopic(String category) async {
 
-  // 本地收藏 非服务器
-  void handleLocalBookmark() {
+    if (_bookmarkService.isBookmarked(topic.value?.id ?? 0)){
+      showWarning('您已收藏过该主题');
+      return false;
+    }
 
+    if (topic.value == null) return false;
+    
+    final topicDetail = topic.value!;
+    final createUser = topicDetail.details?.createdBy;
+    
+    // 创建BookmarkItem
+    final bookmarkItem = BookmarkItem(
+      id: topicDetail.id,
+      title: topicDetail.title ?? '未命名主题',
+      avatarUrl: createUser?.getAvatarUrl() ?? '',
+      tags: topicDetail.tags ?? [],
+      category: category,
+      username: createUser?.username ?? '',
+      userId: createUser?.id ?? 0,
+      name: topicDetail.slug,
+    );
+
+    return await _bookmarkService.addBookmark(bookmarkItem);
   }
 }
 

@@ -16,6 +16,7 @@ import 'package:linux_do/pages/settings/profile_settings_controller.dart';
 import 'package:linux_do/pages/settings/profile_settings_page.dart';
 import 'package:linux_do/pages/settings/security_settings_controller.dart';
 import 'package:linux_do/pages/settings/security_settings_page.dart';
+import 'package:linux_do/utils/bookmark_service.dart';
 import 'package:linux_do/widgets/html_widget.dart';
 import '../pages/chat/chat_detail_controller.dart';
 import '../pages/chat/chat_detail_page.dart';
@@ -46,6 +47,8 @@ import '../pages/settings/tracking_settings_page.dart';
 import '../pages/settings/do_not_disturb_controller.dart';
 import '../pages/settings/do_not_disturb_page.dart';
 import '../pages/category/category_page.dart';
+import '../pages/profile/bookmark_page.dart';
+import '../pages/profile/bookmark_controller.dart';
 
 part 'app_routes.dart';
 
@@ -71,6 +74,7 @@ class AppPages {
         Get.lazyPut(() => CategoryTopicsController());
         Get.lazyPut(() => ChatListController());
         Get.lazyPut(() => ProfileController());
+        Get.lazyPut(() => BookmarkService());
       }),
     ),
 
@@ -244,6 +248,15 @@ class AppPages {
       page: () => const PopularPage(),
       binding: BindingsBuilder(() {
         Get.lazyPut<PopularController>(() => PopularController());
+      }),
+    ),
+
+    /// 书签页
+    GetPage(
+      name: Routes.BOOKMARKS,
+      page: () => const BookmarkPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => BookmarkController());
       }),
     ),
   ];

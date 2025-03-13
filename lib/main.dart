@@ -6,7 +6,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_const.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
 import 'app.dart';
 import 'controller/global_controller.dart';
@@ -22,10 +21,6 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
-  // 添加timeago中文支持
-  timeago.setLocaleMessages('zh', timeago.ZhCnMessages());
-  timeago.setLocaleMessages('zh_CN', timeago.ZhCnMessages());
 
   // 初始化App
   await App.instance.initial();

@@ -36,7 +36,7 @@ class AppConst {
   static const faq = 'faq';
 
   static const open = '打开';
-  
+
   static const close = '关闭';
 
   /// 用户协议
@@ -44,6 +44,22 @@ class AppConst {
 
   /// 隐私政策
   static const privacy = 'assets/html/privacy-policy.html';
+
+  // 收藏菜单类别列表
+  static const bookmarkCategories = [
+    '开发调优',
+    '文档共建',
+    '非我莫属',
+    '扬帆起航',
+    '福利羊毛',
+    '运营反馈',
+    '资源荟萃',
+    '跳蚤市场',
+    '读书成诗',
+    '前沿快讯',
+    '搞七捻三',
+    '深海幽域'
+  ];
 
   /// 抽屉菜单
   static const drawerMenu = _DrawerMenu();
@@ -85,8 +101,6 @@ class AppConst {
 
   /// 用户相关
   static const user = _User();
-
-
 }
 
 /// 抽屉菜单文本
@@ -307,7 +321,6 @@ class _Settings {
   String get telegramNotification => 'Telegram 通知';
   String get telegramHint => '输入机器人给你的 Chat ID';
 
-  
   String get dataExportMessage => '您确定要下载您的帐户活动和偏好设置的归档吗？';
   String get dataExportSuccess => '数据导出成功';
   String get dataExportFailed => '数据导出失败';
@@ -335,7 +348,8 @@ class _Settings {
   String get notificationWhenReplied => '当我关注的人回复时通知我';
   String get notificationWhenTopicCreated => '当我关注的人创建话题时通知我';
   String get notificationSchedule => '接收指定话题提醒的频率';
-  String get notificationTip => '注意：您必须须在使用的每个浏览器上更改此设置。如果您从用户菜单暂停通知，则无论此设置如何，所有通知都将被禁用。';
+  String get notificationTip =>
+      '注意：您必须须在使用的每个浏览器上更改此设置。如果您从用户菜单暂停通知，则无论此设置如何，所有通知都将被禁用。';
 
   String get ignoredUsers => '已忽略的用户';
   String get noIgnoredUsers => '您没有忽略任何用户';
@@ -370,7 +384,8 @@ class _Settings {
   String get trackBrowsingHistoryDesc => '保存您的浏览历史以提供更好的内容推荐';
   String get shareAnalytics => '分析数据共享';
   String get shareAnalyticsDesc => '与我们分享匿名使用数据以帮助改进服务';
-  String get trackingPrivacyTip => '我们重视您的隐私。您可以随时调整这些设置来控制数据的收集和使用方式。所有数据都将按照我们的隐私政策进行处理。';
+  String get trackingPrivacyTip =>
+      '我们重视您的隐私。您可以随时调整这些设置来控制数据的收集和使用方式。所有数据都将按照我们的隐私政策进行处理。';
 
   String get communityData => '社区数据';
   String get ourModerators => '我们的版主';
@@ -384,7 +399,8 @@ class _Settings {
   String get emergencyIssues => '紧急事项';
   String get contactForCriticalIssues => '如果出现影响此网站的关键问题或紧急事项，请联系';
   String get inappropriateContentReport => '不当内容报告';
-  String get reportInappropriateContent => '如果您发现任何不当内容，请立即与我们的版主和管理员进行对话。请记住，联系前请先登录。';
+  String get reportInappropriateContent =>
+      '如果您发现任何不当内容，请立即与我们的版主和管理员进行对话。请记住，联系前请先登录。';
   String get versionInfo => '版本信息';
   String get webVersion => 'Web版本号';
   String get appVersion => 'App版本号';
@@ -410,37 +426,37 @@ class _Posts {
   String get openInBrowser => '系统浏览器打开';
   // 举报相关
   List<Map<String, String>> get reasons => [
-    {
-        'title': '偏离话题',
-        'desc': '此帖子与标题和第一个帖子定义的当前讨论无关，可能应该移到其他地方。',
-        'value': 'off_topic'
-      },
-      {
-        'title': '不当言论',
-        'desc': '这个帖子包含的内容会被一个有理性的人认为具有冒犯性、侮辱性、属于仇恨行为或违反我们的社区准则。',
-        'value': 'off_topic'
-      },
-      {
-        'title': '垃圾信息',
-        'desc': '此帖子是广告或者蓄意破坏讨论。帖子没有价值或者与当前话题无关。',
-        'value': 'inappropriate'
-      },
-      {
-        'title': '违规推广',
-        'desc': '我确认：此帖子系用户未遵守社区推广规则，进行违规推广。',
-        'value': 'spam'
-      },
-      {
-        'title': '非法',
-        'desc': '此帖子需要工作人员注意，因为我认为其中包含非法内容。',
-        'value': 'notify_moderators'
-      },
-      {
-        'title': '其他内容',
-        'desc': '由于上面未列出的另一个原因，此帖子需要管理人员注意。',
-        'value': 'notify_moderators'
-      },
-    ];
+        {
+          'title': '偏离话题',
+          'desc': '此帖子与标题和第一个帖子定义的当前讨论无关，可能应该移到其他地方。',
+          'value': 'off_topic'
+        },
+        {
+          'title': '不当言论',
+          'desc': '这个帖子包含的内容会被一个有理性的人认为具有冒犯性、侮辱性、属于仇恨行为或违反我们的社区准则。',
+          'value': 'off_topic'
+        },
+        {
+          'title': '垃圾信息',
+          'desc': '此帖子是广告或者蓄意破坏讨论。帖子没有价值或者与当前话题无关。',
+          'value': 'inappropriate'
+        },
+        {
+          'title': '违规推广',
+          'desc': '我确认：此帖子系用户未遵守社区推广规则，进行违规推广。',
+          'value': 'spam'
+        },
+        {
+          'title': '非法',
+          'desc': '此帖子需要工作人员注意，因为我认为其中包含非法内容。',
+          'value': 'notify_moderators'
+        },
+        {
+          'title': '其他内容',
+          'desc': '由于上面未列出的另一个原因，此帖子需要管理人员注意。',
+          'value': 'notify_moderators'
+        },
+      ];
 
   String get reportTitle => '举报内容';
   String get reportButton => '举报帖子';
@@ -606,5 +622,4 @@ class _User {
   String get startupNavigation => '扬帆起航';
   String get resourceSharing => '资源荟萃';
   String get nonMainstream => '非我莫属';
-  
 }

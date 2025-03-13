@@ -6,6 +6,7 @@ import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/models/follow.dart';
 import 'package:linux_do/models/user_post.dart';
+import 'package:linux_do/utils/expand/datetime_expand.dart';
 import 'package:linux_do/utils/tag.dart';
 import 'package:linux_do/widgets/avatar_widget.dart';
 import 'package:linux_do/widgets/cached_image.dart';
@@ -15,7 +16,6 @@ import 'package:linux_do/widgets/html_widget.dart';
 import 'package:linux_do/widgets/state_view.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:slide_switcher/slide_switcher.dart';
-import 'package:timeago/timeago.dart' as timeago;
 import 'follow_controller.dart';
 
 class FollowPage extends GetView<FollowController> {
@@ -136,7 +136,7 @@ class FollowPage extends GetView<FollowController> {
     final username = user.username ?? '';
     final displayName = user.name ?? '无名大佬';
     final createdDate = DateTime.parse(post.createdAt);
-    final formattedTime = timeago.format(createdDate, locale: 'zh');
+    final formattedTime = createdDate.friendlyDateTime;
     final category = CategoryManager().getCategory(post.categoryId);
     final logoUrl = category?.logo?.imageUrl;
     final slug = category?.slug;

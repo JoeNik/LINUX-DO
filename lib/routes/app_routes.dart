@@ -72,4 +72,7 @@ abstract class Routes {
 
   // 热门页面
   static const POPULAR_PAGE = '/popular';
+
+  // 书签页面
+  static const BOOKMARKS = '/bookmarks';
 }

@@ -68,9 +68,3 @@ else
     print_warning "❌ IPA 文件生成失败"
     exit 1
 fi
-
-
-# 打包安卓版本
-flutter build apk --release --split-per-abi 
-
-print_message "✅ 打包完成"

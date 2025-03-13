@@ -11,7 +11,6 @@ import 'package:linux_do/models/summary.dart';
 import 'package:linux_do/pages/profile/popular_controller.dart';
 import 'package:linux_do/utils/badge.dart';
 import 'package:linux_do/utils/expand/datetime_expand.dart';
-import 'package:linux_do/utils/expand/num_expand.dart';
 import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/utils/tag.dart';
 import 'package:linux_do/widgets/badge_widget.dart';
@@ -235,11 +234,13 @@ class PopularPage extends GetView<PopularController> {
                             ),
                           ),
 
+                          6.hGap,
+
                         Expanded(
                           child: Text(
                             formattedTime,
                             style: TextStyle(
-                              fontSize: 12.sp,
+                              fontSize: 11.sp,
                               fontFamily: AppFontFamily.dinPro,
                               color:
                                   Theme.of(context).textTheme.bodySmall?.color,
@@ -678,8 +679,8 @@ class PopularPage extends GetView<PopularController> {
               // 类别图标
               if (logoUrl != null)
                 Container(
-                  width: 40.w,
-                  height: 40.w,
+                  width: 20.w,
+                  height: 20.w,
                   margin: EdgeInsets.only(right: 12.w),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -687,74 +688,89 @@ class PopularPage extends GetView<PopularController> {
                   ),
                   child: CachedImage(
                     imageUrl: logoUrl,
-                    width: 40.w,
-                    height: 40.w,
+                    width: 20.w,
+                    height: 20.w,
                     fit: BoxFit.contain,
                   ),
                 ),
 
               // 类别信息
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontFamily: AppFontFamily.dinPro,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).textTheme.titleLarge?.color,
-                      ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontFamily: AppFontFamily.dinPro,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
                     ),
-                    if (category.description != null &&
-                        category.description!.isNotEmpty) ...[
-                      4.vGap,
-                      Text(
-                        category.description!,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontFamily: AppFontFamily.dinPro,
-                          color: textColor.withValues(alpha: 0.8),
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                  ),
+                  if (category.description != null &&
+                      category.description!.isNotEmpty) ...[
+                    4.vGap,
+                    Text(
+                      category.description!,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontFamily: AppFontFamily.dinPro,
+                        color: textColor.withValues(alpha: 0.8),
                       ),
-                    ],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
-                ),
+                ],
               ),
+              const Spacer(),
 
               // 回复数量
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withValues(alpha: 0.6),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(12.w),
                 ),
                 child: Text(
                   '$replyCount 回复',
                   style: TextStyle(
                     fontSize: 10.sp,
-                    color: textColor,
+                    color: AppColors.white,
                     fontFamily: AppFontFamily.dinPro,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
 
+              4.hGap,
+
               // 话题数量
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withValues(alpha: 0.6),
+                    ],
+                  ),
                   borderRadius: BorderRadius.circular(12.w),
                 ),
                 child: Text(
                   '$count 话题',
                   style: TextStyle(
                     fontSize: 10.sp,
-                    color: textColor,
+                    color: AppColors.white,
                     fontFamily: AppFontFamily.dinPro,
                     fontWeight: FontWeight.w500,
                   ),

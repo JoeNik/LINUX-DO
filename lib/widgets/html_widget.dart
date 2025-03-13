@@ -19,9 +19,11 @@ import 'package:linux_do/widgets/avatar_widget.dart';
 import 'package:linux_do/widgets/dis_button.dart';
 import 'package:linux_do/widgets/dis_loading.dart';
 import 'package:linux_do/widgets/video_player_widget.dart';
+import 'dart:ui';
 import 'cached_image.dart';
 import 'image_preview_dialog.dart';
 import 'code_preview_dialog.dart';
+import 'package:flutter/rendering.dart';
 
 // 自定义PageStorageBucket，用于防止滚动位置恢复错误
 // type 'ItemPosition' is not a subtype of type 'double?' in type cast ???????????????
@@ -58,137 +60,137 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
     return PageStorage(
       bucket: _storageBucket,
       child: SelectionArea(
-        child: Html(
+      child: Html(
           anchorKey: anchorKey,
-          data: html,
-          style: {
-            "body": Style(
-              fontSize: FontSize(fontSize ?? 14.sp),
-              margin: Margins.zero,
-              padding: HtmlPaddings.zero,
-              color: theme.textTheme.bodyLarge?.color,
+        data: html,
+        style: {
+          "body": Style(
+            fontSize: FontSize(fontSize ?? 14.sp),
+            margin: Margins.zero,
+            padding: HtmlPaddings.zero,
+            color: theme.textTheme.bodyLarge?.color,
               fontFamily: AppFontFamily.dinPro,
-            ),
-            "a": Style(
-              color: theme.primaryColor,
-              textDecoration: TextDecoration.none,
+          ),
+          "a": Style(
+            color: theme.primaryColor,
+            textDecoration: TextDecoration.none,
               fontFamily: AppFontFamily.dinPro,
-            ),
-            "img": Style(
-              width: Width(100, Unit.percent),
-              height: Height.auto(),
-              margin: Margins.only(top: 8.h, bottom: 8.h),
-              padding: HtmlPaddings.zero,
-              display: Display.block,
-            ),
-            "p": Style(
-              margin: Margins.only(top: 8.h, bottom: 8.h),
-              padding: HtmlPaddings.zero,
-              fontSize: FontSize(fontSize ?? 14.sp),
-              lineHeight: LineHeight.number(1.5),
+          ),
+          "img": Style(
+            width: Width(100, Unit.percent),
+            height: Height.auto(),
+            margin: Margins.only(top: 8.h, bottom: 8.h),
+            padding: HtmlPaddings.zero,
+            display: Display.block,
+          ),
+          "p": Style(
+            margin: Margins.only(top: 8.h, bottom: 8.h),
+            padding: HtmlPaddings.zero,
+            fontSize: FontSize(fontSize ?? 14.sp),
+            lineHeight: LineHeight.number(1.5),
               fontFamily: AppFontFamily.dinPro,
-            ),
-            "img.emoji": Style(
-              width: Width(16.sp),
-              height: Height(16.sp),
-              margin: Margins.only(left: 2.sp, right: 2.sp),
-              verticalAlign: VerticalAlign.middle,
-              display: Display.inlineBlock,
-            ),
-            // 代码块样式
-            "pre": Style(
-              backgroundColor:
-                  Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              padding: HtmlPaddings.all(12.w),
-              margin: Margins.symmetric(vertical: 8.h),
+          ),
+          "img.emoji": Style(
+            width: Width(16.sp),
+            height: Height(16.sp),
+            margin: Margins.only(left: 2.sp, right: 2.sp),
+            verticalAlign: VerticalAlign.middle,
+            display: Display.inlineBlock,
+          ),
+          // 代码块样式
+          "pre": Style(
+            backgroundColor:
+                Theme.of(context).primaryColor.withValues(alpha: 0.1),
+            padding: HtmlPaddings.all(12.w),
+            margin: Margins.symmetric(vertical: 8.h),
               fontFamily: AppFontFamily.dinPro,
-            ),
-            "code": Style(
-              backgroundColor:
-                  Theme.of(context).primaryColor.withValues(alpha: 0),
-              padding: HtmlPaddings.symmetric(horizontal: 4.w, vertical: 2.h),
+          ),
+          "code": Style(
+            backgroundColor:
+                Theme.of(context).primaryColor.withValues(alpha: 0),
+            padding: HtmlPaddings.symmetric(horizontal: 4.w, vertical: 2.h),
               fontFamily: AppFontFamily.dinPro,
-              fontSize: FontSize(13.sp),
-              color: Theme.of(context).primaryColor,
-            ),
-            // 引用样式
-            "blockquote": Style(
-              margin: Margins.symmetric(vertical: 8.h),
-              padding: HtmlPaddings.only(left: 12.w),
-              border: Border(
-                left: BorderSide(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
-                  width: 4.w,
-                ),
+            fontSize: FontSize(13.sp),
+            color: Theme.of(context).primaryColor,
+          ),
+          // 引用样式
+          "blockquote": Style(
+            margin: Margins.symmetric(vertical: 8.h),
+            padding: HtmlPaddings.only(left: 12.w),
+            border: Border(
+              left: BorderSide(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
+                width: 4.w,
               ),
-              backgroundColor:
-                  Theme.of(context).primaryColor.withValues(alpha: 0.05),
             ),
-            // 标题样式
-            "h1": Style(
-              fontSize: FontSize(24.sp),
-              fontWeight: FontWeight.bold,
-              margin: Margins.only(top: 16.h, bottom: 8.h),
-              lineHeight: LineHeight.number(1.2),
+            backgroundColor:
+                Theme.of(context).primaryColor.withValues(alpha: 0.05),
+          ),
+          // 标题样式
+          "h1": Style(
+            fontSize: FontSize(24.sp),
+            fontWeight: FontWeight.bold,
+            margin: Margins.only(top: 16.h, bottom: 8.h),
+            lineHeight: LineHeight.number(1.2),
               fontFamily: AppFontFamily.dinPro,
-            ),
-            "h2": Style(
-              fontSize: FontSize(20.sp),
-              fontWeight: FontWeight.bold,
-              margin: Margins.only(top: 16.h, bottom: 8.h),
-              lineHeight: LineHeight.number(1.2),
+          ),
+          "h2": Style(
+            fontSize: FontSize(20.sp),
+            fontWeight: FontWeight.bold,
+            margin: Margins.only(top: 16.h, bottom: 8.h),
+            lineHeight: LineHeight.number(1.2),
               fontFamily: AppFontFamily.dinPro,
-            ),
-            "h3": Style(
-              fontSize: FontSize(18.sp),
-              fontWeight: FontWeight.bold,
-              margin: Margins.only(top: 16.h, bottom: 8.h),
-              lineHeight: LineHeight.number(1.2),
+          ),
+          "h3": Style(
+            fontSize: FontSize(18.sp),
+            fontWeight: FontWeight.bold,
+            margin: Margins.only(top: 16.h, bottom: 8.h),
+            lineHeight: LineHeight.number(1.2),
               fontFamily: AppFontFamily.dinPro,
-            ),
-            // 加粗和强调
-            "strong": Style(
-              fontWeight: FontWeight.bold,
-              color: theme.textTheme.bodyLarge?.color,
+          ),
+          // 加粗和强调
+          "strong": Style(
+            fontWeight: FontWeight.bold,
+            color: theme.textTheme.bodyLarge?.color,
               fontFamily: AppFontFamily.dinPro,
-            ),
-            "em": Style(
-              fontStyle: FontStyle.italic,
+          ),
+          "em": Style(
+            fontStyle: FontStyle.italic,
               fontFamily: AppFontFamily.dinPro,
-            ),
-            // 列表样式
-            "ul": Style(
-              margin: Margins.only(left: 8.w, top: 8.h, bottom: 8.h),
-              padding: HtmlPaddings.only(left: 16.w),
-              listStyleType: ListStyleType.disc,
+          ),
+          // 列表样式
+          "ul": Style(
+            margin: Margins.only(left: 8.w, top: 8.h, bottom: 8.h),
+            padding: HtmlPaddings.only(left: 16.w),
+            listStyleType: ListStyleType.disc,
               fontFamily: AppFontFamily.dinPro,
-            ),
-            "ol": Style(
-              margin: Margins.only(left: 8.w, top: 8.h, bottom: 8.h),
-              padding: HtmlPaddings.only(left: 16.w),
-              listStyleType: ListStyleType.decimal,
+          ),
+          "ol": Style(
+            margin: Margins.only(left: 8.w, top: 8.h, bottom: 8.h),
+            padding: HtmlPaddings.only(left: 16.w),
+            listStyleType: ListStyleType.decimal,
               fontFamily: AppFontFamily.dinPro,
-            ),
-            "li": Style(
-              margin: Margins.only(bottom: 4.h),
+          ),
+          "li": Style(
+            margin: Margins.only(bottom: 4.h),
               fontFamily: AppFontFamily.dinPro,
-            ),
-            // 表格样式
-            "table": Style(
-              width: Width(100, Unit.percent),
+          ),
+          // 表格样式
+          "table": Style(
+            width: Width(100, Unit.percent),
               fontFamily: AppFontFamily.dinPro,
-            ),
-            "th": Style(
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              fontWeight: FontWeight.bold,
+          ),
+          "th": Style(
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
+            fontWeight: FontWeight.bold,
               fontFamily: AppFontFamily.dinPro,
-            ),
-            "td": Style(
-              padding: HtmlPaddings.all(8.w),
+          ),
+          "td": Style(
+            padding: HtmlPaddings.all(8.w),
               fontFamily: AppFontFamily.dinPro,
-            ),
-          },
-          extensions: [
+          ),
+        },
+        extensions: [
             // 添加图片扩展
             _imageExtension(context, theme),
 
@@ -207,9 +209,9 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
             const TableHtmlExtension()
           ],
           onLinkTap: (url, _, __) {
-            if(url == null) return;
+            if (url == null) return;
 
-            if(url.startsWith('/u/')){
+            if (url.startsWith('/u/')) {
               final username = url.split('/').last;
               Get.dialog(
                 Dialog(
@@ -224,9 +226,9 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                 barrierColor: Colors.black.withValues(alpha: 0.5),
               );
             } else {
-            if (onLinkTap != null) {
-              onLinkTap!(url);
-            } else {
+              if (onLinkTap != null) {
+                onLinkTap!(url);
+              } else {
                 Get.toNamed(Routes.WEBVIEW, arguments: url);
               }
             }
@@ -240,61 +242,107 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
     return TagExtension(
       tagsToExtend: {"div"},
       builder: (extensionContext) {
-        // 如果是 lightbox-wrapper，只返回其中的图片内容
-        if (extensionContext.classes.contains('lightbox-wrapper')) {
-          final imgElement =
-              extensionContext.element?.getElementsByTagName('img').firstOrNull;
-          if (imgElement != null) {
-            final src = imgElement.attributes['src'];
-            if (src != null) {
-              // 获取原始图片URL用于预览
-              String previewUrl = src;
-              // 尝试从 lightbox 链接获取原始图片 URL
-              final lightboxElement = extensionContext.element
-                  ?.getElementsByClassName('lightbox')
-                  .firstOrNull;
-              final originalUrl = lightboxElement?.attributes['href'];
-              if (originalUrl != null) {
-                previewUrl = originalUrl;
-              }
+        if (extensionContext.classes.contains('spoiler')) {
+          final innerHtml = extensionContext.element?.innerHtml ?? '';
 
-              return GestureDetector(
-                onTap: () => showImagePreview(context, previewUrl),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.w),
-                    border: Border.all(
-                      color: theme.dividerColor,
-                      width: 1,
-                    ),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.w),
-                    child: CachedImage(
-                      imageUrl: src,
-                      width: double.infinity,
-                      placeholder: Container(
-                        color: theme.primaryColor.withValues(alpha: 0.1),
-                        child: Center(
-                          child: DisRefreshLoading(),
-                        ),
-                      ),
-                      errorWidget: Icon(
-                        Icons.broken_image_outlined,
-                        size: 40.w,
-                        color: theme.iconTheme.color?.withValues(alpha: .5),
-                      ),
-                    ),
+          // 每一个div都对应一个状态 无法维护在controller
+          bool revealed = false;
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 2000),
+                child: revealed
+                    ? HtmlWidget(
+                        html: innerHtml,
+                        onLinkTap: onLinkTap,
+                        fontSize: fontSize,
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(8).w,
+                        child: Stack(
+                          children: [
+                            ImageFiltered(
+                              imageFilter:
+                                  ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+                              child: HtmlWidget(
+                                html: innerHtml,
+                                onLinkTap: onLinkTap,
+                                fontSize: fontSize,
+                              ),
+                            ),
+                            Positioned.fill(
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {
+                                  setState(() {
+                                    revealed = !revealed;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                   ),
                 ),
               );
-            }
-          }
+            },
+          );
         }
-        // 如果是 meta div，不显示
-        if (extensionContext.classes.contains('meta')) {
-          return const SizedBox();
-        }
+
+              // 如果是 lightbox-wrapper，只返回其中的图片内容
+              if (extensionContext.classes.contains('lightbox-wrapper')) {
+          final imgElement =
+              extensionContext.element?.getElementsByTagName('img').firstOrNull;
+                if (imgElement != null) {
+                  final src = imgElement.attributes['src'];
+                  if (src != null) {
+                    // 获取原始图片URL用于预览
+                    String previewUrl = src;
+                    // 尝试从 lightbox 链接获取原始图片 URL
+                    final lightboxElement = extensionContext.element
+                        ?.getElementsByClassName('lightbox')
+                        .firstOrNull;
+                    final originalUrl = lightboxElement?.attributes['href'];
+                    if (originalUrl != null) {
+                      previewUrl = originalUrl;
+                    }
+
+                    return GestureDetector(
+                      onTap: () => showImagePreview(context, previewUrl),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8.w),
+                          border: Border.all(
+                            color: theme.dividerColor,
+                            width: 1,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.w),
+                          child: CachedImage(
+                            imageUrl: src,
+                            width: double.infinity,
+                            placeholder: Container(
+                        color: theme.primaryColor.withValues(alpha: 0.1),
+                              child: Center(
+                          child: DisRefreshLoading(),
+                              ),
+                            ),
+                            errorWidget: Icon(
+                              Icons.broken_image_outlined,
+                              size: 40.w,
+                        color: theme.iconTheme.color?.withValues(alpha: .5),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                }
+              }
+              // 如果是 meta div，不显示
+              if (extensionContext.classes.contains('meta')) {
+                return const SizedBox();
+              }
 
         if (extensionContext.element?.className == 'md-table') {
           final tableElement = extensionContext.element
@@ -373,9 +421,9 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                                         Get.toNamed(Routes.WEBVIEW,
                                             arguments: url);
                                       }
-                                    },
-                                  ),
-                                ),
+                        },
+                      ),
+                    ),
                               ),
                             ),
                           ),
@@ -413,10 +461,10 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
           final revokeText = extensionContext.attributes['data-revoke'] ?? '拒绝';
           final innerHtml = extensionContext.element?.innerHtml ?? '';
 
-          return Container(
+              return Container(
             margin: const EdgeInsets.symmetric(vertical: 8).w,
             padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
+                decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest
                   .withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(8).w,
@@ -442,9 +490,9 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                         controller.updatePolicyAccepted();
                       },
                       loading: controller.isLoading.value,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           );
@@ -508,109 +556,109 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
 
   TagExtension _codeExtension(BuildContext context) {
     return TagExtension(
-      tagsToExtend: {"pre"},
-      builder: (extensionContext) {
-        // 获取代码内容
-        final codeElement = extensionContext.element?.children.firstWhere(
-          (element) => element.localName == 'code',
-          orElse: () => dom.Element.tag('code'),
-        );
-        final code = codeElement?.text ?? '';
+            tagsToExtend: {"pre"},
+            builder: (extensionContext) {
+              // 获取代码内容
+              final codeElement = extensionContext.element?.children.firstWhere(
+                (element) => element.localName == 'code',
+                orElse: () => dom.Element.tag('code'),
+              );
+              final code = codeElement?.text ?? '';
 
-        // 获取代码语言
-        final language = codeElement?.className.split('-').last;
+              // 获取代码语言
+              final language = codeElement?.className.split('-').last;
 
-        return Stack(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8.w),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              return Stack(
                 children: [
-                  if (language != null && language != 'null') ...[
-                    Container(
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8.w),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (language != null && language != 'null') ...[
+                          Container(
                       padding:
                           EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .primaryColor
-                            .withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4.w),
-                      ),
-                      child: Text(
-                        language,
-                        style: TextStyle(
-                          fontSize: 12.w,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                      ),
-                    ),
-                    8.vGap,
-                  ],
-                  Text.rich(
-                    TextSpan(
-                      text: code,
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontFamily: 'monospace',
-                        height: 1.5,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .primaryColor
+                                  .withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4.w),
+                            ),
+                            child: Text(
+                              language,
+                              style: TextStyle(
+                                fontSize: 12.w,
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                          ),
+                          8.vGap,
+                        ],
+                        Text.rich(
+                          TextSpan(
+                            text: code,
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontFamily: 'monospace',
+                              height: 1.5,
                         color: Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
+                            ),
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.left,
                   ),
-                ],
-              ),
-            ),
-            // 全屏按钮
-            Positioned(
-              top: 8.w,
-              right: 8.w,
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: code));
-                      showSuccess('代码已复制到剪贴板');
-                    },
-                    icon: Icon(
-                      CupertinoIcons.doc_on_doc,
-                      size: 18.w,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(
-                      minWidth: 32.w,
-                      minHeight: 32.w,
-                    ),
-                    splashRadius: 20.w,
-                  ),
-                  IconButton(
+                  // 全屏按钮
+                  Positioned(
+                    top: 8.w,
+                    right: 8.w,
+                    child: Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: code));
+                            showSuccess('代码已复制到剪贴板');
+                          },
+                          icon: Icon(
+                            CupertinoIcons.doc_on_doc,
+                            size: 18.w,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(
+                            minWidth: 32.w,
+                            minHeight: 32.w,
+                          ),
+                          splashRadius: 20.w,
+                        ),
+                        IconButton(
                     onPressed: () =>
                         showCodePreview(context, code, language: language),
-                    icon: Icon(
-                      CupertinoIcons.fullscreen,
-                      size: 18.w,
-                      color: Theme.of(context).primaryColor,
+                          icon: Icon(
+                            CupertinoIcons.fullscreen,
+                            size: 18.w,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(
+                            minWidth: 32.w,
+                            minHeight: 32.w,
+                          ),
+                          splashRadius: 20.w,
+                        ),
+                      ],
                     ),
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(
-                      minWidth: 32.w,
-                      minHeight: 32.w,
-                    ),
-                    splashRadius: 20.w,
                   ),
                 ],
-              ),
-            ),
-          ],
-        );
-      },
+              );
+            },
     );
   }
 
@@ -777,14 +825,14 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
     try {
       // 使用 dom 库解析 HTML
       final document = dom.Document.html(html);
-
+      
       // 处理表格中的 p 标签
       document.querySelectorAll('th p, td p').forEach((element) {
         final span = dom.Element.tag('span');
         span.innerHtml = element.innerHtml;
         element.replaceWith(span);
       });
-
+      
       // 处理表格中的列表元素
       document
           .querySelectorAll(
@@ -794,7 +842,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
         span.innerHtml = element.innerHtml;
         element.replaceWith(span);
       });
-
+      
       document
           .querySelectorAll('th > ul, th > ol, td > ul, td > ol')
           .forEach((element) {
@@ -802,7 +850,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
         span.innerHtml = element.innerHtml;
         element.replaceWith(span);
       });
-
+      
       return document.outerHtml;
     } catch (e) {
       l.e('修复表格 HTML 出错: $e');
@@ -897,8 +945,8 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                   ),
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                     Row(
                       children: [
                         Icon(
@@ -907,11 +955,11 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                           color: theme.primaryColor,
                         ),
                         SizedBox(width: 8.w),
-                        Text(
-                          '表格预览',
-                          style: TextStyle(
+                  Text(
+                    '表格预览',
+                    style: TextStyle(
                             fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.bold,
                             color: theme.textTheme.titleLarge?.color,
                           ),
                         ),
@@ -936,9 +984,9 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
               ),
               SizedBox(height: 16.h),
 
@@ -959,55 +1007,55 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                       child: NotificationListener<ScrollNotification>(
                         // 拦截滚动通知，避免触发滚动位置恢复
                         onNotification: (notification) => true,
-                        child: SingleChildScrollView(
+                child: SingleChildScrollView(
                           controller: horizontalScrollCtrl,
                           scrollDirection: Axis.horizontal,
-                          physics: const ClampingScrollPhysics(),
+                  physics: const ClampingScrollPhysics(),
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
                               minWidth:
                                   MediaQuery.of(context).size.width - 64.w,
                               maxWidth: MediaQuery.of(context).size.width * 1.7,
                             ),
-                            child: SingleChildScrollView(
+                  child: SingleChildScrollView(
                               scrollDirection: Axis.vertical,
-                              physics: const ClampingScrollPhysics(),
+                    physics: const ClampingScrollPhysics(),
                               controller: verticalScrollCtrl,
                               child: ConstrainedBox(
                                 constraints: BoxConstraints(
                                   maxHeight:
                                       MediaQuery.of(context).size.height * 3,
                                 ),
-                                child: Html(
-                                  data: html,
-                                  style: {
-                                    "table": Style(
+                      child: Html(
+                        data: html,
+                        style: {
+                          "table": Style(
                                       backgroundColor: theme.cardColor,
                                       border: Border.all(
                                         color: theme.dividerColor,
                                         width: 1,
                                       ),
-                                    ),
-                                    "th": Style(
-                                      padding: HtmlPaddings.all(12.w),
+                          ),
+                          "th": Style(
+                            padding: HtmlPaddings.all(12.w),
                                       backgroundColor: theme
                                           .colorScheme.surfaceContainerHighest,
-                                      fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                                       border: Border.all(
                                         color: theme.dividerColor,
                                         width: 0.5,
                                       ),
                                       textAlign: TextAlign.center,
-                                    ),
-                                    "td": Style(
-                                      padding: HtmlPaddings.all(12.w),
+                          ),
+                          "td": Style(
+                            padding: HtmlPaddings.all(12.w),
                                       border: Border.all(
                                         color: theme.dividerColor,
                                         width: 0.5,
-                                      ),
-                                    ),
-                                  },
-                                  extensions: const [TableHtmlExtension()],
+                          ),
+                          ),
+                        },
+                        extensions: const [TableHtmlExtension()],
                                   onLinkTap: (url, _, __) {
                                     if (onLinkTap != null) {
                                       onLinkTap!(url);
@@ -1016,9 +1064,9 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                                           arguments: url);
                                     }
                                   },
-                                ),
-                              ),
-                            ),
+                      ),
+                    ),
+                  ),
                           ),
                         ),
                       ),

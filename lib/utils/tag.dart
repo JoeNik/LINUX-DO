@@ -165,7 +165,6 @@ class BadgeManager {
   }
 
   BadgeDetail? getBadge(int? badgeId) {
-    l.d('getBadge: $badgeId');
     if (badgeId == null) return null;
     return _badges[badgeId];
   }

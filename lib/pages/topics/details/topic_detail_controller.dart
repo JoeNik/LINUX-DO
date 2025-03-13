@@ -11,6 +11,7 @@ import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/utils/browser_util.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:linux_do/widgets/browser_tips_sheet.dart';
+import 'package:linux_do/widgets/dis_popup.dart';
 import 'package:linux_do/widgets/html_widget.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../controller/global_controller.dart';
@@ -1062,6 +1063,11 @@ class TopicDetailController extends BaseController
       l.e('打开浏览器失败: $e');
       showError('打开浏览器失败');
     }
+  }
+
+  // 本地收藏 非服务器
+  void handleLocalBookmark() {
+
   }
 }
 

@@ -5,6 +5,7 @@ import 'package:linux_do/const/app_colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/pages/topics/details/widgets/post_reply.dart';
 import 'package:linux_do/widgets/dis_button.dart';
+import 'package:linux_do/widgets/dis_popup.dart';
 import 'package:linux_do/widgets/owner_banner.dart';
 import 'package:linux_do/widgets/state_view.dart';
 import '../../../const/app_const.dart';
@@ -29,7 +30,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
   //   var topicId = Get.arguments as int;
   //   return Get.find<TopicDetailController>(tag: 'topic_$topicId');
   // }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,10 +103,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
       ),
       title: _buildHeader(context),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.open_in_browser),
-          onPressed: () => controller.handleOpenInBrowser(),
-        ),
+        _buildMoreButton(context),
         IconButton(
           icon: Obx(() => Icon(
                 controller.isFooderVisible.value
@@ -117,6 +115,63 @@ class TopicDetailPage extends GetView<TopicDetailController> {
           },
         )
       ],
+    );
+  }
+
+  CustomPopup _buildMoreButton(BuildContext context) {
+    return CustomPopup(
+      backgroundColor: Theme.of(context).cardColor,
+      arrowColor: Theme.of(context).cardColor,
+      contentPadding: const EdgeInsets.all(10).w,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () => controller.handleOpenInBrowser(),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(CupertinoIcons.globe,
+                    size: 16.w,
+                    color: Theme.of(context).textTheme.bodyLarge?.color),
+                2.hGap,
+                Text(
+                  '浏览器打开',
+                  style: TextStyle(
+                    fontSize: 12.w,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          8.vGap,
+          GestureDetector(
+              onTap: () => controller.handleLocalBookmark(),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Icon(CupertinoIcons.star_circle,
+                      size: 16.w,
+                      color: Theme.of(context).textTheme.bodyLarge?.color),
+                  2.hGap,
+                  Text(
+                    '本地收藏',
+                    style: TextStyle(
+                      fontSize: 12.w,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ],
+              ))
+        ],
+      ),
+      child: const Icon(CupertinoIcons.ellipsis_circle),
     );
   }
 
@@ -145,7 +200,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                     return Obx(() => controller.hasPrevious.value &&
                             !controller.isLoading.value
                         ? Container(
-                            padding: EdgeInsets.symmetric(vertical: 10.h),
+                            padding: const EdgeInsets.symmetric(vertical: 10).w,
                             alignment: Alignment.center,
                             child: DisRefreshLoading())
                         : const SizedBox());
@@ -153,13 +208,13 @@ class TopicDetailPage extends GetView<TopicDetailController> {
 
                   // 底部加载指示器
                   if (index == controller.replyTree.length + 1) {
-                    return Obx(() =>
-                        controller.hasMore.value && !controller.isLoading.value
-                            ? Container(
-                                padding: EdgeInsets.symmetric(vertical: 10.h),
-                                alignment: Alignment.center,
-                                child: DisRefreshLoading())
-                            : const SizedBox());
+                    return Obx(() => controller.hasMore.value &&
+                            !controller.isLoading.value
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10).w,
+                            alignment: Alignment.center,
+                            child: DisRefreshLoading())
+                        : const SizedBox());
                   }
 
                   // 帖子内容
@@ -205,16 +260,16 @@ class TopicDetailPage extends GetView<TopicDetailController> {
     return GetBuilder<TopicDetailController>(
       id: 'post_${node.post.postNumber}',
       builder: (controller) => Container(
-        margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4).w,
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12.w),
+          borderRadius: const BorderRadius.all(Radius.circular(12)).w,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(12.w),
+              borderRadius: const BorderRadius.all(Radius.circular(12)).w,
               child: Stack(
                 children: [
                   Padding(
@@ -232,7 +287,10 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                             post: node.post,
                             title: controller.topic.value?.title),
                         2.vGap,
-                        PostContent(node: node, isReply: isReply, controller: controller),
+                        PostContent(
+                            node: node,
+                            isReply: isReply,
+                            controller: controller),
                         Divider(
                           height: 1.h,
                           color: Theme.of(context).dividerColor,
@@ -246,15 +304,16 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                     top: 0,
                     right: 0,
                     child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.w),
+                      padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4)
+                          .w,
                       decoration: BoxDecoration(
                         color: Theme.of(context)
                             .primaryColor
                             .withValues(alpha: 0.1),
                         borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(12.w),
-                          bottomLeft: Radius.circular(12.w),
+                          topRight: const Radius.circular(12).w,
+                          bottomLeft: const Radius.circular(12).w,
                         ),
                       ),
                       child: Text(
@@ -279,7 +338,8 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                                     node.post.replyToPostNumber! - 1);
                               }
                             },
-                            child: PostReply(post: node.post, controller: controller),
+                            child: PostReply(
+                                post: node.post, controller: controller),
                           ),
                         )
                       : const SizedBox(),
@@ -324,8 +384,8 @@ class TopicDetailPage extends GetView<TopicDetailController> {
           ),
         ],
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(12.w),
-          bottomRight: Radius.circular(12.w),
+          bottomLeft: const Radius.circular(12).w,
+          bottomRight: const Radius.circular(12).w,
         ),
       ),
       child: Row(
@@ -335,7 +395,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
             width: 25.w,
             height: 25.w,
             circle: !(createUser?.isWebMaster() ?? false),
-            borderRadius: BorderRadius.circular(4.w),
+            borderRadius: BorderRadius.circular(4).w,
             placeholder: CircularProgressIndicator(
               color: Theme.of(context).primaryColor,
             ),
@@ -409,7 +469,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                 controller.startReply(
                     null, topic.title, topic.details?.createdBy?.username);
               },
-              icon: Icon(CupertinoIcons.reply, size: 22.w),
+              icon: Icon(CupertinoIcons.reply_thick_solid, size: 18.w),
             ),
           )
         ],
@@ -428,8 +488,8 @@ class TopicDetailPage extends GetView<TopicDetailController> {
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(12.w),
-          topRight: Radius.circular(12.w),
+          topLeft: const Radius.circular(12).w,
+          topRight: const Radius.circular(12).w,
         ),
         boxShadow: [
           BoxShadow(
@@ -450,7 +510,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                 onPressed: controller.cancelReply,
                 icon: Icon(
                   CupertinoIcons.clear,
-                  size: 18.sp,
+                  size: 18.w,
                   color: theme.hintColor,
                 ),
                 style: IconButton.styleFrom(
@@ -465,11 +525,11 @@ class TopicDetailPage extends GetView<TopicDetailController> {
               return const SizedBox();
             }
             return Container(
-              margin: EdgeInsets.symmetric(horizontal: 12.w),
-              padding: EdgeInsets.all(12.w),
+              margin: const EdgeInsets.symmetric(horizontal: 12).w,
+              padding: const EdgeInsets.all(12).w,
               decoration: BoxDecoration(
                 color: theme.cardColor,
-                borderRadius: BorderRadius.circular(12.w),
+                borderRadius: const BorderRadius.all(Radius.circular(12)).w,
                 border: Border.all(
                   color: theme.dividerColor.withValues(alpha: 0.1),
                 ),
@@ -542,17 +602,17 @@ class TopicDetailPage extends GetView<TopicDetailController> {
           }),
           // 输入区域
           Padding(
-            padding: EdgeInsets.all(12.w),
+            padding: const EdgeInsets.all(12).w,
             child: Column(
               children: [
                 Container(
                   constraints: BoxConstraints(
-                    minHeight: 120.h,
-                    maxHeight: 200.h,
+                    minHeight: 120.w,
+                    maxHeight: 200.w,
                   ),
                   decoration: BoxDecoration(
                     color: theme.cardColor,
-                    borderRadius: BorderRadius.circular(12.w),
+                    borderRadius: const BorderRadius.all(Radius.circular(12)).w,
                     border: Border.all(
                       color: theme.dividerColor.withValues(alpha: 0.1),
                     ),
@@ -567,16 +627,16 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                     keyboardType: TextInputType.multiline,
                     textInputAction: TextInputAction.newline,
                     style: TextStyle(
-                      fontSize: 15.sp,
+                      fontSize: 15.w,
                       height: 1.4,
                     ),
                     decoration: InputDecoration(
                         hintText: AppConst.posts.replyPlaceholder,
                         hintStyle: TextStyle(
-                          fontSize: 13.sp,
+                          fontSize: 13.w,
                           color: theme.hintColor.withValues(alpha: 0.3),
                         ),
-                        contentPadding: EdgeInsets.all(10.w),
+                        contentPadding: const EdgeInsets.all(10).w,
                         border: InputBorder.none,
                         isDense: true,
                         fillColor: AppColors.transparent),
@@ -594,7 +654,8 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                           decoration: BoxDecoration(
                             border: Border.all(
                                 color: Theme.of(context).dividerColor),
-                            borderRadius: BorderRadius.circular(8.w),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(8)).w,
                           ),
                           child: controller.isUploading.value
                               ? Center(
@@ -677,7 +738,8 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                                               onTap: () =>
                                                   controller.removeImage(image),
                                               child: Container(
-                                                padding: EdgeInsets.all(4.w),
+                                                padding:
+                                                    const EdgeInsets.all(4).w,
                                                 decoration: BoxDecoration(
                                                   color: Colors.black
                                                       .withValues(alpha: 0.5),
@@ -714,7 +776,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                         duration: const Duration(milliseconds: 200),
                         child: SizedBox(
                           width: double.infinity,
-                          height: 44.h,
+                          height: 44.w,
                           child: DisButton(
                               text: AppConst.posts.send,
                               onPressed: controller.sendReply,

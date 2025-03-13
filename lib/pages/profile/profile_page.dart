@@ -9,6 +9,7 @@ import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/pages/profile/widget/profile_menu.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import 'package:linux_do/widgets/cached_image.dart';
+import 'package:linux_do/widgets/glowing_text_wweep.dart';
 import 'dart:ui';
 import '../../const/app_const.dart';
 import '../../controller/global_controller.dart';
@@ -19,8 +20,6 @@ import '../../widgets/switch.dart';
 import 'profile_controller.dart';
 import '../../widgets/dis_loading.dart';
 import 'package:slide_switcher/slide_switcher.dart';
-
-
 
 class ProfilePage extends GetView<ProfileController> with ToastMixin {
   const ProfilePage({super.key});
@@ -42,7 +41,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
   Widget build(BuildContext context) {
     // 创建一个 ValueNotifier 来跟踪滚动进度
     final scrollProgress = ValueNotifier<double>(0.0);
-    
+
     return Scaffold(
       body: Obx(() {
         final userInfo = Get.find<GlobalController>().userInfo;
@@ -299,14 +298,22 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          user?.name ?? '',
+                        GlowingTextSweep(
+                          text: user?.name ?? '',
                           style: TextStyle(
                             color: AppColors.white,
+                            fontSize: 18.w,
                             fontFamily: AppFontFamily.dinPro,
                             fontWeight: FontWeight.bold,
-                            fontSize: 18.sp,
+                            shadows: [
+                              Shadow(
+                                offset: const Offset(1, 1),
+                                blurRadius: 2,
+                                color: Colors.black.withValues(alpha: 0.5),
+                              ),
+                            ],
                           ),
+                          glowColor: Colors.white,
                         ),
                         IconButton(
                             onPressed: () {

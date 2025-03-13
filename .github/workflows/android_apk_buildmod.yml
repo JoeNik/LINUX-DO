@@ -3,93 +3,113 @@ name: Build Android APK
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'LICENSE'
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      versionName:
+        description: '版本名称 (例如: 1.0.0)'
+        required: false
+      versionCode:
+        description: '版本代码 (整数)'
+        required: false
 
 jobs:
   build:
-	name: 构建Android APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: 检出代码
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 获取所有历史记录用于版本计算
       
-      - name: 设置Java环境
+      - name: Set up date variables
+        id: date
+        run: |
+          echo "DATE=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+          echo "BUILD_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      
+      - name: Calculate version info
+        id: version
+        run: |
+          # 如果没有指定版本名称，则使用日期作为版本名称
+          if [ -z "${{ github.event.inputs.versionName }}" ]; then
+            VERSION_NAME="1.0.${{ steps.date.outputs.DATE }}"
+          else
+            VERSION_NAME="${{ github.event.inputs.versionName }}"
+          fi
+          
+          # 如果没有指定版本代码，则使用当前时间戳或自动递增
+          if [ -z "${{ github.event.inputs.versionCode }}" ]; then
+            # 获取最后一个release的tag，提取版本号并加1
+            LAST_VERSION=$(git tag -l | grep -E '^v[0-9]+$' | sort -V | tail -n 1)
+            if [ -z "$LAST_VERSION" ]; then
+              # 如果没有之前的版本，从1开始
+              VERSION_CODE=1
+            else
+              # 提取数字并加1
+              VERSION_CODE=$((${LAST_VERSION#v} + 1))
+            fi
+          else
+            VERSION_CODE="${{ github.event.inputs.versionCode }}"
+          fi
+          
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
+      
+      - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '17'
       
-      - name: 设置Flutter环境
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.2'
+          flutter-version: '3.13.2'
           channel: 'stable'
-		  cache: true
-		
-	  - name: 获取Flutter依赖
+      
+      - name: Setup Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          echo "${{ secrets.KEY_PROPERTIES }}" > android/key.properties
+      
+      - name: Update version in pubspec.yaml
+        run: |
+          # 更新pubspec.yaml中的版本号
+          sed -i "s/version: .*/version: ${{ steps.version.outputs.VERSION_NAME }}+${{ steps.version.outputs.VERSION_CODE }}/" pubspec.yaml
+          cat pubspec.yaml
+      
+      - name: Get dependencies
         run: flutter pub get
       
-      - name: 创建Keystore目录
-        run: mkdir -p android/keystore
+      - name: Build APK
+        run: flutter build apk --release --split-per-abi
       
-      - name: 设置Keystore
-        if: ${{ inputs.build_type == 'release' }}
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEY_PROPERTIES: ${{ secrets.KEY_PROPERTIES }}
-        run: |
-          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEY_PROPERTIES" ]; then
-            echo "$KEYSTORE_BASE64" | base64 --decode > android/keystore/linux-do.jks
-            echo "$KEY_PROPERTIES" > android/keystore/key.properties
-            echo "已配置签名密钥"
-          else
-            echo "未设置签名密钥，将构建未签名APK"
-          fi
-      
-      
-      - name: 构建APK
-        run: |
-          if [ -n "${{ inputs.build_number }}" ]; then
-            echo "使用自定义构建版本号: ${{ inputs.build_number }}"
-            flutter build apk --build-number=${{ inputs.build_number }} --${{ inputs.build_type }}
-          else
-            if [ "${{ inputs.build_type }}" == "release" ]; then
-              echo "构建release版本APK"
-              flutter build apk --release --split-per-abi
-            else
-              echo "构建debug版本APK"
-              flutter build apk --debug
-            fi
-          fi
-      
-      # Debug step to see what files are actually generated
       - name: List output files
         run: find build/app/outputs -type f
       
-      # # Use a more flexible artifact path pattern
-      # - name: Upload APK
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: release-apk
-      #     path: |
-      #       build/app/outputs/flutter-apk/*.apk
-      #     retention-days: 3
-		  
-	  # 新增步骤：生成版本号
-      - name: Generate version number
-        id: version
-        run: echo "version=$(date +'%Y.%m.%d.%H%M')" >> $GITHUB_OUTPUT
-        
-      # 新增步骤：创建Release并上传APK
-      - name: Create Release and Upload APK
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-${{ steps.date.outputs.DATE }}
+          path: |
+            build/app/outputs/flutter-apk/*.apk
+          retention-days: 3
+      
+      - name: Create GitHub Release
+        id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          name: Release ${{ steps.version.outputs.version }}
-          tag_name: v${{ steps.version.outputs.version }}
-          files: build/app/outputs/apk/release/*.apk
-          generate_release_notes: true
+          tag_name: v${{ steps.version.outputs.VERSION_CODE }}
+          name: Release ${{ steps.version.outputs.VERSION_NAME }} (${{ steps.date.outputs.BUILD_DATE }})
+          draft: false
+          prerelease: false
+          files: |
+            build/app/outputs/flutter-apk/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

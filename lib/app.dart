@@ -1,3 +1,5 @@
+import 'package:get_storage/get_storage.dart';
+
 import 'controller/global_controller.dart';
 import 'net/api_service.dart';
 import 'net/http_client.dart';
@@ -22,6 +24,9 @@ class App {
   Future<void> initial() async {
     // 初始化SharedPreferences
     await StorageManager.init();
+
+    // 初始化GetStorage
+    await GetStorage.init(); 
 
     // 初始化设备信息
     await DeviceUtil.init();

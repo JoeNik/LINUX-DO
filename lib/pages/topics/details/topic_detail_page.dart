@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/pages/topics/details/widgets/post_reply.dart';
+import 'package:linux_do/utils/mixins/toast_mixin.dart';
 import 'package:linux_do/widgets/dis_button.dart';
 import 'package:linux_do/widgets/dis_popup.dart';
 import 'package:linux_do/widgets/owner_banner.dart';
@@ -22,7 +23,7 @@ import 'widgets/post_header.dart';
 import 'widgets/post_footer.dart';
 import 'widgets/posts_selector.dart';
 
-class TopicDetailPage extends GetView<TopicDetailController> {
+class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
   const TopicDetailPage({super.key});
 
   // @override
@@ -122,7 +123,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
     return CustomPopup(
       backgroundColor: Theme.of(context).cardColor,
       arrowColor: Theme.of(context).cardColor,
-      contentPadding: const EdgeInsets.all(10).w,
+      contentPadding: const EdgeInsets.all(14).w,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,8 +132,8 @@ class TopicDetailPage extends GetView<TopicDetailController> {
             onTap: () => controller.handleOpenInBrowser(),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(CupertinoIcons.globe,
                     size: 16.w,
@@ -141,7 +142,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                 Text(
                   '浏览器打开',
                   style: TextStyle(
-                    fontSize: 12.w,
+                    fontSize: 14.w,
                     color: Theme.of(context).textTheme.bodyMedium?.color,
                   ),
                 ),
@@ -150,11 +151,11 @@ class TopicDetailPage extends GetView<TopicDetailController> {
           ),
           8.vGap,
           GestureDetector(
-              onTap: () => controller.handleLocalBookmark(),
+              onTap: () => _showCategoryDialog(context),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(CupertinoIcons.star_circle,
                       size: 16.w,
@@ -163,7 +164,7 @@ class TopicDetailPage extends GetView<TopicDetailController> {
                   Text(
                     '本地收藏',
                     style: TextStyle(
-                      fontSize: 12.w,
+                      fontSize: 14.w,
                       color: Theme.of(context).textTheme.bodyMedium?.color,
                     ),
                   ),
@@ -173,6 +174,172 @@ class TopicDetailPage extends GetView<TopicDetailController> {
       ),
       child: const Icon(CupertinoIcons.ellipsis_circle),
     );
+  }
+
+  void _showCategoryDialog(BuildContext context) {
+    Get.bottomSheet(
+      isScrollControlled: true,
+      Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16).w,
+            topRight: const Radius.circular(16).w,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        constraints: BoxConstraints(
+          maxHeight: Get.height * 0.7,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 顶部把手和标题
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12).w,
+              child: Column(
+                children: [
+                  Container(
+                    width: 40.w,
+                    height: 4.w,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).dividerColor,
+                      borderRadius: BorderRadius.circular(4.w),
+                    ),
+                  ),
+                  16.vGap,
+                  Text(
+                    '选择分类',
+                    style: TextStyle(
+                      fontSize: 18.w,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            const Divider(height: 1),
+            
+            // 分类列表
+            Flexible(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16).w,
+                child: Wrap(
+                  spacing: 12.w,
+                  runSpacing: 16.w,
+                  children: AppConst.bookmarkCategories.map((category) {
+                    final hue = (category.hashCode % 12) * 30.0;
+                    final color = HSLColor.fromAHSL(1.0, hue, 0.6, 0.8).toColor();
+                    final iconData = _getCategoryIcon(category);
+                    
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () async {
+                          Get.back(result: category);
+                          bool isSuccess = await controller.bookmarkTopic(category);
+                          if (isSuccess) {
+                            showSuccess('收藏成功');
+                          } 
+                        },
+                        borderRadius: BorderRadius.circular(12).w,
+                        child: Container(
+                          width: (Get.width - 56.w) / 3,
+                          padding: const EdgeInsets.symmetric(vertical: 16).w,
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(12.w),
+                            border: Border.all(
+                              color: color.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                iconData,
+                                size: 28.w,
+                                color: color,
+                              ),
+                              8.vGap,
+                              Text(
+                                category,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12.w,
+                                  fontWeight: FontWeight.w500,
+                                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+            
+            // 底部取消按钮
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16).w,
+              child: DisButton(
+                    text: '取消',
+                    type: ButtonType.outline,
+                    onPressed: () => Get.back(),
+                  ),
+            ),
+            12.vGap
+          ],
+        ),
+      ),
+      enterBottomSheetDuration: 300.milliseconds,
+      exitBottomSheetDuration: 200.milliseconds,
+    );
+  }
+  
+  // 根据分类名获取对应的图标
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case '开发调优':
+        return CupertinoIcons.wand_rays;
+      case '文档共建':
+        return CupertinoIcons.doc_text;
+      case '非我莫属':
+        return CupertinoIcons.person_2;
+      case '扬帆起航':
+        return CupertinoIcons.paperplane_fill;
+      case '福利羊毛':
+        return CupertinoIcons.gift;
+      case '运营反馈':
+        return CupertinoIcons.chat_bubble_2;
+      case '资源荟萃':
+        return CupertinoIcons.rectangle_stack;
+      case '跳蚤市场':
+        return CupertinoIcons.cart;
+      case '读书成诗':
+        return CupertinoIcons.book;
+      case '前沿快讯':
+        return CupertinoIcons.news;
+      case '搞七捻三':
+        return CupertinoIcons.lightbulb;
+      case '深海幽域':
+        return CupertinoIcons.moon_stars;
+      default:
+        return CupertinoIcons.tag;
+    }
   }
 
   Widget _buildHeader(BuildContext context) {

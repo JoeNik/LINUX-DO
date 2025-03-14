@@ -200,7 +200,9 @@ class ProfileController extends BaseController with Concatenated {
   }
 
   // 访问收藏页面
-  void toCollectPage() {}
+  void toCollectPage() {
+    Get.toNamed(Routes.BOOKMARKS);
+  }
 
   // 访问热门页面
   void toPopularPage() {

@@ -26,81 +26,93 @@ class EmailSettingsPage extends GetView<EmailSettingsController> {
         ),
       ),
       body: Obx(() {
-        if (controller.isLoading.value) {
-          return Center(child: DisRefreshLoading());
-        }
-
-        return SingleChildScrollView(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-             
-              _buildSection(
-                context,
+        return Stack(
+          children: [
+            SingleChildScrollView(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildOptionItem(
+                  _buildSection(
                     context,
-                    title: AppConst.settings.personalMessage,
-                    value: controller.personalMessageOption.value,
-                    onChanged: (value) => controller.personalMessageOption.value = value,
+                    children: [
+                      _buildOptionItem(
+                        context,
+                        title: AppConst.settings.personalMessage,
+                        value: controller.personalMessageOption.value,
+                        onChanged: (value) =>
+                            controller.personalMessageOption.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildOptionItem(
+                        context,
+                        title: AppConst.settings.mentionsAndReplies,
+                        value: controller.mentionsOption.value,
+                        onChanged: (value) =>
+                            controller.mentionsOption.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildOptionItem(
+                        context,
+                        title: AppConst.settings.watchingCategory,
+                        value: controller.watchingOption.value,
+                        onChanged: (value) =>
+                            controller.watchingOption.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildOptionItem(
+                        context,
+                        title: AppConst.settings.policyReview,
+                        value: controller.policyOption.value,
+                        onChanged: (value) =>
+                            controller.policyOption.value = value,
+                      ),
+                      if (controller.summary.value) ...[
+                        _buildDivider(),
+                        _buildOptionItem(
+                          context,
+                          title: AppConst.settings.activitySummary,
+                          value: controller.summaryOption.value,
+                          onChanged: (value) =>
+                              controller.summaryOption.value = value,
+                        ),
+                      ],
+                      _buildDivider(),
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.includeNewUsers,
+                        value: controller.includeReplies.value,
+                        onChanged: (value) =>
+                            controller.includeReplies.value = value,
+                      ),
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.summary,
+                        value: controller.summary.value,
+                        onChanged: (value) => controller.summary.value = value,
+                      ),
+                    ],
                   ),
-                  _buildDivider(),
-                  _buildOptionItem(
-                    context,
-                    title: AppConst.settings.mentionsAndReplies,
-                    value: controller.mentionsOption.value,
-                    onChanged: (value) => controller.mentionsOption.value = value,
-                  ),
-                  _buildDivider(),
-                  _buildOptionItem(
-                    context,
-                    title: AppConst.settings.watchingCategory,
-                    value: controller.watchingOption.value,
-                    onChanged: (value) => controller.watchingOption.value = value,
-                  ),
-                  _buildDivider(),
-                  _buildOptionItem(
-                    context,
-                    title: AppConst.settings.policyReview,
-                    value: controller.policyOption.value,
-                    onChanged: (value) => controller.policyOption.value = value,
-                  ),
-                  if (controller.summary.value) ...[
-                    _buildDivider(),
-                    _buildOptionItem(
-                      context,
-                      title: AppConst.settings.activitySummary,
-                      value: controller.summaryOption.value,
-                      onChanged: (value) => controller.summaryOption.value = value,
+                  32.vGap,
+                  SizedBox(
+                    width: double.infinity,
+                    child: DisButton(
+                      text: AppConst.settings.save,
+                      type: ButtonType.primary,
+                      onPressed: () => controller.saveEmailSettings(),
                     ),
-                  ],
-                  _buildDivider(),
-                  _buildSwitchItem(
-                    context,
-                    title: AppConst.settings.includeNewUsers,
-                    value: controller.includeReplies.value,
-                    onChanged: (value) => controller.includeReplies.value = value,
-                  ),
-                  _buildSwitchItem(
-                    context,
-                    title: AppConst.settings.summary,
-                    value: controller.summary.value,
-                    onChanged: (value) => controller.summary.value = value,
                   ),
                 ],
               ),
-              32.vGap,
-              SizedBox(
-                width: double.infinity,
-                child: DisButton(
-                  text: AppConst.settings.save,
-                  type: ButtonType.primary,
-                  onPressed: () => controller.saveEmailSettings(),
-                ),
-              ),
-            ],
-          ),
+            ),
+            if (controller.isLoading.value)
+              Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Center(child: DisRefreshLoading()))
+          ],
         );
       }),
     );
@@ -222,7 +234,8 @@ class EmailSettingsPage extends GetView<EmailSettingsController> {
                     size: 13.w,
                     color: Theme.of(context).primaryColor,
                   ),
-                  onPressed: () => _showHelpDialog(context, title, _getHelpText(title)),
+                  onPressed: () =>
+                      _showHelpDialog(context, title, _getHelpText(title)),
                 ),
               ],
             ),
@@ -313,4 +326,4 @@ class EmailSettingsPage extends GetView<EmailSettingsController> {
       color: Theme.of(Get.context!).dividerColor.withValues(alpha: 0.4),
     );
   }
-} 
+}

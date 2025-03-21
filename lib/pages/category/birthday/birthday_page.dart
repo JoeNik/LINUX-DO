@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_const.dart';
-import 'package:linux_do/const/app_spacing.dart';
 import 'birthday_controller.dart';
 import 'brithday_tab_view.dart';
 

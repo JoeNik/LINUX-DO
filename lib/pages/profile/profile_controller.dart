@@ -178,6 +178,7 @@ class ProfileController extends BaseController with Concatenated {
       isLoading.value = true;
       final data = await _apiService.getUserSummary(userName);
       summaryData.value = data;
+      Get.find<SummaryController>().updateData(data);
     } catch (e, s) {
       l.e('获取统计数据失败 $e --- $s');
     } finally {

@@ -6,12 +6,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_const.dart';
-
-import 'app.dart';
-import 'controller/global_controller.dart';
-import 'routes/app_pages.dart';
-import 'const/app_theme.dart';
-import 'utils/storage_manager.dart';
+import 'package:linux_do/const/app_theme.dart';
+import 'package:linux_do/controller/global_controller.dart';
+import 'package:linux_do/routes/app_pages.dart';
+import 'package:linux_do/app.dart';
+import 'package:linux_do/utils/storage_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +32,7 @@ void main() async {
   runApp(MyApp(designSize: size, initialRoute: initialRoute));
 } 
 
+
 Future<String> _determineInitialRoute() async {
   // 检查是否首次启动
   final hasLaunched =
@@ -46,6 +46,7 @@ Future<String> _determineInitialRoute() async {
 
   return hasLogin ? Routes.HOME : Routes.LOGIN;
 }
+
 
 class MyApp extends StatelessWidget {
   final Size designSize;

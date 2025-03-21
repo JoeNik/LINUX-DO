@@ -1,35 +1,8 @@
 #!/bin/bash
 
-# 设置错误时退出
-set -e
-
-# 定义颜色输出
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
-# 输出带颜色的信息函数
 print_message() {
     echo -e "${GREEN}[INFO] $1${NC}"
 }
-
-print_warning() {
-    echo -e "${YELLOW}[WARNING] $1${NC}"
-}
-
-# 检查是否安装了 Flutter
-if ! command -v flutter &> /dev/null; then
-    echo "Flutter 未安装，请先安装 Flutter"
-    exit 1
-fi
-
-# 清理旧的构建文件
-print_message "清理旧的构建文件..."
-flutter clean
-
-# 获取依赖
-print_message "获取 Flutter 依赖..."
-flutter pub get
 
 # 构建 iOS 版本
 print_message "开始构建 iOS 版本..."
@@ -69,3 +42,8 @@ else
     exit 1
 fi
 
+
+# android
+flutter build apk --release --split-per-abi
+
+print_message "构建完成！"

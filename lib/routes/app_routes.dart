@@ -52,6 +52,9 @@ abstract class Routes {
   // 免打扰设置页
   static const DO_NOT_DISTURB_SETTINGS = '/settings/do-not-disturb';
 
+  // 字体设置页
+  static const FONT_SIZE_SETTINGS = '/settings/font-size';
+
   // 关于页
   static const ABOUT = '/about';
 

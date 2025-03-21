@@ -6,6 +6,7 @@ import 'package:linux_do/controller/global_controller.dart';
 import 'package:linux_do/models/category.dart';
 import 'package:linux_do/models/user.dart';
 import 'package:linux_do/utils/log.dart';
+import 'package:linux_do/utils/mixins/toast_mixin.dart';
 import 'package:linux_do/utils/tag.dart';
 import '../const/app_colors.dart';
 import '../const/app_const.dart';
@@ -14,7 +15,7 @@ import '../const/app_sizes.dart';
 import '../const/app_spacing.dart';
 import '../routes/app_pages.dart';
 
-class DrawerMenu extends GetView<DrawerMenuController> {
+class DrawerMenu extends GetView<DrawerMenuController> with ToastMixin{
   const DrawerMenu({super.key});
 
   @override
@@ -142,7 +143,9 @@ class DrawerMenu extends GetView<DrawerMenuController> {
               if (showViewAll) ...[
                 const Spacer(),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    showWarning('请在web端修改');
+                  },
                   icon: Icon(
                     CupertinoIcons.pencil_circle_fill,
                     size: AppSizes.iconSmall,

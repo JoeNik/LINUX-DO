@@ -935,7 +935,7 @@ class AboutPage extends GetView<AboutController> {
                 borderRadius: BorderRadius.circular(4.w),
               ),
               child: Text(
-                '${DeviceUtil.version}-beta-4',
+                '${DeviceUtil.version}-beta-19',
                 style: TextStyle(
                   fontSize: 10.w,
                   fontWeight: FontWeight.w600,

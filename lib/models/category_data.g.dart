@@ -115,7 +115,8 @@ Map<String, dynamic> _$UploadedImageToJson(UploadedImage instance) =>
       'height': instance.height,
     };
 
-Topic _$TopicFromJson(Map<String, dynamic> json) => Topic(
+CategoryTopic _$CategoryTopicFromJson(Map<String, dynamic> json) =>
+    CategoryTopic(
       id: (json['id'] as num).toInt(),
       title: json['title'] as String,
       fancyTitle: json['fancy_title'] as String,
@@ -143,7 +144,8 @@ Topic _$TopicFromJson(Map<String, dynamic> json) => Topic(
           LastPoster.fromJson(json['last_poster'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$TopicToJson(Topic instance) => <String, dynamic>{
+Map<String, dynamic> _$CategoryTopicToJson(CategoryTopic instance) =>
+    <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
       'fancy_title': instance.fancyTitle,

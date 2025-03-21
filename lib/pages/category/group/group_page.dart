@@ -77,9 +77,9 @@ class GroupPage extends GetView<GroupController> with ToastMixin {
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(12.w),
         child: InkWell(
-          onTap: () {
-            showSuccess('开发中...');
-          },
+          // onTap: () {
+          //   showSuccess('开发中...');
+          // },
           borderRadius: BorderRadius.circular(12.w),
           child: Padding(
             padding: EdgeInsets.all(16.w),

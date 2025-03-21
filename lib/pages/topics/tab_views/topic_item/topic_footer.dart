@@ -21,7 +21,7 @@ class TopicFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: 8.w),
+      padding: const EdgeInsets.only(top: 8).w,
       child: Row(
         children: [
           // 最后发帖人
@@ -36,7 +36,7 @@ class TopicFooter extends StatelessWidget {
 
           // 分隔点
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 6.w),
+            margin: const EdgeInsets.symmetric(horizontal: 6).w,
             width: 3.w,
             height: 3.w,
             decoration: BoxDecoration(

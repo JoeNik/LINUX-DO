@@ -174,6 +174,8 @@ class _Identifier {
   String get clientId => 'clientId';
 
   String get themeColor => 'themeColor';
+  String get postFontSize => 'postFontSize';
+  String get replyFontSize => 'replyFontSize';
 
   String get browserTips => 'browserTips';
 }
@@ -184,7 +186,7 @@ class _LoginConst {
 
   String get title => '登录';
   String get scanLogin => '扫码登录';
-  String get webTitle => '网页授权登录(仅支持账密)';
+  String get webTitle => '网页授权登录';
   String get greetingPhrase => '欢迎来到';
   String get accountHint => '请输入账号';
   String get passwordHint => '请输入密码';
@@ -240,6 +242,7 @@ class _Settings {
   String get themeLight => '浅色模式';
   String get themeDark => '深色模式';
   String get themeCustom => '自定义主题';
+  String get fontSize => '字体大小';
   String get helpAndSupport => '帮助与支持';
   String get about => '关于 ${AppConst.siteName}';
   String get faq => '常见问题';

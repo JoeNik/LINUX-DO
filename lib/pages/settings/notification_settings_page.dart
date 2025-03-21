@@ -25,88 +25,97 @@ class NotificationSettingsPage extends GetView<NotificationSettingsController> {
         ),
       ),
       body: Obx(() {
-        if (controller.isLoading.value) {
-          return Center(child: DisRefreshLoading());
-        }
-
-        return SingleChildScrollView(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSection(
-                context,
+      
+        return Stack(
+          children: [
+            SingleChildScrollView(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSwitchItem(
+                  _buildSection(
                     context,
-                    title: AppConst.settings.notificationWhenLiked,
-                    value: controller.whenLiked.value,
-                    onChanged: (value) => controller.whenLiked.value = value,
+                    children: [
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.notificationWhenLiked,
+                        value: controller.whenLiked.value,
+                        onChanged: (value) => controller.whenLiked.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.notificationWhenFollowed,
+                        value: controller.allowFollow.value,
+                        onChanged: (value) => controller.allowFollow.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.notificationWhenUserFollowed,
+                        value: controller.whenFollowed.value,
+                        onChanged: (value) => controller.whenFollowed.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.notificationWhenIFollow,
+                        value: controller.whenIFollow.value,
+                        onChanged: (value) => controller.whenIFollow.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.notificationWhenReplied,
+                        value: controller.whenReplied.value,
+                        onChanged: (value) => controller.whenReplied.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.notificationWhenTopicCreated,
+                        value: controller.whenTopicCreated.value,
+                        onChanged: (value) => controller.whenTopicCreated.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildOptionItem(
+                        context,
+                        title: AppConst.settings.notificationSchedule,
+                        value: controller.notificationSchedule.value,
+                        onChanged: (value) => controller.notificationSchedule.value = value,
+                      ),
+                    ],
                   ),
-                  _buildDivider(),
-                  _buildSwitchItem(
-                    context,
-                    title: AppConst.settings.notificationWhenFollowed,
-                    value: controller.allowFollow.value,
-                    onChanged: (value) => controller.allowFollow.value = value,
+                  16.vGap,
+                  Text(
+                    AppConst.settings.notificationTip,
+                    style: TextStyle(
+                      fontSize: 12.w,
+                      color: Theme.of(context).hintColor,
+                      height: 1.5,
+                    ),
                   ),
-                  _buildDivider(),
-                  _buildSwitchItem(
-                    context,
-                    title: AppConst.settings.notificationWhenUserFollowed,
-                    value: controller.whenFollowed.value,
-                    onChanged: (value) => controller.whenFollowed.value = value,
-                  ),
-                  _buildDivider(),
-                  _buildSwitchItem(
-                    context,
-                    title: AppConst.settings.notificationWhenIFollow,
-                    value: controller.whenIFollow.value,
-                    onChanged: (value) => controller.whenIFollow.value = value,
-                  ),
-                  _buildDivider(),
-                  _buildSwitchItem(
-                    context,
-                    title: AppConst.settings.notificationWhenReplied,
-                    value: controller.whenReplied.value,
-                    onChanged: (value) => controller.whenReplied.value = value,
-                  ),
-                  _buildDivider(),
-                  _buildSwitchItem(
-                    context,
-                    title: AppConst.settings.notificationWhenTopicCreated,
-                    value: controller.whenTopicCreated.value,
-                    onChanged: (value) => controller.whenTopicCreated.value = value,
-                  ),
-                  _buildDivider(),
-                  _buildOptionItem(
-                    context,
-                    title: AppConst.settings.notificationSchedule,
-                    value: controller.notificationSchedule.value,
-                    onChanged: (value) => controller.notificationSchedule.value = value,
+                  32.vGap,
+                  SizedBox(
+                    width: double.infinity,
+                    child: DisButton(
+                      text: AppConst.settings.save,
+                      type: ButtonType.primary,
+                      onPressed: () => controller.saveNotificationSettings(),
+                    ),
                   ),
                 ],
               ),
-              16.vGap,
-              Text(
-                AppConst.settings.notificationTip,
-                style: TextStyle(
-                  fontSize: 12.w,
-                  color: Theme.of(context).hintColor,
-                  height: 1.5,
-                ),
-              ),
-              32.vGap,
-              SizedBox(
-                width: double.infinity,
-                child: DisButton(
-                  text: AppConst.settings.save,
-                  type: ButtonType.primary,
-                  onPressed: () => controller.saveNotificationSettings(),
-                ),
-              ),
-            ],
-          ),
+            ),
+
+            if (controller.isLoading.value)
+              Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Center(child: DisRefreshLoading()))
+          ],
         );
       }),
     );

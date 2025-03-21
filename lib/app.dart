@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:linux_do/utils/log.dart';
 
 import 'controller/global_controller.dart';
 import 'net/api_service.dart';
@@ -35,15 +37,16 @@ class App {
     await ScreenUtil.ensureScreenSize();
 
     // 初始化HTTP客户端
-    await HttpClient.getInstance().init();
+    await NetClient.getInstance().init();
 
     // 初始化API服务
-    Inject.put<ApiService>(ApiService(HttpClient.getInstance().dio,baseUrl: HttpConfig.baseUrl));
+    Inject.put<ApiService>(ApiService(NetClient.getInstance().dio,baseUrl: HttpConfig.baseUrl));
 
     Inject.put<GlobalController>(GlobalController());
     
     // Tag的颜色
     Tag.init();
 
+    L.setDebug(kDebugMode);
   }
 }

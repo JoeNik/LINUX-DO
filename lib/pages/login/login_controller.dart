@@ -10,7 +10,6 @@ import '../../controller/global_controller.dart';
 import 'package:dio/dio.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/pages/qr_scanner/qr_scanner_page.dart';
 import 'package:linux_do/utils/storage_manager.dart';
@@ -26,12 +25,18 @@ class LoginController extends BaseController {
   final password = ''.obs;
   final isPasswordVisible = false.obs;
   final isChecking = false.obs;
+  final isAgreementChecked = false.obs;
 
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
   void webLogin() async {
+    if (!isAgreementChecked.value) {
+      showError('请先阅读并同意服务协议');
+      return;
+    }
+
     final result = await Get.to(() => const WebPage());
     if (result == true) {
       isLoading.value = true;
@@ -144,10 +149,15 @@ class LoginController extends BaseController {
 
   /// 扫码登录
   Future<void> scanLogin() async {
+    if (!isAgreementChecked.value) {
+      showError('请先阅读并同意服务协议');
+      return;
+    }
+
     try {
       isLoading.value = true;
       final result = await Get.to(() => const QRScannerPage());
-      
+
       if (result == null) {
         // 用户取消了扫描
         return;
@@ -157,8 +167,8 @@ class LoginController extends BaseController {
         final data = jsonDecode(result);
         l.d('验证前的数据: $data');
         // 验证数据结构
-        if (!data.containsKey('cf') || 
-            !data.containsKey('f') || 
+        if (!data.containsKey('cf') ||
+            !data.containsKey('f') ||
             !data.containsKey('t') ||
             !data.containsKey('c')) {
           showError('无效的二维码数据');
@@ -171,12 +181,10 @@ class LoginController extends BaseController {
         final directory = await getApplicationDocumentsDirectory();
         final cookiePath = '${directory.path}/.cookies/';
         final cookieJar = PersistCookieJar(
-          ignoreExpires: true, 
-          storage: FileStorage(cookiePath)
-        );
+            ignoreExpires: true, storage: FileStorage(cookiePath));
 
         final uri = Uri.parse('${HttpConfig.baseUrl}login');
-        
+
         // 保存 cookies
         await cookieJar.saveFromResponse(uri, [
           Cookie('cf_clearance', data['cf'])
@@ -194,35 +202,24 @@ class LoginController extends BaseController {
             ..path = '/'
             ..httpOnly = true
             ..secure = true,
-
         ]);
 
         // 保存 CSRF Token
-        await StorageManager.setData(
-          AppConst.identifier.csrfToken, 
-          data['c']
-        );
+        await StorageManager.setData(AppConst.identifier.csrfToken, data['c']);
 
-       // token会失效,临时的解决方案
-        await StorageManager.setData(
-          AppConst.identifier.token,
-          data['t']
-        );
+        // token会失效,临时的解决方案
+        await StorageManager.setData(AppConst.identifier.token, data['t']);
 
         await StorageManager.setData(
-          AppConst.identifier.cfClearance,
-          data['cf']
-        );
+            AppConst.identifier.cfClearance, data['cf']);
 
         // 执行到这里，说明扫码登录成功
-          showSuccess('扫码登录成功');
+        showSuccess('扫码登录成功');
 
-          // 获取用户信息并返回
-          await Get.find<GlobalController>().fetchUserInfo();
+        // 获取用户信息并返回
+        await Get.find<GlobalController>().fetchUserInfo();
 
-          Get.offAllNamed(Routes.HOME);
-
-
+        Get.offAllNamed(Routes.HOME);
       } catch (e) {
         l.e('扫码登录失败: $e');
         showError('无效的二维码格式');

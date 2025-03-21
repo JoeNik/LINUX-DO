@@ -43,6 +43,20 @@
 	<string>需要访问相册以保存图片</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>需要访问相册以选择上传的图片</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>需要访问位置信息以提供位置相关服务</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>需要访问位置信息以提供位置相关服务</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>需要访问位置信息以提供位置相关服务</string>
+	<key>NSLocationUsageDescription</key>
+	<string>需要访问位置信息以提供位置相关服务</string>
+	<key>NSContactsUsageDescription</key>
+	<string>需要访问联系人以提供相关服务</string>
+	<key>NSNotificationsUsageDescription</key>
+	<string>需要发送通知以提供消息提醒服务</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>需要访问语音识别以提供语音相关服务</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

@@ -172,7 +172,9 @@ Post _$PostFromJson(Map<String, dynamic> json) => Post(
       bookmarkReminderAt: json['bookmarkReminderAt'] as String?,
       bookmarkName: json['bookmarkName'] as String?,
       policyAccepted: json['policyAccepted'] as bool?,
-    );
+    )..replayList = (json['replayList'] as List<dynamic>?)
+        ?.map((e) => Post.fromJson(e as Map<String, dynamic>))
+        .toList();
 
 Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
       'id': instance.id,
@@ -251,6 +253,7 @@ Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
       'bookmarkReminderAt': instance.bookmarkReminderAt,
       'bookmarkName': instance.bookmarkName,
       'policyAccepted': instance.policyAccepted,
+      'replayList': instance.replayList,
     };
 
 ActionSummary _$ActionSummaryFromJson(Map<String, dynamic> json) =>

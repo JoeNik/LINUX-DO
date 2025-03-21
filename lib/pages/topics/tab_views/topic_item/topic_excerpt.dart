@@ -14,7 +14,7 @@ class TopicExcerpt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: 8.w),
+      padding: const EdgeInsets.only(top: 8).w,
       child: Text(
         excerpt,
         maxLines: 3,

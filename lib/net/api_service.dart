@@ -501,5 +501,16 @@ abstract class ApiService {
 
   /// 删除话题
   @DELETE('t/{topic_id}.json')
-  Future<SuccessResponse<dynamic>> deleteTopic(@Path('topic_id') String topicId);
+  Future<SuccessResponse<dynamic>> deleteTopic(
+      @Path('topic_id') String topicId);
+
+  /// 查询回复信息
+  @GET('posts/{id}/replies')
+  Future<PostRepliesResponse> getPostReplies(@Path('id') String id,
+      {@Query('after') int? after = 1});
+
+  /// 查询帖子链接行
+  @GET('posts/by_number/{topic_id}/{post_number}')
+  Future<Post> getPostLinkRow(
+      @Path('topic_id') String topicId, @Path('post_number') String postNumber);
 }

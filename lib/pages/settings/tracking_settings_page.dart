@@ -25,79 +25,88 @@ class TrackingSettingsPage extends GetView<TrackingSettingsController> {
         ),
       ),
       body: Obx(() {
-        if (controller.isLoading.value) {
-          return Center(child: DisRefreshLoading());
-        }
 
-        return SingleChildScrollView(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSection(
-                context,
+        return Stack(
+          children: [
+            SingleChildScrollView(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSwitchItem(
+                  _buildSection(
                     context,
-                    title: AppConst.settings.enableTracking,
-                    subtitle: AppConst.settings.enableTrackingDesc,
-                    value: controller.enableTracking.value,
-                    onChanged: (value) => controller.enableTracking.value = value,
+                    children: [
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.enableTracking,
+                        subtitle: AppConst.settings.enableTrackingDesc,
+                        value: controller.enableTracking.value,
+                        onChanged: (value) => controller.enableTracking.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.trackLocation,
+                        subtitle: AppConst.settings.trackLocationDesc,
+                        value: controller.trackLocation.value,
+                        onChanged: (value) => controller.trackLocation.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.trackActivity,
+                        subtitle: AppConst.settings.trackActivityDesc,
+                        value: controller.trackActivity.value,
+                        onChanged: (value) => controller.trackActivity.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.trackBrowsingHistory,
+                        subtitle: AppConst.settings.trackBrowsingHistoryDesc,
+                        value: controller.trackBrowsingHistory.value,
+                        onChanged: (value) => controller.trackBrowsingHistory.value = value,
+                      ),
+                      _buildDivider(),
+                      _buildSwitchItem(
+                        context,
+                        title: AppConst.settings.shareAnalytics,
+                        subtitle: AppConst.settings.shareAnalyticsDesc,
+                        value: controller.shareAnalytics.value,
+                        onChanged: (value) => controller.shareAnalytics.value = value,
+                      ),
+                    ],
                   ),
-                  _buildDivider(),
-                  _buildSwitchItem(
-                    context,
-                    title: AppConst.settings.trackLocation,
-                    subtitle: AppConst.settings.trackLocationDesc,
-                    value: controller.trackLocation.value,
-                    onChanged: (value) => controller.trackLocation.value = value,
+                  16.vGap,
+                  Text(
+                    AppConst.settings.trackingPrivacyTip,
+                    style: TextStyle(
+                      fontSize: 12.w,
+                      color: Theme.of(context).hintColor,
+                      height: 1.5,
+                    ),
                   ),
-                  _buildDivider(),
-                  _buildSwitchItem(
-                    context,
-                    title: AppConst.settings.trackActivity,
-                    subtitle: AppConst.settings.trackActivityDesc,
-                    value: controller.trackActivity.value,
-                    onChanged: (value) => controller.trackActivity.value = value,
-                  ),
-                  _buildDivider(),
-                  _buildSwitchItem(
-                    context,
-                    title: AppConst.settings.trackBrowsingHistory,
-                    subtitle: AppConst.settings.trackBrowsingHistoryDesc,
-                    value: controller.trackBrowsingHistory.value,
-                    onChanged: (value) => controller.trackBrowsingHistory.value = value,
-                  ),
-                  _buildDivider(),
-                  _buildSwitchItem(
-                    context,
-                    title: AppConst.settings.shareAnalytics,
-                    subtitle: AppConst.settings.shareAnalyticsDesc,
-                    value: controller.shareAnalytics.value,
-                    onChanged: (value) => controller.shareAnalytics.value = value,
+                  32.vGap,
+                  SizedBox(
+                    width: double.infinity,
+                    child: DisButton(
+                      text: AppConst.settings.save,
+                      type: ButtonType.primary,
+                      onPressed: () => controller.saveTrackingSettings(),
+                    ),
                   ),
                 ],
               ),
-              16.vGap,
-              Text(
-                AppConst.settings.trackingPrivacyTip,
-                style: TextStyle(
-                  fontSize: 12.w,
-                  color: Theme.of(context).hintColor,
-                  height: 1.5,
-                ),
-              ),
-              32.vGap,
-              SizedBox(
-                width: double.infinity,
-                child: DisButton(
-                  text: AppConst.settings.save,
-                  type: ButtonType.primary,
-                  onPressed: () => controller.saveTrackingSettings(),
-                ),
-              ),
-            ],
-          ),
+            ),
+
+            if (controller.isLoading.value)
+              Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Center(child: DisRefreshLoading()))
+          ],
         );
       }),
     );

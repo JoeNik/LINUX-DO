@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_spacing.dart';
+import 'package:linux_do/const/app_theme.dart';
 
-import '../../../const/app_colors.dart';
 import '../../../const/app_const.dart';
 import '../../../models/birthday.dart';
 import '../../../widgets/cached_image.dart';
@@ -55,14 +55,14 @@ class _BrithdayTabViewState extends State<BrithdayTabView> with AutomaticKeepAli
 
     return DisSmartRefresher(
       controller: controller.refreshController,
-      enablePullDown: true,
+      enablePullDown: false,
       enablePullUp: true,
       onRefresh: controller.onRefresh,
       onLoading: controller.onLoading,
       child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 16).w,
         itemCount: controller.birthdays.length,
-        separatorBuilder: (context, index) => 12.vGap,
+        separatorBuilder: (context, index) => 10.vGap,
         itemBuilder: (context, index) {
           final birthday = controller.birthdays[index];
           return _buildBirthdayCard(context, birthday);
@@ -73,10 +73,10 @@ class _BrithdayTabViewState extends State<BrithdayTabView> with AutomaticKeepAli
 
   Widget _buildBirthdayCard(BuildContext context, Birthday birthday) {
     return Container(
-      height: 80.w,
+      height: 70.w,
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12.w),
+        borderRadius: BorderRadius.circular(8).w,
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
@@ -87,19 +87,19 @@ class _BrithdayTabViewState extends State<BrithdayTabView> with AutomaticKeepAli
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12.w),
+        borderRadius: BorderRadius.circular(8).w,
         child: InkWell(
-          onTap: () => controller.onBirthdayTap(birthday),
-          borderRadius: BorderRadius.circular(12.w),
+          //onTap: () => controller.onBirthdayTap(birthday),
+          borderRadius: BorderRadius.circular(8).w,
           child: Row(
             children: [
               CachedImage(
                 imageUrl: birthday.getAvatar(120),
-                width: 80.w,
-                height: 80.w,
+                width: 70.w,
+                height: 70.w,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12.w),
-                  bottomLeft: Radius.circular(12.w),
+                  topLeft: const Radius.circular(8).w,
+                  bottomLeft: const Radius.circular(8).w,
                 ),
                 backgroundColor: Theme.of(context).cardColor,
               ),
@@ -111,14 +111,19 @@ class _BrithdayTabViewState extends State<BrithdayTabView> with AutomaticKeepAli
                   children: [
                     Row(
                       children: [
-                        Text(
-                          birthday.name.isEmpty ? birthday.username : birthday.name,
-                          style: TextStyle(
-                            fontSize: 16.w,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            birthday.name.isEmpty ? birthday.username : birthday.name,
+                            maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13.w,
+                              fontFamily: AppFontFamily.dinPro,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        if (birthday.title != null) ...[
+                        if (birthday.title != null && birthday.title!.isNotEmpty) ...[
                           8.hGap,
                           Container(
                             padding: EdgeInsets.symmetric(
@@ -132,27 +137,34 @@ class _BrithdayTabViewState extends State<BrithdayTabView> with AutomaticKeepAli
                             child: Text(
                               birthday.title!,
                               style: TextStyle(
-                                fontSize: 10.w,
+                                fontSize: 8.w,
+                                fontFamily: AppFontFamily.dinPro,
                                 color: Theme.of(context).primaryColor,
                               ),
                             ),
                           ),
                         ],
+
+                        120.hGap
                       ],
+                      
                     ),
-                    4.vGap,
+                    2.vGap,
                     Text(
                       '@${birthday.username}',
                       style: TextStyle(
-                        fontSize: 12.w,
+                        fontSize: 9.w,
+                        fontFamily: AppFontFamily.dinPro,
                         color: Theme.of(context).hintColor,
                       ),
                     ),
-                    4.vGap,
+                    2.vGap,
                     Text(
                       '${AppConst.birthday.birthdayOn}: ${birthday.cakedate}',
                       style: TextStyle(
-                        fontSize: 12.w,
+                        fontSize: 9.w,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: AppFontFamily.dinPro,
                         color: Theme.of(context).hintColor,
                       ),
                     ),

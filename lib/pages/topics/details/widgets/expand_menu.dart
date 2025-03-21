@@ -4,69 +4,133 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/const/app_spacing.dart';
-import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/models/topic_detail.dart';
+import 'package:linux_do/pages/topics/details/topic_detail_controller.dart';
 import 'package:linux_do/widgets/dis_button.dart';
-import '../topic_detail_controller.dart';
+import 'package:linux_do/widgets/dis_popup.dart';
 
-/// 帖子底部组件
-class PostFooter extends StatelessWidget {
-  const PostFooter({
-    required this.post,
-    required this.controller,
-    Key? key,
-  }) : super(key: key);
-
-  final Post post;
+class ExpandMenu extends StatelessWidget {
   final TopicDetailController controller;
+  final Post post;
+  const ExpandMenu({super.key, required this.controller, required this.post});
+
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        if (post.yours != true) ...[
-          _LikeButton(post: post, controller: controller),
-          16.hGap,
-        ],
-        _CopyButton(post: post, controller: controller),
-        16.hGap,
-        _BookmarkButton(post: post, controller: controller),
-        16.hGap,
-        // 举报按钮
-        _ReportButton(post: post, controller: controller),
-
-        // 16.hGap,
-        // if (post.canEdit == true) _EditButton(post: post),
-        16.hGap,
-        if (post.canDelete == true) _DeleteButton(post: post, controller: controller),
-
-        //ExpandMenu(controller: controller, post: post),
-
-        const Spacer(),
-
-
-        _ReplyButton(post: post, controller: controller),
-
-        post.isForumMaster(controller.topic.value?.userId ?? 0)
-            ? 10.hGap
-            : const SizedBox.shrink()
-      ],
-    );
+    return _buildMoreButton(context);
   }
-}
 
-class _TranslateButton extends StatelessWidget {
-  final Post post;
-  final TopicDetailController controller;
-  const _TranslateButton({required this.post, required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      child: Row(
+  CustomPopup _buildMoreButton(BuildContext context) {
+    return CustomPopup(
+      backgroundColor: Theme.of(context).cardColor,
+      arrowColor: Theme.of(context).cardColor,
+      contentPadding: const EdgeInsets.all(14).w,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.translate, size: 16.w, color: Theme.of(context).hintColor),
+          GestureDetector(
+            onTap: () => controller.copyPost(post),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _CopyButton(post: post, controller: controller),
+                4.hGap,
+                Text(
+                  '复制内容',
+                  style: TextStyle(
+                    fontSize: 13.w,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          8.vGap,
+          GestureDetector(
+              onTap: () => controller.toggleBookmark(post),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _BookmarkButton(post: post, controller: controller),
+                  4.hGap,
+                  Text(
+                    '添加书签',
+                    style: TextStyle(
+                      fontSize: 13.w,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ],
+              )),
+          8.vGap,
+          GestureDetector(
+              onTap: () => controller.reportPost(post, '举报', ''),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _ReportButton(post: post, controller: controller),
+                  4.hGap,
+                  Text(
+                    '举报',
+                    style: TextStyle(
+                      fontSize: 13.w,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ],
+              )),
+          if (post.canEdit != true) ...[
+            8.vGap,
+            GestureDetector(
+                onTap: () => controller.editPost(post),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _EditButton(post: post, controller: controller),
+                    4.hGap,
+                    Text(
+                      '编辑',
+                      style: TextStyle(
+                        fontSize: 13.w,
+                        color: Theme.of(context).textTheme.bodyMedium?.color,
+                      ),
+                    ),
+                  ],
+                )),
+          ],
+
+          if (post.canDelete != true)...[
+          8.vGap,
+          GestureDetector(
+              onTap: () => controller.deletePost(post),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _DeleteButton(post: post, controller: controller),
+                 4.hGap,
+                  Text(
+                    '删除',
+                    style: TextStyle(
+                      fontSize: 13.w,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                    ),
+                  ),
+                ],
+              ))],
         ],
       ),
+      child: Icon(CupertinoIcons.ellipsis_circle,
+          size: 18.w, color: Theme.of(context).hintColor),
     );
   }
 }
@@ -80,15 +144,8 @@ class _EditButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => controller.editPost(post),
-      child: Row(
-        children: [
-          Icon(CupertinoIcons.pencil,
-              size: 14.w, color: Theme.of(context).hintColor),
-        ],
-      ),
-    );
+    return Icon(CupertinoIcons.pencil_circle,
+        size: 22.w, color: Theme.of(context).hintColor);
   }
 }
 
@@ -99,25 +156,18 @@ class _ReportButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => showReportDialog(post),
-      child: Row(
-        children: [
-          Icon(CupertinoIcons.exclamationmark_triangle,
-              size: 14.w, color: Theme.of(context).hintColor),
-        ],
-      ),
-    );
+    return Icon(CupertinoIcons.exclamationmark_circle_fill,
+        size: 22.w, color: Theme.of(context).hintColor);
   }
 
   // 显示举报对话框
-  void showReportDialog(Post post) {
+  void showReportDialog(Post post, BuildContext context) {
     final selectedIndex = 0.obs;
     final customDesc = ''.obs;
 
     Get.dialog(
       Dialog(
-        backgroundColor: Theme.of(Get.context!).cardColor,
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(
           borderRadius: const BorderRadius.all(Radius.circular(16)).w,
         ),
@@ -128,7 +178,7 @@ class _ReportButton extends StatelessWidget {
           ),
           padding: const EdgeInsets.all(20).w,
           decoration: BoxDecoration(
-            color: Theme.of(Get.context!).cardColor,
+            color: Theme.of(context).cardColor,
             borderRadius: const BorderRadius.all(Radius.circular(16)).w,
           ),
           child: SingleChildScrollView(
@@ -179,7 +229,9 @@ class _ReportButton extends StatelessWidget {
                                     color: isSelected
                                         ? Get.theme.primaryColor
                                         : Colors.white,
-                                    borderRadius: const BorderRadius.all(Radius.circular(8)).w,
+                                    borderRadius: const BorderRadius.all(
+                                            Radius.circular(8))
+                                        .w,
                                     boxShadow: [
                                       BoxShadow(
                                         color:
@@ -218,7 +270,7 @@ class _ReportButton extends StatelessWidget {
                     height: 90.w,
                     padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
-                      color: Theme.of(Get.context!).cardColor,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(16.w),
                     ),
                     child: Obx(() {
@@ -229,7 +281,7 @@ class _ReportButton extends StatelessWidget {
                           maxLines: 3,
                           decoration: InputDecoration(
                             filled: false,
-                            fillColor: Theme.of(Get.context!).cardColor,
+                            fillColor: Theme.of(context).cardColor,
                             hintText: AppConst.posts.reportHint,
                             hintStyle: TextStyle(
                               fontSize: 12.w,
@@ -237,13 +289,13 @@ class _ReportButton extends StatelessWidget {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(
-                                color: Theme.of(Get.context!).primaryColor,
+                                color: Theme.of(context).primaryColor,
                               ),
                               borderRadius: BorderRadius.circular(8.w),
                             ),
                             border: OutlineInputBorder(
                               borderSide: BorderSide(
-                                color: Theme.of(Get.context!).primaryColor,
+                                color: Theme.of(context).primaryColor,
                               ),
                               borderRadius: BorderRadius.circular(8.w),
                             ),
@@ -293,86 +345,6 @@ class _ReportButton extends StatelessWidget {
   }
 }
 
-/// 点赞按钮组件
-class _LikeButton extends StatelessWidget {
-  const _LikeButton({
-    required this.post,
-    required this.controller,
-    Key? key,
-  }) : super(key: key);
-
-  final Post post;
-  final TopicDetailController controller;
-  @override
-  Widget build(BuildContext context) {
-
-    return InkWell(
-      onTap: () => controller.toggleLike(post),
-      child: Row(
-        children: [
-          Obx(() => Icon(
-                controller.likedPosts[post.postNumber] == true
-                    ? CupertinoIcons.heart_fill
-                    : CupertinoIcons.heart,
-                size: 14.w,
-                color: controller.likedPosts[post.postNumber] == true
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).hintColor,
-              )),
-          4.hGap,
-          Obx(() => Text(
-                '${controller.postScores[post.postNumber] ?? 0}',
-                style: TextStyle(
-                  fontSize: 12.w,
-                  fontFamily: AppFontFamily.dinPro,
-                  color: Theme.of(context).hintColor,
-                ),
-              )),
-        ],
-      ),
-    );
-  }
-}
-
-/// 回复按钮组件
-class _ReplyButton extends StatelessWidget {
-  final TopicDetailController controller;
-  const _ReplyButton({
-    required this.post,
-    required this.controller,
-    Key? key,
-  }) : super(key: key);
-
-  final Post post;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => {
-        controller.startReply(post.postNumber, post.cooked,
-            post.name?.isEmpty ?? true ? post.username : post.name)
-      },
-      child: Row(
-        children: [
-          Icon(
-            CupertinoIcons.reply,
-            size: 14.w,
-            color: Theme.of(context).hintColor,
-          ),
-          4.hGap,
-          Text(
-            '回复',
-            style: TextStyle(
-              fontSize: 12.w,
-              color: Theme.of(context).hintColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// 复制按钮组件
 class _CopyButton extends StatelessWidget {
   final Post post;
@@ -381,15 +353,8 @@ class _CopyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => controller.copyPost(post),
-      child: Row(
-        children: [
-          Icon(CupertinoIcons.square_on_square,
-              size: 14.w, color: Theme.of(context).hintColor),
-        ],
-      ),
-    );
+    return Icon(CupertinoIcons.doc_circle,
+        size: 22.w, color: Theme.of(context).hintColor);
   }
 }
 
@@ -401,21 +366,14 @@ class _BookmarkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => controller.toggleBookmark(post),
-      child: Row(
-        children: [
-          Obx(() => Icon(
-              controller.bookmarkedPosts[post.postNumber ?? -1] ?? false
-                  ? CupertinoIcons.bookmark_fill
-                  : CupertinoIcons.bookmark,
-              size: 14.w,
-              color: controller.bookmarkedPosts[post.postNumber ?? -1] ?? false
-                  ? Theme.of(context).primaryColor
-                  : Theme.of(context).hintColor)),
-        ],
-      ),
-    );
+    return Obx(() => Icon(
+        controller.bookmarkedPosts[post.postNumber ?? -1] ?? false
+            ? CupertinoIcons.book_circle_fill
+            : CupertinoIcons.book_circle,
+        size: 22.w,
+        color: controller.bookmarkedPosts[post.postNumber ?? -1] ?? false
+            ? Theme.of(context).primaryColor
+            : Theme.of(context).hintColor));
   }
 }
 
@@ -431,8 +389,8 @@ class _DeleteButton extends StatelessWidget {
       onTap: () => controller.deletePost(post),
       child: Row(
         children: [
-          Icon(CupertinoIcons.trash,
-              size: 14.w, color: Theme.of(context).hintColor),
+          Icon(CupertinoIcons.trash_circle_fill,
+              size: 22.w, color: Theme.of(context).hintColor),
         ],
       ),
     );

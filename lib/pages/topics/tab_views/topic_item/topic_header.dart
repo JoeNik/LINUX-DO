@@ -22,11 +22,11 @@ class TopicHeader extends StatelessWidget {
         // 置顶标签
         if (isPinned)
           Container(
-            margin: EdgeInsets.only(right: 8.w),
-            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.w),
+            margin: const EdgeInsets.only(right: 8).w,
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2).w,
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor,
-              borderRadius: BorderRadius.circular(4.w),
+              borderRadius: BorderRadius.circular(4).w,
             ),
             child: Text(
               '置顶',

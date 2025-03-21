@@ -9,7 +9,7 @@ part of 'summary.dart';
 SummaryResponse _$SummaryResponseFromJson(Map<String, dynamic> json) =>
     SummaryResponse(
       topics: (json['topics'] as List<dynamic>?)
-          ?.map((e) => t.Topic.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => Topic.fromJson(e as Map<String, dynamic>))
           .toList(),
       badges: (json['badges'] as List<dynamic>?)
           ?.map((e) => Badge.fromJson(e as Map<String, dynamic>))
@@ -18,7 +18,7 @@ SummaryResponse _$SummaryResponseFromJson(Map<String, dynamic> json) =>
           ?.map((e) => BadgeType.fromJson(e as Map<String, dynamic>))
           .toList(),
       users: (json['users'] as List<dynamic>?)
-          ?.map((e) => t.User.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => User.fromJson(e as Map<String, dynamic>))
           .toList(),
       userSummary: json['user_summary'] == null
           ? null
@@ -108,13 +108,13 @@ UserSummary _$UserSummaryFromJson(Map<String, dynamic> json) => UserSummary(
           ?.map((e) => Link.fromJson(e as Map<String, dynamic>))
           .toList(),
       mostLikedByUsers: (json['most_liked_by_users'] as List<dynamic>?)
-          ?.map((e) => t.User.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => User.fromJson(e as Map<String, dynamic>))
           .toList(),
       mostLikedUsers: (json['most_liked_users'] as List<dynamic>?)
-          ?.map((e) => t.User.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => User.fromJson(e as Map<String, dynamic>))
           .toList(),
       mostRepliedToUsers: (json['most_replied_to_users'] as List<dynamic>?)
-          ?.map((e) => t.User.fromJson(e as Map<String, dynamic>))
+          ?.map((e) => User.fromJson(e as Map<String, dynamic>))
           .toList(),
       badges: (json['badges'] as List<dynamic>?)
           ?.map((e) => UserBadge.fromJson(e as Map<String, dynamic>))

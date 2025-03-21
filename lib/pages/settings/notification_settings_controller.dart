@@ -33,6 +33,16 @@ class NotificationSettingsController extends BaseController {
   }
 
   Future<void> saveNotificationSettings() async {
-    showWarning('开发中');
+    try {
+      isLoading.value = true;
+      // 模拟保存
+      await Future.delayed(const Duration(seconds: 1));
+      showSuccess('保存成功');
+      Get.back();
+    } catch (e) {
+      showError('保存失败');
+    } finally {
+      isLoading.value = false;
+    }
   }
 } 

@@ -51,15 +51,15 @@ class SettingsPage extends GetView<SettingsController> {
                   controller.toSecuritySettings();
                 },
               ),
-              _buildNavigationItem(
-                context,
-                AppConst.settings.editProfile,
-                CupertinoIcons.pencil_circle_fill,
-                iconColor: const Color(0xFFFF7043),
-                onTap: () {
-                  controller.toProfileSettings();
-                },
-              ),
+              // _buildNavigationItem(
+              //   context,
+              //   AppConst.settings.editProfile,
+              //   CupertinoIcons.pencil_circle_fill,
+              //   iconColor: const Color(0xFFFF7043),
+              //   onTap: () {
+              //     controller.toProfileSettings();
+              //   },
+              // ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.emailSettings,
@@ -103,15 +103,15 @@ class SettingsPage extends GetView<SettingsController> {
                   controller.toTrackingSettings();
                 },
               ),
-              _buildNavigationItem(
-                context,
-                AppConst.settings.doNotDisturb,
-                CupertinoIcons.moon_fill,
-                iconColor: const Color(0xFF8D6E63),
-                onTap: () {
-                  controller.toDoNotDisturbSettings();
-                },
-              ),
+              // _buildNavigationItem(
+              //   context,
+              //   AppConst.settings.doNotDisturb,
+              //   CupertinoIcons.moon_fill,
+              //   iconColor: const Color(0xFF8D6E63),
+              //   onTap: () {
+              //     controller.toDoNotDisturbSettings();
+              //   },
+              // ),
               _buildSwitchItem(
                 context,
                 AppConst.settings.anonymousMode,
@@ -130,13 +130,22 @@ class SettingsPage extends GetView<SettingsController> {
             AppConst.settings.appearance,
             [
               _buildThemeDropdown(context, const Color(0xFFFFB300), CupertinoIcons.moon_stars_fill),
+              // _buildNavigationItem(
+              //   context,
+              //   AppConst.settings.themeCustom,
+              //   CupertinoIcons.paintbrush_fill,
+              //   iconColor: const Color(0xFFFFB300),
+              //   onTap: () {
+              //     controller.showColorPicker();
+              //   },
+              // ),
               _buildNavigationItem(
                 context,
-                AppConst.settings.themeCustom,
-                CupertinoIcons.paintbrush_fill,
+                AppConst.settings.fontSize,
+                CupertinoIcons.textformat_size,
                 iconColor: const Color(0xFFFFB300),
                 onTap: () {
-                  controller.showColorPicker();
+                    controller.toFontSizeSettings();
                 },
               ),
             ],

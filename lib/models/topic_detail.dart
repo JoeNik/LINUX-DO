@@ -111,6 +111,20 @@ class PostStream {
   Map<String, dynamic> toJson() => _$PostStreamToJson(this);
 }
 
+
+class PostRepliesResponse {
+  final List<Post> replies;
+
+  PostRepliesResponse({required this.replies});
+
+  factory PostRepliesResponse.fromJson(List<dynamic> json) {
+    return PostRepliesResponse(
+      replies: json.map((e) => Post.fromJson(e)).toList(),
+    );
+  }
+}
+
+
 @JsonSerializable()
 class Post {
   final int? id;
@@ -189,6 +203,8 @@ class Post {
   final String? bookmarkReminderAt;
   final String? bookmarkName;
   final bool? policyAccepted;
+
+  List<Post>? replayList;
 
 
   Post({

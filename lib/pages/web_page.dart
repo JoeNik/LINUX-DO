@@ -102,7 +102,7 @@ class _WebPageState extends State<WebPage> {
         final value = cookie.value;
 
         // 根据 Cookie 名称保存特定的 Cookie
-        if (name == HttpClient.tokenKey) {
+        if (name == NetClient.tokenKey) {
           hasTokenCookie = true;
           await _cookieJar.saveFromResponse(uri, [
             dart_io.Cookie(name, value)
@@ -111,7 +111,7 @@ class _WebPageState extends State<WebPage> {
               ..httpOnly = true
               ..secure = true
           ]);
-        } else if (name == HttpClient.forumSession) {
+        } else if (name == NetClient.forumSession) {
           hasSessionCookie = true;
           await _cookieJar.saveFromResponse(uri, [
             dart_io.Cookie(name, value)
@@ -120,7 +120,7 @@ class _WebPageState extends State<WebPage> {
               ..httpOnly = true
               ..secure = true
           ]);
-        } else if (name == HttpClient.cfClearance && needsCfVerification) {
+        } else if (name == NetClient.cfClearance && needsCfVerification) {
           hasCfCookie = true;
           await _cookieJar.saveFromResponse(uri, [
             dart_io.Cookie(name, value)

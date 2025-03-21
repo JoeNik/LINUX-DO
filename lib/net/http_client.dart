@@ -12,8 +12,8 @@ import '../const/app_const.dart';
 import '../utils/storage_manager.dart';
 import '../utils/log.dart';
 
-class HttpClient {
-  static HttpClient? _instance;
+class NetClient {
+  static NetClient? _instance;
   late final Dio _dio;
   late final CookieJar _cookieJar;
   late final BaseOptions _options;
@@ -44,7 +44,7 @@ class HttpClient {
   }
 
   /// 私有构造函数
-  HttpClient._();
+  NetClient._();
 
   Future<void> init() async {
     await _initOptions();
@@ -109,8 +109,8 @@ class HttpClient {
   }
 
   /// 单例模式
-  static HttpClient getInstance() {
-    _instance ??= HttpClient._();
+  static NetClient getInstance() {
+    _instance ??= NetClient._();
     return _instance!;
   }
 

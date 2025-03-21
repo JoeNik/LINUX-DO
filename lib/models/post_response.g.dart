@@ -89,7 +89,9 @@ PostDetail _$PostDetailFromJson(Map<String, dynamic> json) => PostDetail(
       canUnacceptAnswer: json['can_unaccept_answer'] as bool?,
       acceptedAnswer: json['accepted_answer'] as bool?,
       topicAcceptedAnswer: json['topic_accepted_answer'] as bool?,
-    );
+    )..replayList = (json['replayList'] as List<dynamic>?)
+        ?.map((e) => Post.fromJson(e as Map<String, dynamic>))
+        .toList();
 
 Map<String, dynamic> _$PostDetailToJson(PostDetail instance) =>
     <String, dynamic>{
@@ -123,6 +125,7 @@ Map<String, dynamic> _$PostDetailToJson(PostDetail instance) =>
       'hidden': instance.hidden,
       'trustLevel': instance.trustLevel,
       'reactionUsersCount': instance.reactionUsersCount,
+      'replayList': instance.replayList,
       'raw': instance.raw,
       'can_edit': instance.canEdit,
       'can_delete': instance.canDelete,

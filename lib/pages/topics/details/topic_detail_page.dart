@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/pages/topics/details/widgets/post_reply.dart';
+import 'package:linux_do/pages/topics/details/widgets/replay_list.dart';
 import 'package:linux_do/utils/mixins/toast_mixin.dart';
 import 'package:linux_do/widgets/dis_button.dart';
 import 'package:linux_do/widgets/dis_popup.dart';
@@ -225,31 +226,34 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                 ],
               ),
             ),
-            
+
             const Divider(height: 1),
-            
+
             // 分类列表
             Flexible(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16).w,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16).w,
                 child: Wrap(
                   spacing: 12.w,
                   runSpacing: 16.w,
                   children: AppConst.bookmarkCategories.map((category) {
                     final hue = (category.hashCode % 12) * 30.0;
-                    final color = HSLColor.fromAHSL(1.0, hue, 0.6, 0.8).toColor();
+                    final color =
+                        HSLColor.fromAHSL(1.0, hue, 0.6, 0.8).toColor();
                     final iconData = _getCategoryIcon(category);
-                    
+
                     return Material(
                       color: Colors.transparent,
                       child: InkWell(
                         onTap: () async {
                           Get.back(result: category);
-                          bool isSuccess = await controller.bookmarkTopic(category);
+                          bool isSuccess =
+                              await controller.bookmarkTopic(category);
                           if (isSuccess) {
                             showSuccess('收藏成功');
-                          } 
+                          }
                         },
                         borderRadius: BorderRadius.circular(12).w,
                         child: Container(
@@ -278,7 +282,10 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                                 style: TextStyle(
                                   fontSize: 12.w,
                                   fontWeight: FontWeight.w500,
-                                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.color,
                                 ),
                               ),
                             ],
@@ -290,16 +297,16 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                 ),
               ),
             ),
-            
+
             // 底部取消按钮
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16).w,
               child: DisButton(
-                    text: '取消',
-                    type: ButtonType.outline,
-                    onPressed: () => Get.back(),
-                  ),
+                text: '取消',
+                type: ButtonType.outline,
+                onPressed: () => Get.back(),
+              ),
             ),
             12.vGap
           ],
@@ -309,7 +316,7 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
       exitBottomSheetDuration: 200.milliseconds,
     );
   }
-  
+
   // 根据分类名获取对应的图标
   IconData _getCategoryIcon(String category) {
     switch (category) {
@@ -455,7 +462,7 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                             title: controller.topic.value?.title),
                         2.vGap,
                         PostContent(
-                            node: node,
+                            post: node.post,
                             isReply: isReply,
                             controller: controller),
                         Divider(
@@ -463,7 +470,16 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                           color: Theme.of(context).dividerColor,
                         ),
                         12.vGap,
+
+                        if (node.post.replyCount != null &&
+                            node.post.replyCount! > 0) ...[
+                          
+                          ReplayList(controller: controller, post: node.post),
+                          12.vGap,
+                        ],
+
                         PostFooter(post: node.post, controller: controller),
+                        
                       ],
                     ),
                   ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/controller/base_controller.dart';
 import 'brithday_tab_controller.dart';
-import 'brithday_tab_view.dart';
 
 enum Filter {
   today('today', 0),

@@ -51,3 +51,4 @@ app.*.map.json
 
 
 pubspec.lock
+.local_build.sh

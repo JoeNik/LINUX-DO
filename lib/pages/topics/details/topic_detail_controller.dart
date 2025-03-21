@@ -32,7 +32,6 @@ import '../../../utils/bookmark_service.dart';
 
 class TopicDetailController extends BaseController
     with WidgetsBindingObserver, Concatenated {
-
   final topicId = 0.obs;
   final topic = Rx<TopicDetail?>(null);
   final hasMore = true.obs;
@@ -41,6 +40,11 @@ class TopicDetailController extends BaseController
   final isLoadingPrevious = false.obs;
   // 用于控制初始滚动位置
   final initialScrollIndex = 0.obs;
+
+  // 用于存储帖子回复数据的映射
+  final postReplies = <int, List<Post>>{}.obs;
+  // 用于跟踪哪些帖子正在加载回复
+  final loadingReplies = <int>{}.obs;
 
   final ApiService apiService = Get.find();
   // 添加ScrollablePositionedList需要的控制器
@@ -108,6 +112,10 @@ class TopicDetailController extends BaseController
   // 书签服务
   final BookmarkService _bookmarkService = Get.find<BookmarkService>();
 
+  // 字体大小
+  double fontSize = 14.0;
+  double replyFontSize = 11.0;
+
   @override
   void onInit() {
     super.onInit();
@@ -116,6 +124,11 @@ class TopicDetailController extends BaseController
 
     itemScrollController = ItemScrollController();
     itemPositionsListener = ItemPositionsListener.create();
+
+    // 获取字体大小
+    fontSize = StorageManager.getDouble(AppConst.identifier.postFontSize) ?? 14.0;
+    replyFontSize =
+        StorageManager.getDouble(AppConst.identifier.replyFontSize) ?? 11.0;
 
     itemPositionsListener.itemPositions.addListener(_onScroll);
 
@@ -570,8 +583,6 @@ class TopicDetailController extends BaseController
 
     BrowserTipsSheet.show(Get.context!, url);
   }
-
-  
 
   // 构建帖子树结构
   void _buildReplyTree() {
@@ -1064,21 +1075,19 @@ class TopicDetailController extends BaseController
       showError('打开浏览器失败');
     }
   }
-  
-  
+
   // 收藏主题到指定分类
   Future<bool> bookmarkTopic(String category) async {
-
-    if (_bookmarkService.isBookmarked(topic.value?.id ?? 0)){
+    if (_bookmarkService.isBookmarked(topic.value?.id ?? 0)) {
       showWarning('您已收藏过该主题');
       return false;
     }
 
     if (topic.value == null) return false;
-    
+
     final topicDetail = topic.value!;
     final createUser = topicDetail.details?.createdBy;
-    
+
     // 创建BookmarkItem
     final bookmarkItem = BookmarkItem(
       id: topicDetail.id,
@@ -1092,6 +1101,61 @@ class TopicDetailController extends BaseController
     );
 
     return await _bookmarkService.addBookmark(bookmarkItem);
+  }
+
+  /// 加载指定帖子的回复数据
+  Future<void> loadReplies(int postId) async {
+    if (loadingReplies.contains(postId)) {
+      return;
+    }
+
+    try {
+      // 添加到加载中状态
+      loadingReplies.add(postId);
+      if (postReplies.containsKey(postId) && postReplies[postId]!.isNotEmpty) {
+        return;
+      }
+
+      final response = await apiService.getPostReplies(postId.toString());
+
+      if (response.replies != null) {
+        postReplies[postId] = response.replies ?? [];
+      } else {
+        postReplies[postId] = [];
+      }
+
+      postReplies.refresh();
+    } catch (e, s) {
+      l.e('加载帖子回复失败: $e\n$s');
+      showError('加载回复失败');
+    } finally {
+      loadingReplies.remove(postId);
+    }
+  }
+
+  // 跳转到某个楼层
+  Future<void> jumpToPost(int postNumber) async {
+    try {
+      l.d('尝试跳转到帖子楼层: $postNumber');
+      setLoading(true);
+      
+      // 检查该楼层帖子是否已加载
+      final posts = topic.value?.postStream?.posts ?? [];
+      final isPostLoaded = posts.any((post) => post.postNumber == postNumber);
+      
+      if (isPostLoaded) {
+        // 如果已加载，直接滚动到该楼层
+        await scrollToPost(postNumber);
+      } else {
+        // 如果未加载，先加载该楼层所在页面，再滚动
+        await fetchTopicDetail(postNumber: postNumber);
+      }
+    } catch (e, s) {
+      l.e('跳转到帖子失败: $e\n$s');
+      showError('跳转失败，请重试');
+    } finally {
+      setLoading(false);
+    }
   }
 }
 

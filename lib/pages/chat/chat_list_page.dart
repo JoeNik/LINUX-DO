@@ -18,15 +18,15 @@ class ChatPage extends GetView<ChatListController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(CupertinoIcons.ellipsis_circle_fill,
-                size: 24.w,
-                color: Theme.of(context).textTheme.bodyLarge?.color),
-          ),
-          6.hGap
-        ],
+        // actions: [
+        //   IconButton(
+        //     onPressed: () {},
+        //     icon: Icon(CupertinoIcons.ellipsis_circle_fill,
+        //         size: 24.w,
+        //         color: Theme.of(context).textTheme.bodyLarge?.color),
+        //   ),
+        //   6.hGap
+        // ],
         leading: Padding(
           padding: EdgeInsets.only(left: 12.w),
           child: Center(
@@ -40,7 +40,7 @@ class ChatPage extends GetView<ChatListController> {
       ),
       body: Column(
         children: [
-          _buildSearchBar(context),
+          //_buildSearchBar(context),
           Expanded(
             child: Obx(() {
               if (controller.messages.isEmpty) {

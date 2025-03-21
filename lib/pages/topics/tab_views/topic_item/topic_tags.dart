@@ -14,22 +14,22 @@ class TopicTags extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: 8.w),
+      padding: const EdgeInsets.only(top: 8).w,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: tags.map((tag) {
             final color = Tag.getTagColors(tag);
             return Container(
-              margin: EdgeInsets.only(right: 8.w),
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.w),
+              margin: const EdgeInsets.only(right: 8).w,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2).w,
               decoration: BoxDecoration(
                 color: color.backgroundColor,
                 border: Border.all(
                   color: color.backgroundColor,
                   width: 0.5,
                 ),
-                borderRadius: BorderRadius.circular(4.w),
+                borderRadius: BorderRadius.circular(4).w,
               ),
               child: Text(
                 tag,

@@ -37,9 +37,9 @@ class TopicItem extends StatelessWidget with Concatenated {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4).w,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4.w),
+        borderRadius: BorderRadius.circular(4).w,
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
@@ -55,13 +55,13 @@ class TopicItem extends StatelessWidget with Concatenated {
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(4.w),
+                borderRadius: BorderRadius.circular(4).w,
               ),
               child: InkWell(
                 onTap: onTap,
-                borderRadius: BorderRadius.circular(4.w),
+                  borderRadius: BorderRadius.circular(4).w,
                 child: Padding(
-                  padding: EdgeInsets.all(14.w),
+                  padding: const EdgeInsets.all(14).w,
                   child: TopicContent(
                     topic: topic,
                     avatarUrl: avatarUrl,
@@ -152,8 +152,8 @@ class TopicItem extends StatelessWidget with Concatenated {
             backgroundColor: AppColors.l2,
             foregroundColor: Colors.white,
             borderRadius: BorderRadius.only(
-                topRight: Radius.circular(4.w),
-                bottomRight: Radius.circular(4.w)),
+                topRight: const Radius.circular(4).w,
+                bottomRight: const Radius.circular(4).w),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

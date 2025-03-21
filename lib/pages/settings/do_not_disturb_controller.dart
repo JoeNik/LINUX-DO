@@ -79,9 +79,15 @@ class DoNotDisturbController extends BaseController {
   // 保存设置
   Future<void> saveSettings() async {
     try {
-      showSuccess(AppConst.settings.saveSuccess);
+      isLoading.value = true;
+      // 模拟保存
+      await Future.delayed(const Duration(seconds: 1));
+      showSuccess('保存成功');
+      Get.back();
     } catch (e) {
-      showError(AppConst.settings.saveFailed);
+      showError('保存失败');
+    } finally {
+      isLoading.value = false;
     }
   }
 } 

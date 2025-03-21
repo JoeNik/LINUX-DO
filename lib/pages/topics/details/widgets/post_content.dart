@@ -13,17 +13,17 @@ import '../topic_detail_controller.dart';
 class PostContent extends StatelessWidget {
   final TopicDetailController controller;
   const PostContent({
-    required this.node,
+    required this.post,
     this.isReply = false,
     required this.controller,
     Key? key,
   }) : super(key: key);
 
-  final PostNode node;
+  final Post post;
   final bool isReply;
   @override
   Widget build(BuildContext context) {
-    if (node.post.cooked == null) {
+    if (post.cooked == null) {
       return const SizedBox();
     }
     
@@ -38,7 +38,7 @@ class PostContent extends StatelessWidget {
               children: [
                 // if (isReply)
                 //   _ReplyQuote(post: node.post),
-                _PostBody(post: node.post,isReply: isReply, controller: controller),
+                _PostBody(post: post,isReply: isReply, controller: controller),
               ],
             ),
           ),
@@ -150,10 +150,11 @@ class _PostBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return HtmlWidget(
       html: post.cooked ?? '',
-      fontSize: isReply ? 11.sp : 14.sp,
+      fontSize: isReply ? controller.replyFontSize : controller.fontSize,
       onLinkTap: (url) {
         controller.launchUrl(url);
       },
+      topicDetailController: controller,
     );
   }
 } 

@@ -5,7 +5,6 @@ import 'loading.dart';
 const double _kDefaultStrokeWidth = 2;
 
 /// Information about a piece of animation (e.g., color).
-@immutable
 class DecorateData {
   final Color? backgroundColor;
   final Indicator indicator;

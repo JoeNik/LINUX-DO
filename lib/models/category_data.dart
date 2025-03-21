@@ -140,7 +140,7 @@ class UploadedImage {
 }
 
 @JsonSerializable()
-class Topic {
+class CategoryTopic {
   final int id;
   final String title;
   @JsonKey(name: 'fancy_title')
@@ -177,7 +177,7 @@ class Topic {
   @JsonKey(name: 'last_poster')
   final LastPoster lastPoster;
 
-  Topic({
+  CategoryTopic({
     required this.id,
     required this.title,
     required this.fancyTitle,
@@ -204,8 +204,8 @@ class Topic {
     required this.lastPoster,
   });
 
-  factory Topic.fromJson(Map<String, dynamic> json) => _$TopicFromJson(json);
-  Map<String, dynamic> toJson() => _$TopicToJson(this);
+  factory CategoryTopic.fromJson(Map<String, dynamic> json) => _$CategoryTopicFromJson(json);
+  Map<String, dynamic> toJson() => _$CategoryTopicToJson(this);
 }
 
 @JsonSerializable()

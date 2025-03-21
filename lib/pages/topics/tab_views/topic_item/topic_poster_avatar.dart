@@ -24,7 +24,7 @@ class TopicPosterAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(right: 12.w),
+      margin: const EdgeInsets.only(right: 12).w,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,

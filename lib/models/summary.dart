@@ -1,19 +1,19 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:linux_do/models/category_data.dart';
-import 'package:linux_do/models/topic_model.dart' as t;
+import 'package:linux_do/models/topic_model.dart';
 
 part 'summary.g.dart';
 
 @JsonSerializable()
 class SummaryResponse {
   @JsonKey(name: 'topics')
-  final List<t.Topic>? topics;
+  final List<Topic>? topics;
   @JsonKey(name: 'badges')
   final List<Badge>? badges;
   @JsonKey(name: 'badge_types')
   final List<BadgeType>? badgeTypes;
   @JsonKey(name: 'users')
-  final List<t.User>? users;
+  final List<User>? users;
   @JsonKey(name: 'user_summary')
   final UserSummary? userSummary;
 
@@ -131,11 +131,11 @@ class UserSummary {
   final List<Reply>? replies;
   final List<Link>? links;
   @JsonKey(name: 'most_liked_by_users')
-  final List<t.User>? mostLikedByUsers;
+  final List<User>? mostLikedByUsers;
   @JsonKey(name: 'most_liked_users')
-  final List<t.User>? mostLikedUsers;
+  final List<User>? mostLikedUsers;
   @JsonKey(name: 'most_replied_to_users')
-  final List<t.User>? mostRepliedToUsers;
+  final List<User>? mostRepliedToUsers;
   final List<UserBadge>? badges;
   @JsonKey(name: 'top_categories')
   final List<Category>? topCategories;
@@ -181,9 +181,9 @@ class UserSummary {
     topicIds: (json['topic_ids'] as List<dynamic>?)?.map((e) => e as int).toList(),
     replies: (json['replies'] as List<dynamic>?)?.map((e) => Reply.fromJson(e as Map<String, dynamic>)).toList(),
     links: (json['links'] as List<dynamic>?)?.map((e) => Link.fromJson(e as Map<String, dynamic>)).toList(),
-    mostLikedByUsers: (json['most_liked_by_users'] as List<dynamic>?)?.map((e) => t.User.fromJson(e as Map<String, dynamic>)).toList(),
-    mostLikedUsers: (json['most_liked_users'] as List<dynamic>?)?.map((e) => t.User.fromJson(e as Map<String, dynamic>)).toList(),
-    mostRepliedToUsers: (json['most_replied_to_users'] as List<dynamic>?)?.map((e) => t.User.fromJson(e as Map<String, dynamic>)).toList(),
+    mostLikedByUsers: (json['most_liked_by_users'] as List<dynamic>?)?.map((e) => User.fromJson(e as Map<String, dynamic>)).toList(),
+    mostLikedUsers: (json['most_liked_users'] as List<dynamic>?)?.map((e) => User.fromJson(e as Map<String, dynamic>)).toList(),
+    mostRepliedToUsers: (json['most_replied_to_users'] as List<dynamic>?)?.map((e) => User.fromJson(e as Map<String, dynamic>)).toList(),
     badges: (json['badges'] as List<dynamic>?)?.map((e) => UserBadge.fromJson(e as Map<String, dynamic>)).toList(),
     topCategories: (json['top_categories'] as List<dynamic>?)?.map((e) => Category.fromJson(e as Map<String, dynamic>)).toList(),
   );

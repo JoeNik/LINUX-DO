@@ -69,7 +69,7 @@ class GlobalController extends BaseController with Concatenated {
   Future<bool> checkLoginStatus() async {
     try {
       // 首先检查是否有有效的 cookies
-      final hasValidCookies = await HttpClient.getInstance().hasValidCookies();
+      final hasValidCookies = await NetClient.getInstance().hasValidCookies();
       if (!hasValidCookies) {
         _isLogin.value = false;
         return false;

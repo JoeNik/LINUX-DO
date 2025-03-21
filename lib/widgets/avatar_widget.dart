@@ -73,7 +73,7 @@ class AvatarWidget extends StatelessWidget {
         Get.dialog(
           Dialog(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.w),
+              borderRadius: BorderRadius.circular(12).w,
             ),
             child: UserInfoCard(
               username: username,

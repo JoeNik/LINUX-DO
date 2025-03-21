@@ -93,7 +93,7 @@ class SettingsController extends BaseController {
 
   Future<void> logout() async {
     await WebPage.clearCache();
-    await HttpClient.getInstance().clearCookies();
+    await NetClient.getInstance().clearCookies();
     await StorageManager.remove(AppConst.identifier.csrfToken);
     Get.find<GlobalController>().setIsLogin(false);
     Get.offAllNamed(Routes.LOGIN);
@@ -209,5 +209,10 @@ class SettingsController extends BaseController {
   void toPrivacy() async{
     final htmlContent = await rootBundle.loadString(AppConst.privacy);
     Get.toNamed(Routes.WEBVIEW, arguments: htmlContent);
+  }
+
+  /// 字体大小设置
+  void toFontSizeSettings() {
+    Get.toNamed(Routes.FONT_SIZE_SETTINGS);
   }
 } 

@@ -12,6 +12,8 @@ import 'package:linux_do/pages/profile/popular_controller.dart';
 import 'package:linux_do/pages/profile/popular_page.dart';
 import 'package:linux_do/pages/settings/about_controller.dart';
 import 'package:linux_do/pages/settings/about_page.dart';
+import 'package:linux_do/pages/settings/font_size_controller.dart';
+import 'package:linux_do/pages/settings/font_size_page.dart';
 import 'package:linux_do/pages/settings/profile_settings_controller.dart';
 import 'package:linux_do/pages/settings/profile_settings_page.dart';
 import 'package:linux_do/pages/settings/security_settings_controller.dart';
@@ -203,6 +205,15 @@ class AppPages {
       page: () => const AboutPage(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => AboutController());
+      }),
+    ),
+
+    /// 字体设置页
+    GetPage(
+      name: Routes.FONT_SIZE_SETTINGS,
+      page: () => const FontSizePage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => FontSizeController());
       }),
     ),
 

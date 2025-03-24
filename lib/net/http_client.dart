@@ -3,6 +3,7 @@ import 'package:get/get.dart' hide Response;
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:linux_do/utils/cloudflare_auth_service.dart';
 import 'package:linux_do/utils/device_util.dart';
 import 'package:path_provider/path_provider.dart';
 import 'api_response.dart';
@@ -15,7 +16,7 @@ import '../utils/log.dart';
 class NetClient {
   static NetClient? _instance;
   late final Dio _dio;
-  late final CookieJar _cookieJar;
+  late final CookieJar cookieJar;
   late final BaseOptions _options;
   static const String cfClearance = 'cf_clearance';
   static const String forumSession = '_forum_session';
@@ -49,19 +50,18 @@ class NetClient {
   Future<void> init() async {
     await _initOptions();
     await _initCookieManager();
-    
+
     _initInterceptors();
   }
 
   /// 初始化options
-  Future<void>  _initOptions() async{
+  Future<void> _initOptions() async {
     final userAgent = await DeviceUtil.getUserAgent();
     _options = BaseOptions(
       baseUrl: HttpConfig.baseUrl,
       connectTimeout: const Duration(milliseconds: HttpConfig.connectTimeout),
       receiveTimeout: const Duration(milliseconds: HttpConfig.receiveTimeout),
       sendTimeout: const Duration(milliseconds: HttpConfig.sendTimeout),
-      
       headers: {
         'Accept': 'application/json, text/plain, */*',
         'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
@@ -95,17 +95,17 @@ class NetClient {
   /// 初始化Cookie管理器
   Future<void> _initCookieManager() async {
     if (kIsWeb) {
-      _cookieJar = CookieJar();
+      cookieJar = CookieJar();
     } else {
       final directory = await getApplicationDocumentsDirectory();
       final cookiePath = '${directory.path}/.cookies/';
-      _cookieJar = PersistCookieJar(
+      cookieJar = PersistCookieJar(
           ignoreExpires: true, storage: FileStorage(cookiePath));
     }
     // 确保在添加 CookieManager 之前清除其他可能存在的 CookieManager
     _dio.interceptors
         .removeWhere((interceptor) => interceptor is CookieManager);
-    _dio.interceptors.add(CookieManager(_cookieJar));
+    _dio.interceptors.add(CookieManager(cookieJar));
   }
 
   /// 单例模式
@@ -116,7 +116,7 @@ class NetClient {
 
   /// 清除所有Cookie
   Future<void> clearCookies() async {
-    await _cookieJar.deleteAll();
+    await cookieJar.deleteAll();
   }
 
   /// 初始化拦截器
@@ -129,7 +129,7 @@ class NetClient {
       onRequest: (options, handler) async {
         // 从 cookie jar 获取 cookies
         final uri = Uri.parse(options.uri.toString());
-        final cookies = await _cookieJar.loadForRequest(uri);
+        final cookies = await cookieJar.loadForRequest(uri);
 
         // 如果有 cookies，添加到请求头
         if (cookies.isNotEmpty) {
@@ -138,7 +138,8 @@ class NetClient {
               .join('; ');
         }
         // 如果是 POST 请求，添加 Referer
-        if (options.method == 'POST') {
+        if (options.method == 'POST' &&
+            !options.headers.containsKey('Referer')) {
           options.headers['Referer'] = '${HttpConfig.baseUrl}${options.path}';
         }
 
@@ -192,7 +193,8 @@ class NetClient {
       InterceptorsWrapper(
         onRequest: (options, handler) {
           final sb = StringBuffer();
-          sb.writeln('┌─────────────────────────── Request ───────────────────────────');
+          sb.writeln(
+              '┌─────────────────────────── Request ───────────────────────────');
           sb.writeln('│ ${options.method} ${options.uri}');
           sb.writeln('│ Headers:');
           options.headers.forEach((key, value) {
@@ -204,20 +206,23 @@ class NetClient {
           if (options.queryParameters.isNotEmpty) {
             sb.writeln('│ Query: ${options.queryParameters}');
           }
-          sb.writeln('└─────────────────────────────────────────────────────────────────────');
+          sb.writeln(
+              '└─────────────────────────────────────────────────────────────────────');
           l.d(sb.toString());
           return handler.next(options);
         },
         onResponse: (response, handler) {
           final sb = StringBuffer();
-          sb.writeln('┌─────────────────────────── Response ───────────────────────────');
+          sb.writeln(
+              '┌─────────────────────────── Response ───────────────────────────');
           sb.writeln('│ Status: ${response.statusCode}');
           sb.writeln('│ Headers:');
           response.headers.forEach((name, values) {
             sb.writeln('│   $name: ${values.join(", ")}');
           });
           sb.writeln('│ Body: ${response.data}');
-          sb.writeln('└─────────────────────────────────────────────────────────────────────');
+          sb.writeln(
+              '└─────────────────────────────────────────────────────────────────────');
           l.d(sb.toString());
 
           // 获取并存储用户名
@@ -236,8 +241,10 @@ class NetClient {
         },
         onError: (error, handler) {
           final sb = StringBuffer();
-          sb.writeln('┌─────────────────────────── Request Error ───────────────────────────');
-          sb.writeln('│ 请求类型: ${error.requestOptions.method} URL: ${error.requestOptions.uri}');
+          sb.writeln(
+              '┌─────────────────────────── Request Error ───────────────────────────');
+          sb.writeln(
+              '│ 请求类型: ${error.requestOptions.method} URL: ${error.requestOptions.uri}');
           sb.writeln('│ Headers:');
           error.requestOptions.headers.forEach((key, value) {
             sb.writeln('│   $key: $value');
@@ -258,7 +265,8 @@ class NetClient {
           if (error.message != null) {
             sb.writeln('│ Error: ${error.message}');
           }
-          sb.writeln('└─────────────────────────────────────────────────────────────────────');
+          sb.writeln(
+              '└─────────────────────────────────────────────────────────────────────');
           l.e(sb.toString());
           return handler.next(error);
         },
@@ -276,14 +284,14 @@ class NetClient {
           final cfCookie = _parseCfCookie(cookieString);
           if (cfCookie != null) {
             l.d('保存 CF cookie: ${cfCookie.value}');
-            await _cookieJar.saveFromResponse(uri, [cfCookie]);
+            await cookieJar.saveFromResponse(uri, [cfCookie]);
           }
         } else if (cookieString.contains(tokenKey)) {
           // 解析登录 token
           final tokenCookie = _parseTokenCookie(cookieString);
           if (tokenCookie != null) {
             l.d('保存 token cookie: ${tokenCookie.value}');
-            await _cookieJar.saveFromResponse(uri, [tokenCookie]);
+            await cookieJar.saveFromResponse(uri, [tokenCookie]);
             // 更新登录状态
             Get.find<GlobalController>().setIsLogin(true);
           }
@@ -292,7 +300,7 @@ class NetClient {
           final sessionCookie = _parseSessionCookie(cookieString);
           if (sessionCookie != null) {
             l.d('保存 session cookie: ${sessionCookie.value}');
-            await _cookieJar.saveFromResponse(uri, [sessionCookie]);
+            await cookieJar.saveFromResponse(uri, [sessionCookie]);
           }
         }
       }
@@ -504,15 +512,15 @@ class NetClient {
           validateStatus: (status) => true,
         ),
       );
-      
+
       // 检查响应头中是否包含 Cloudflare 相关信息
       final headers = response.headers;
       final server = headers.value('server');
       final cfRay = headers.value('cf-ray');
-      
+
       // 如果响应头中包含 Cloudflare 相关信息，说明网站使用了 Cloudflare
-      return (server?.toLowerCase().contains('cloudflare') ?? false) || 
-             (cfRay != null);
+      return (server?.toLowerCase().contains('cloudflare') ?? false) ||
+          (cfRay != null);
     } catch (e) {
       l.e('检查 Cloudflare 状态失败: $e');
       // 如果检查失败，保守起见返回 true
@@ -524,13 +532,12 @@ class NetClient {
   Future<bool> hasValidCookies() async {
     try {
       final uri = Uri.parse(HttpConfig.baseUrl);
-      final cookies = await _cookieJar.loadForRequest(uri);
-      
+      final cookies = await cookieJar.loadForRequest(uri);
+
       bool hasCfClearance = false;
       bool hasForumSession = false;
       bool hasToken = false;
-      final csrfToken =
-            StorageManager.getString(AppConst.identifier.csrfToken) ;
+      final csrfToken = StorageManager.getString(AppConst.identifier.csrfToken);
 
       // 检查所有必要的 cookies
       for (var cookie in cookies) {
@@ -539,21 +546,25 @@ class NetClient {
         if (cookie.name == tokenKey) hasToken = true;
       }
 
-      if (!hasToken){
+      if (!hasToken) {
         hasToken = StorageManager.getString(AppConst.identifier.token) != null;
       }
 
-      if (!hasCfClearance){
-        hasCfClearance = StorageManager.getString(AppConst.identifier.cfClearance) != null;
+      if (!hasCfClearance) {
+        hasCfClearance =
+            StorageManager.getString(AppConst.identifier.cfClearance) != null;
       }
 
       bool hasCsrfToken = csrfToken != null && csrfToken.isNotEmpty;
 
       // 检查网站是否使用了 Cloudflare
       final needsCfVerification = await _checkCloudflareEnabled();
-      
+
       // 根据是否需要 CF 验证来判断 cookies 是否有效
-      return  hasCsrfToken && hasForumSession && hasToken && (!needsCfVerification || (needsCfVerification && hasCfClearance));
+      return hasCsrfToken &&
+          hasForumSession &&
+          hasToken &&
+          (!needsCfVerification || (needsCfVerification && hasCfClearance));
     } catch (e) {
       l.e('检查 cookies 失败: $e');
       return false;
@@ -564,7 +575,7 @@ class NetClient {
   Future<String?> getCookieValue(String name) async {
     try {
       final uri = Uri.parse(HttpConfig.baseUrl);
-      final cookies = await _cookieJar.loadForRequest(uri);
+      final cookies = await cookieJar.loadForRequest(uri);
       final cookie = cookies.firstWhereOrNull((c) => c.name == name);
       return cookie?.value;
     } catch (e) {
@@ -572,4 +583,20 @@ class NetClient {
       return null;
     }
   }
+
+  Future<void> ensureValidClearance() async {
+    final cookies =
+        await cookieJar.loadForRequest(Uri.parse(HttpConfig.baseUrl));
+    final clearance = cookies.firstWhere((c) => c.name == 'cf_clearance',
+        orElse: () => Cookie('cf_clearance', ''));
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    if (clearance == null ||
+        (now - int.tryParse(clearance.value.split('-')[1])!) > 3600) {
+      l.d('cf_clearance 已过期或不存在，尝试更新');
+      await CloudflareAuthService().authenticate();
+    } else {
+      l.d('cf_clearance 有效: ${clearance.value}');
+    }
+  }
+  
 }

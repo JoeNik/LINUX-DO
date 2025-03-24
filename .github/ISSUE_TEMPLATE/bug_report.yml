@@ -1,0 +1,46 @@
+name: 错误报告 Bug Report
+description: 创建一个错误报告以帮助改进
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢提出问题!
+  
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 清晰简洁地描述这个Bug是什么
+      placeholder: 当我...时，发生了...什么，最好能附加上帖子的连接方便跟进
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统
+      description: 该问题发生在哪个操作系统上？
+      options:
+        - iOS
+        - Android
+    validations:
+      required: true
+      
+  - type: input
+    id: app_version
+    attributes:
+      label: App版本
+      placeholder: 例如 1.0.1
+    validations:
+      required: true
+      
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图/视频
+      description: 如果有的话，请添加截图或视频以帮助说明问题
+      placeholder: 拖放图片或视频到这里
+    validations:
+      required: false 

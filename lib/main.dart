@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
           // 主题配置
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.system, // 跟随系统主题
+          themeMode: _getSavedThemeMode(),
 
           // 路由配置
           initialRoute: initialRoute, // 使用动态初始路由
@@ -125,5 +125,19 @@ class MyApp extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+// 从存储中获取保存的主题模式
+ThemeMode _getSavedThemeMode() {
+  final savedTheme = StorageManager.getString(AppConst.identifier.theme);
+  switch (savedTheme) {
+    case 'light':
+      return ThemeMode.light;
+    case 'dark':
+      return ThemeMode.dark;
+    case 'system':
+    default:
+      return ThemeMode.system;
   }
 }

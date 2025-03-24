@@ -79,13 +79,23 @@ abstract class ApiService {
   });
 
   /// 更新帖子阅读时间
-  @POST("topics/timings")
-  @MultiPart()
-  Future<void> updateTopicTiming(
-    @Part(name: "topic_id") String topicId,
-    @Part(name: "topic_time") int topicTime,
-    @Part(name: "timings") Map<String, int> timings,
-  );
+@POST("topics/timings")
+@MultiPart()
+Future<void> updateTopicTiming(
+  @Part(name : "topic_id") String topicId,
+  @Part(name : "topic_time") String topicTime,
+  @Part(name : "timings") Map<String, String> timingsMap,
+  {@Header("discourse-background") String background = "true",
+   @Header("discourse-logged-in") String loggedIn = "true",
+   @Header("discourse-present") String present = "true",
+   @Header("x-silence-logger") String silence = "true",
+   @Header("Accept") String accept = "application/json, text/plain, */*",
+   @Header("Accept-Language") String acceptLanguage = "zh-CN,zh;q=0.9,en;q=0.8",
+   @Header("X-Requested-With") String requestedWith = "XMLHttpRequest",
+   @Header("sec-ch-ua") String secChUa = "\"Chromium\";v=\"134\", \"Not:A-Brand\";v=\"24\", \"Google Chrome\";v=\"134\"",
+   @Header("sec-ch-ua-mobile") String secChUaMobile = "?0",
+   @Header("sec-ch-ua-platform") String secChUaPlatform = "\"macOS\""}
+);
 
   /// 用户信息
   @GET('u/{current}.json')

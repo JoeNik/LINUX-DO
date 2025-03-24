@@ -232,12 +232,35 @@ class _ApiService implements ApiService {
   @override
   Future<void> updateTopicTiming(
     String topicId,
-    int topicTime,
-    Map<String, int> timings,
-  ) async {
+    String topicTime,
+    Map<String, String> timingsMap, {
+    String background = "true",
+    String loggedIn = "true",
+    String present = "true",
+    String silence = "true",
+    String accept = "application/json, text/plain, */*",
+    String acceptLanguage = "zh-CN,zh;q=0.9,en;q=0.8",
+    String requestedWith = "XMLHttpRequest",
+    String secChUa =
+        "\"Chromium\";v=\"134\", \"Not:A-Brand\";v=\"24\", \"Google Chrome\";v=\"134\"",
+    String secChUaMobile = "?0",
+    String secChUaPlatform = "\"macOS\"",
+  }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
+    final _headers = <String, dynamic>{
+      r'discourse-background': background,
+      r'discourse-logged-in': loggedIn,
+      r'discourse-present': present,
+      r'x-silence-logger': silence,
+      r'Accept': accept,
+      r'Accept-Language': acceptLanguage,
+      r'X-Requested-With': requestedWith,
+      r'sec-ch-ua': secChUa,
+      r'sec-ch-ua-mobile': secChUaMobile,
+      r'sec-ch-ua-platform': secChUaPlatform,
+    };
+    _headers.removeWhere((k, v) => v == null);
     final _data = FormData();
     _data.fields.add(MapEntry(
       'topic_id',
@@ -245,11 +268,11 @@ class _ApiService implements ApiService {
     ));
     _data.fields.add(MapEntry(
       'topic_time',
-      topicTime.toString(),
+      topicTime,
     ));
     _data.fields.add(MapEntry(
       'timings',
-      jsonEncode(timings),
+      jsonEncode(timingsMap),
     ));
     final _options = _setStreamType<void>(Options(
       method: 'POST',

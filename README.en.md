@@ -1,6 +1,4 @@
-# Linux DO
-
-<div align="center">
+# LINUX DO 🐧
 
 <p align="center">
   <picture>
@@ -16,15 +14,22 @@
   </picture>
 </p>
 
+---
+
+<div align="center">
+
 [![Flutter](https://img.shields.io/badge/Flutter-3.27.2-blue.svg)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.6.1-red.svg)](https://dart.dev)
+[![App Version](https://img.shields.io/badge/dynamic/yaml?url=https://raw.githubusercontent.com/R-lz/LINUX-DO/main/pubspec.yaml&query=$.version&label=Version&color=orange)]()
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![EN](https://img.shields.io/badge/English-README-blue.svg)](README.en.md)
+
 
 </div>
 
 ## 📝 Description
 
-Linux DO is a mobile client for Linux discussion forums, built with Flutter. It provides a seamless experience for browsing, participating in discussions, and staying connected with the Linux community.
+The LINUX DO client developed using Flutter supports `Android` and `IOS`.
 
 ## ✨ Features
 
@@ -72,6 +77,7 @@ flutter doctor -v
 
 <details>
 <summary><b>Setup Instructions</b></summary>
+</br>
 
 ```bash
 # Clone the repository
@@ -90,8 +96,9 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 <details>
 <summary><b>iOS Setup</b></summary>
+</br>
 
-> Make sure you have Xcode and CocoaPods installed
+    Make sure you have Xcode and CocoaPods installed
 
 ```bash
 # Navigate to iOS directory
@@ -119,8 +126,9 @@ flutter build ios --release
 
 <details>
 <summary><b>Android Setup</b></summary>
+</br>
 
-> Make sure you have JDK installed and environment variables (JAVA_HOME and PATH) configured
+    Make sure you have JDK installed and environment variables (JAVA_HOME and PATH) configured
 
 #### Generate signing key
 ```bash

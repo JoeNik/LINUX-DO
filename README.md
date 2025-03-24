@@ -1,15 +1,5 @@
 # LINUX DO 🐧
 
-<div align="center">
-
-[![Flutter](https://img.shields.io/badge/Flutter-3.27.2-blue.svg)](https://flutter.dev)
-[![Dart](https://img.shields.io/badge/Dart-3.6.1-red.svg)](https://dart.dev)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![EN](https://img.shields.io/badge/English-README-blue.svg)](README.en.md)
-
-</div>
-
-
 <p align="center">
   <picture>
     <source 
@@ -25,6 +15,16 @@
 </p>
 
 ---
+
+<div align="center">
+
+[![Flutter](https://img.shields.io/badge/Flutter-3.27.2-blue.svg)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.6.1-red.svg)](https://dart.dev)
+[![App Version](https://img.shields.io/badge/dynamic/yaml?url=https://raw.githubusercontent.com/R-lz/LINUX-DO/main/pubspec.yaml&query=$.version&label=Version&color=orange)]()
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![EN](https://img.shields.io/badge/English-README-blue.svg)](README.en.md)
+
+</div>
 
 
 ## 🌟 这是什么？
@@ -59,7 +59,7 @@ lib/
   - Android: Android SDK（用于Android开发）
 ```
 
-> 安装flutter
+    安装flutter
 ```bash
 # 检查安装结果
 flutter --version
@@ -90,8 +90,9 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 <details>
 <summary>iOS 配置</summary>
+</br>
 
-> 确保系统中安装了xcode,cocoapods
+    确保系统中安装了xcode,cocoapods
 
 ```bash
 # 进入 iOS 目录
@@ -111,8 +112,9 @@ cd ..
 
 <details>
 <summary>Android 配置</summary>
+</br>
 
-> 确保你的系统中已安装JDK，并配置了环境变量（JAVA_HOME 和 PATH）
+    确保你的系统中已安装JDK，并配置了环境变量（JAVA_HOME 和 PATH）
 
 #### 生成签名文件
 ```bash
@@ -170,7 +172,7 @@ flutter build apk --release --split-per-abi
 <summary>使用Github Actions编译打包</summary>
 
 #### Android:
-> 配置 KEYSTORE_BASE64 | KEY_PROPERTIES
+    配置 KEYSTORE_BASE64 | KEY_PROPERTIES
 
 ```bash
 # 生成base64
@@ -183,10 +185,14 @@ base64 -i release.jks
 - 添加 Key: `KEYSTORE_BASE64` Value:<生成的base64>
 - 添加KEY_PROPERTIES 复制整个`key.properties`文本内容
 - 转到Actions运行`build_android`
+
+
+#### IOS:
+    ios为未签名的IPA,直接运行`build_ios`
+    
 </details>
 
-IOS:
-> ios为未签名的IPA,直接运行`build_ios`
+
 ---
 
 

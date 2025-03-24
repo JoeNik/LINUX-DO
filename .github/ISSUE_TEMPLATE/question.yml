@@ -1,0 +1,34 @@
+name: 问题咨询 Question
+description: 如果你有问题需要帮助，请使用此模板
+title: "[QUESTION] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你的问题，我们会尽快回复！
+  
+  - type: textarea
+    id: question
+    attributes:
+      label: 问题描述
+      description: 清晰简洁地描述你的问题
+      placeholder: 我想了解如何...
+    validations:
+      required: true
+      
+  - type: input
+    id: app_version
+    attributes:
+      label: App版本
+      placeholder: 例如 1.0.1
+    validations:
+      required: true
+      
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息
+      description: 任何其他相关的上下文或截图
+    validations:
+      required: false 

@@ -19,6 +19,7 @@ import 'package:linux_do/pages/settings/profile_settings_page.dart';
 import 'package:linux_do/pages/settings/security_settings_controller.dart';
 import 'package:linux_do/pages/settings/security_settings_page.dart';
 import 'package:linux_do/utils/bookmark_service.dart';
+import 'package:linux_do/utils/cloudflare_auth_service.dart';
 import 'package:linux_do/widgets/html_widget.dart';
 import '../pages/chat/chat_detail_controller.dart';
 import '../pages/chat/chat_detail_page.dart';
@@ -105,6 +106,7 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.lazyPut(() => TopicDetailController());
         Get.lazyPut(() => HtmlController());
+        Get.lazyPut(() => CloudflareAuthService());
       }),
     ),
 

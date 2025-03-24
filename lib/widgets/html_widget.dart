@@ -12,6 +12,7 @@ import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/net/api_service.dart';
+import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/pages/topics/details/topic_detail_controller.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import 'package:html/dom.dart' as dom;
@@ -276,6 +277,154 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
     return TagExtension(
       tagsToExtend: {"aside"},
       builder: (extensionContext) {
+        // 处理 GitHub 仓库的 onebox
+        if (extensionContext.classes.contains('githubrepo') && extensionContext.classes.contains('onebox')) {
+          final header = extensionContext.element?.getElementsByClassName('source').firstOrNull;
+          final link = header?.getElementsByTagName('a').firstOrNull;
+          final href = link?.attributes['href'];
+          final sourceText = link?.text ?? '';
+          
+          final article = extensionContext.element?.getElementsByClassName('onebox-body').firstOrNull;
+          final githubRow = article?.getElementsByClassName('github-row').firstOrNull;
+          
+          // 获取缩略图 
+          final thumbnailImg = githubRow?.getElementsByTagName('img').firstOrNull;
+          final thumbnailSrc = thumbnailImg?.attributes['src'];
+          
+          // 获取标题
+          final titleElement = githubRow?.getElementsByTagName('h3').firstOrNull;
+          final titleLink = titleElement?.getElementsByTagName('a').firstOrNull;
+          final titleText = titleLink?.text ?? '';
+          
+          // 获取描述
+          final descSpan = githubRow?.getElementsByClassName('github-repo-description').firstOrNull;
+          final descriptionText = descSpan?.text ?? '';
+
+          return Container(
+            margin: const EdgeInsets.symmetric(vertical: 8).w,
+            decoration: BoxDecoration(
+              color: theme.cardColor,
+              borderRadius: BorderRadius.circular(12).w,
+              border: Border.all(
+                color: theme.dividerColor,
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: theme.shadowColor.withValues(alpha: 0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => onLinkTap?.call(href),
+                borderRadius: BorderRadius.circular(12).w,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 仓库图片（如果可用）
+                    if (thumbnailSrc != null && thumbnailSrc.isNotEmpty)
+                      ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: const Radius.circular(12).w,
+                          topRight: const Radius.circular(12).w,
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          height: 180.h,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                          ),
+                          child: CachedImage(
+                            imageUrl: thumbnailSrc,
+                            fit: BoxFit.cover,
+                            placeholder: Container(
+                              color: theme.primaryColor.withValues(alpha: 0.1),
+                              child: Center(
+                                child: DisRefreshLoading(),
+                              ),
+                            ),
+                            errorWidget: Container(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              child: Center(
+                                child: Icon(
+                                  Icons.broken_image_outlined,
+                                  size: 40.w,
+                                  color: theme.iconTheme.color?.withValues(alpha: 0.5),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    
+                    Padding(
+                      padding: const EdgeInsets.all(12).w,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // github 来源
+                          Row(
+                            children: [
+                              Icon(
+                                CupertinoIcons.link,
+                                size: 14.w,
+                                color: theme.primaryColor,
+                              ),
+                              4.hGap,
+                              Text(
+                                sourceText,
+                                style: TextStyle(
+                                  fontSize: 12.w,
+                                  color: theme.primaryColor,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: AppFontFamily.dinPro,
+                                ),
+                              ),
+                            ],
+                          ),
+                          8.vGap,
+                          
+                          // 仓库标题
+                          Text(
+                            titleText,
+                            style: TextStyle(
+                              fontSize: 14.w,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: AppFontFamily.dinPro,
+                              color: theme.textTheme.titleLarge?.color,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          8.vGap,
+                          
+                          // 仓库描述
+                          if (descriptionText.isNotEmpty)
+                            Text(
+                              descriptionText,
+                              style: TextStyle(
+                                fontSize: 13.w,
+                                fontFamily: AppFontFamily.dinPro,
+                                color: theme.textTheme.bodyMedium?.color,
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+        
+        // 处理通用的 onebox
         if (extensionContext.classes.contains('allowlistedgeneric') && extensionContext.classes.contains('onebox')) {
           final header = extensionContext.element?.getElementsByClassName('source').firstOrNull;
           final article = extensionContext.element?.getElementsByClassName('onebox-body').firstOrNull;
@@ -368,7 +517,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
           );
         }
         
-
+        // Handle quoted content
         final titleDiv = extensionContext.element
             ?.getElementsByClassName('title')
             .firstOrNull;
@@ -636,16 +785,22 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
           final imgElement =
               extensionContext.element?.getElementsByTagName('img').firstOrNull;
           if (imgElement != null) {
-            final src = imgElement.attributes['src'];
-            if (src != null) {
+            final imgSrc = imgElement.attributes['src'];
+            if (imgSrc != null) {
+              // 处理相对路径，添加域名前缀
+              final src = imgSrc.startsWith('/') ? '${HttpConfig.baseUrl.replaceAll(RegExp(r'/$'), '')}$imgSrc' : imgSrc;
+              
               // 获取原始图片URL用于预览
               String previewUrl = src;
               // 尝试从 lightbox 链接获取原始图片 URL
               final lightboxElement = extensionContext.element
                   ?.getElementsByClassName('lightbox')
                   .firstOrNull;
-              final originalUrl = lightboxElement?.attributes['href'];
-              if (originalUrl != null) {
+              final originalUrlAttr = lightboxElement?.attributes['href'];
+              if (originalUrlAttr != null) {
+                final originalUrl = originalUrlAttr.startsWith('/') 
+                    ? '${HttpConfig.baseUrl.replaceAll(RegExp(r'/$'), '')}$originalUrlAttr' 
+                    : originalUrlAttr;
                 previewUrl = originalUrl;
               }
 
@@ -1091,11 +1246,14 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
           return widget;
         }
 
+        // 处理相对路径，添加域名前缀
+        final String imageUrl = src.startsWith('/') ? '${HttpConfig.baseUrl.replaceAll(RegExp(r'/$'), '')}$src' : src;
+
         // 检查是否是回复中用户头像
-        if (src.contains('user_avatar/linux.do') ||
-            src.contains('/letter_avatar_proxy')) {
+        if (imageUrl.contains('user_avatar/linux.do') ||
+            imageUrl.contains('/letter_avatar_proxy')) {
           return CachedImage(
-            imageUrl: src,
+            imageUrl: imageUrl,
             width: 32.w,
             height: 32.w,
             circle: true,
@@ -1106,17 +1264,17 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
 
         // 检查是否是表情
         final isEmoji = extensionContext.classes.contains('emoji');
-        final isEmojiPath = src.contains('/uploads/default/original') ||
-            src.contains('/images/emoji/twitter/') ||
-            src.contains('plugins/discourse-narrative-bot/images') ||
-            src.contains('/images/emoji/apple/');
+        final isEmojiPath = imageUrl.contains('/uploads/default/original') ||
+            imageUrl.contains('/images/emoji/twitter/') ||
+            imageUrl.contains('plugins/discourse-narrative-bot/images') ||
+            imageUrl.contains('/images/emoji/apple/');
 
         final width = extensionContext.attributes['width'];
         final height = extensionContext.attributes['height'];
 
         if (isEmoji || isEmojiPath) {
           return Image.network(
-            src,
+            imageUrl,
             width: width != null ? double.parse(width) : 20.sp,
             height: height != null ? double.parse(height) : 20.sp,
             fit: BoxFit.contain,
@@ -1124,7 +1282,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
         }
 
         // 获取原始图片URL用于预览
-        String previewUrl = src;
+        String previewUrl = imageUrl;
         // if (previewUrl.contains('/optimized/')) {
         //   previewUrl = previewUrl.replaceFirst('/optimized/', '/original/');
         // }
@@ -1142,7 +1300,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8.w),
               child: CachedImage(
-                imageUrl: src,
+                imageUrl: imageUrl,
                 width: double.infinity,
                 placeholder: Container(
                   color: theme.primaryColor.withValues(alpha: 0.1),
@@ -1563,3 +1721,4 @@ class HtmlController extends BaseController {
     }
   }
 }
+

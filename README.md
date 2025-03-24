@@ -1,48 +1,43 @@
 # LINUX DO 🐧
 
+<div align="center">
+
+[![Flutter](https://img.shields.io/badge/Flutter-3.27.2-blue.svg)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.6.1-red.svg)](https://dart.dev)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![EN](https://img.shields.io/badge/English-README-blue.svg)](README.en.md)
+
+</div>
+
 
 <p align="center">
-  <img src="assets/images/light/search-banner.png" width="100%" alt="LINUX DO Logo">
+  <picture>
+    <source 
+      srcset="assets/images/dark/logo.webp" 
+      media="(prefers-color-scheme: dark)"
+    />
+    <img 
+      src="assets/images/light/logo.webp" 
+      width="200" 
+      alt="LINUX DO Logo"
+    />
+  </picture>
 </p>
 
-<p align="center">
-  <img src="assets/images/light/logo.webp" width="200" alt="LINUX DO Logo">
-</p>
+---
 
-> 在这个数字化的星球上，我们正在构建一个独特的技术乌托邦。
-> 
-> "真诚、友善、团结、专业，共建你我引以为荣之社区。" （ 虽然有点严肃，但我们是认真的！）
 
 ## 🌟 这是什么？
 
-在这个信息爆炸的时代，我们不缺乏社区，但我们缺少一个真正懂技术人的家。LINUX DO 连接技术灵魂的桥梁.... 咳咳,这是一个使用Flutter开发的(套壳儿的)LINUX DO ()社区。理论支持其他Discourse部署的社区。
+使用Flutter开发的LINUX DO客户端,支持 `Android` `IOS`.
 
-
-
-## 🛠 技术栈
-
-
-```dart
-class TechnologyStack {
-  final framework = "Flutter 3.0+";  
-  final stateManagement = "GetX";    
-  final networking = "Dio";  
-  final ui = {
-    "设计语言": "Material You",
-    "适配框架": "flutter_screenutil",
-    "动画系统": "自研引擎"
-  };
-  final api = "LINUX DO API";
-  ... ...
-}
-```
 
 ## 📦 项目结构
 
 ```
 lib/
 ├── 🏛 const/          
-├── 🧠 controller/    
+├── 🧠 controller/      
 ├── 🗃 models/         
 ├── 🌐 net/          
 ├── 📱 pages/        
@@ -55,14 +50,22 @@ lib/
 
 ### 环境准备
 
-
 ```yaml
 必要条件:
   - Flutter: ">=3.0.0 <4.0.0"
   - Dart: ">=3.0.0 <4.0.0"
-  - CocoaPods: ">=1.11.0" (仅 iOS/macOS)
-  - Android SDK: ">=31" (仅 Android)
-  - Xcode: ">=13.0" (仅 iOS/macOS)
+  - 开发工具: Android Studio / VS Code
+  - iOS: Xcode 13.0+（用于iOS开发）
+  - Android: Android SDK（用于Android开发）
+```
+
+> 安装flutter
+```bash
+# 检查安装结果
+flutter --version
+
+# 检查环境
+flutter doctor -v
 ```
 
 ### 🎯 开发环境配置
@@ -70,8 +73,8 @@ lib/
 #### 1. 项目获取
 ```bash
 # 克隆项目
-git clone https://github.com/R-lz/Linux-DO.git
-cd linux-do
+git clone https://github.com/R-lz/LINUX-DO.git
+cd LINUX-DO
 
 # 安装依赖
 flutter pub get
@@ -85,34 +88,62 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 #### 3. 平台特定配置
 
-##### iOS/macOS 配置
+<details>
+<summary>iOS 配置</summary>
+
+> 确保系统中安装了xcode,cocoapods
+
 ```bash
 # 进入 iOS 目录
 cd ios
 
-# 清理 CocoaPods 缓存
 pod cache clean --all
 rm -rf Pods Podfile.lock
 
-# 安装 CocoaPods 依赖
 pod install --repo-update
 
-# 返回项目根目录
 cd ..
 ```
+</details>
 
-##### Android 配置
-1. 打开 `android/app/build.gradle`
-2. 配置应用信息：
-```gradle
-android {
-    defaultConfig {
-        applicationId "xxx.xxx"
-        minSdkVersion 21
-        targetSdkVersion 33
-    }
-}
+---
+
+
+<details>
+<summary>Android 配置</summary>
+
+> 确保你的系统中已安装JDK，并配置了环境变量（JAVA_HOME 和 PATH）
+
+#### 生成签名文件
+```bash
+mkdir -p keystore
 ```
+
+```bash
+keytool -genkey -v -keystore keystore/linux-do.jks -alias mykey -keyalg RSA -keysize 2048 -validity 10000
+```
+
+继续交互式
+``` bash
+Enter keystore password:  [输入 Keystore 密码]
+Re-enter new password:   [再次输入确认密码]
+What is your first and last name? 
+... ...
+```
+创建key.properties
+```bash
+touch keystore/key.properties
+
+cat > keystore/key.properties << EOF
+storePassword=<你的Keystore密码>
+keyPassword=<你的密钥密码>
+keyAlias=mykey
+storeFile=../keystore/linux-do.jks
+EOF
+```
+
+</details>
+
 
 ### 🚀 启动项目
 
@@ -123,7 +154,6 @@ flutter run -d ios
 
 # 发布版本
 flutter build ios --release
-flutter build ipa --release
 ```
 
 #### Android
@@ -131,41 +161,46 @@ flutter build ipa --release
 # 开发版本
 flutter run -d android
 
-# 发布版本
+# 安卓打包
 flutter build apk --release --split-per-abi
-flutter build appbundle --release
 ```
 
-#### macOS
+
+<details>
+<summary>使用Github Actions编译打包</summary>
+
+#### Android:
+> 配置 KEYSTORE_BASE64 | KEY_PROPERTIES
+
 ```bash
-# 开发版本
-flutter run -d macos
-
-# 发布版本
-flutter build macos --release
+# 生成base64
+base64 -i release.jks
 ```
+配置步骤:
+- 打开仓库Settings
+- 点击 `Secrets and variables` -> `New repository secret`
+- 添加两个Secret
+- 添加 Key: `KEYSTORE_BASE64` Value:<生成的base64>
+- 添加KEY_PROPERTIES 复制整个`key.properties`文本内容
+- 转到Actions运行`build_android`
+</details>
+
+IOS:
+> ios为未签名的IPA,直接运行`build_ios`
+---
+
 
 ## 🤝 参与贡献
 
 每一个想法都值得被倾听，每一行代码都应该被尊重。
 
-1. Fork 项目
-2. 创建分支：`git checkout -b feature/amazing-feature`
-3. 提交更改：`git commit -m 'Add some amazing feature'`
-4. 推送分支：`git push origin feature/amazing-feature`
-5. 提交 Pull Request
+- 发现任何问题或功能上的建议,请通过Issues反馈
+- 欢迎提交PR
+- 感谢你对项目的贡献！
 
 
-## 🎭 写在最后
-
-> 项目还在开发中，距离正式版还有很多需要改进的地方。所以如果你对项目有任何建议、意见或者想法，欢迎提交PR，本项目的每一行代码都承载着对L站的热爱。
-> 每一个小小的贡献都会让它变得更接近理想。很期待能有你的加入，一起改进、一起成长。
-
----
-
-如果这个项目让你感到愉悦，请献上你的 Star ⭐️
-你的认可，是我(们)前进的动力。
-
+如果这个项目有帮助到你，请献上你的 Star ⭐️
+你的认可，是我们前进的动力。
 
 ## 📜 开源协议
 

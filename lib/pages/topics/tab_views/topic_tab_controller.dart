@@ -46,7 +46,6 @@ class TopicTabController extends BaseController
     try {
       isLoading.value = true;
       clearError();
-      String path = this.path;
 
       final response = await apiService.getTopics(path);
 
@@ -108,7 +107,16 @@ class TopicTabController extends BaseController
       // 更新用户缓存
       _userCache.updateUsers(response.users);
 
-      topics.addAll(response.topicList?.topics ?? []);
+      // 获取新加载的话题
+      final newTopics = response.topicList?.topics ?? [];
+      
+      // 去重：过滤掉已经存在的话题
+      final existingIds = topics.map((topic) => topic.id).toSet();
+      final uniqueNewTopics = newTopics.where((topic) => !existingIds.contains(topic.id)).toList();
+      
+      // 只添加不重复的话题
+      topics.addAll(uniqueNewTopics);
+      
       hasMore.value = response.topicList?.moreTopicsUrl != null;
       currentPage.value = nextPage;
 
@@ -117,7 +125,7 @@ class TopicTabController extends BaseController
       } else {
         refreshController.loadComplete();
       }
-      l.d('加载更多成功');
+      //l.d('加载更多成功');
     } catch (e) {
       refreshController.loadFailed();
       setError('加载更多失败');

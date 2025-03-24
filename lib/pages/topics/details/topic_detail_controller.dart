@@ -1,13 +1,17 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/controller/base_controller.dart';
+import 'package:linux_do/net/http_client.dart';
 import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/utils/browser_util.dart';
+import 'package:linux_do/utils/cloudflare_auth_service.dart';
+import 'package:linux_do/utils/device_util.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:linux_do/widgets/browser_tips_sheet.dart';
 import 'package:linux_do/widgets/html_widget.dart';
@@ -22,7 +26,7 @@ import '../../../utils/mixins/toast_mixin.dart';
 import '../../../utils/storage_manager.dart';
 import '../../../routes/app_pages.dart';
 import 'package:crypto/crypto.dart';
-import 'package:dio/dio.dart' as dio;
+import 'package:dio/dio.dart' as d;
 import 'dart:math';
 import 'dart:async';
 import 'dart:convert';
@@ -64,7 +68,7 @@ class TopicDetailController extends BaseController
   final _lastTrackTime = DateTime.now().obs;
   final _visiblePostNumbers = <int>{}.obs;
   Timer? _debounceTimer;
-  static const _debounceDelay = Duration(milliseconds: 1000);
+  static const _debounceDelay = Duration(milliseconds: 2000);
 
   // 用于存储帖子树结构
   final replyTree = <PostNode>[].obs;
@@ -112,6 +116,12 @@ class TopicDetailController extends BaseController
   // 书签服务
   final BookmarkService _bookmarkService = Get.find<BookmarkService>();
 
+  final CloudflareAuthService _cloudflareAuthService = Get.find<CloudflareAuthService>();
+
+  // csrfToken
+  String? csrfToken = '';
+  String? cfClearance = '';
+
   // 字体大小
   double fontSize = 14.0;
   double replyFontSize = 11.0;
@@ -126,7 +136,8 @@ class TopicDetailController extends BaseController
     itemPositionsListener = ItemPositionsListener.create();
 
     // 获取字体大小
-    fontSize = StorageManager.getDouble(AppConst.identifier.postFontSize) ?? 14.0;
+    fontSize =
+        StorageManager.getDouble(AppConst.identifier.postFontSize) ?? 14.0;
     replyFontSize =
         StorageManager.getDouble(AppConst.identifier.replyFontSize) ?? 11.0;
 
@@ -137,6 +148,7 @@ class TopicDetailController extends BaseController
     } else {
       fetchTopicDetail();
     }
+
     // 添加应用生命周期监听
     WidgetsBinding.instance.addObserver(this);
 
@@ -251,7 +263,7 @@ class TopicDetailController extends BaseController
 
     _visiblePostNumbers.value = visiblePosts;
     // 阅读时间 目前没办法更新
-    // _debouncedUpdateTiming();
+    //_debouncedUpdateTiming();
 
     // 检查是否需要加载更多
     if (positions.isNotEmpty) {
@@ -261,7 +273,7 @@ class TopicDetailController extends BaseController
           firstVisibleItem.index <= 3 &&
           !isLoadingPrevious.value &&
           hasPrevious.value) {
-        l.d('触发向上加载: ${firstVisibleItem.index}');
+        //l.d('触发向上加载: ${firstVisibleItem.index}');
         loadPrevious();
       }
 
@@ -272,7 +284,7 @@ class TopicDetailController extends BaseController
           actualLastIndex >= replyTree.length - 5 &&
           !isLoadingMore.value &&
           hasMore.value) {
-        l.d('触发向下加载: ${lastVisibleItem.index}');
+        //l.d('触发向下加载: ${lastVisibleItem.index}');
         loadMore();
       }
     }
@@ -284,29 +296,81 @@ class TopicDetailController extends BaseController
     final visiblePosts = _visiblePostNumbers.value;
     if (visiblePosts.isEmpty) return;
 
+    final client = NetClient.getInstance();
+
+    await client.ensureValidClearance();
+
     final now = DateTime.now();
-    final timeSpent = now.difference(_lastTrackTime.value).inSeconds;
+    final timeSpent = now.difference(_lastTrackTime.value).inSeconds * 1000;
     if (timeSpent <= 0) return;
 
     try {
-      // 构建计时映射，为每个可见的帖子记录阅读时间
-      final timings = {
-        for (var postNumber in visiblePosts) postNumber.toString(): timeSpent
-      };
+      final body =
+          'topic_id=${topicId.value}&topic_time=$timeSpent${visiblePosts.map((postNumber) => '&timings[$postNumber]=$timeSpent').join()}';
 
-      await apiService.updateTopicTiming(
-        topicId.value.toString(),
-        timeSpent,
-        timings,
-      );
+      final dio = NetClient.getDio;
 
-      l.d('阅读时间更新: $timings');
+      final userAgent = await DeviceUtil.getUserAgent();
+
+      final uri = Uri.parse('${HttpConfig.baseUrl}topics/timings');
+      final cookies =
+          await client.cookieJar.loadForRequest(uri);
+      final cookieHeader = cookies.isNotEmpty
+          ? cookies.map((c) => '${c.name}=${c.value}').join('; ')
+          : '';
+      l.d('CookieJar Cookies: $cookieHeader');
+
+      // 创建请求
+      final response = await dio.post('${HttpConfig.baseUrl}topics/timings',
+          data: body,
+          options: d.Options(
+            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+            headers: {
+              'Accept': '*/*',
+              'X-CSRF-Token':
+                  StorageManager.getString(AppConst.identifier.csrfToken) ?? '',
+              'X-Requested-With': 'XMLHttpRequest',
+              'path': '/topics/timings',
+              'Referer': '${HttpConfig.baseUrl}t/topic/${topicId.value}',
+              'discourse-background': 'true',
+              'discourse-logged-in': 'true',
+              'discourse-present': 'true',
+              'x-silence-logger': 'true',
+              'User-Agent': userAgent,
+              'origin': HttpConfig.baseUrl,
+              'Accept-Encoding': 'gzip, deflate, br, zstd',
+            },
+          ));
+
+      if (response.statusCode == 200) {
+        l.d('阅读时间更新成功');
+      } else {
+        l.e('更新阅读时间失败: ${response.statusMessage}');
+      }
 
       _lastTrackTime.value = now;
-    } catch (e) {
-      l.e('更新阅读时间失败: $e');
+    } catch (e, s) {
+      l.e('更新阅读时间失败: $e ${s.toString()}');
     }
   }
+
+
+  /// 确保 cf_clearance 有效
+  Future<void> ensureValidClearance(NetClient client) async {
+    final cookies = await client.cookieJar.loadForRequest(
+        Uri.parse(HttpConfig.baseUrl));
+    final clearance = cookies.firstWhere(
+        (c) => c.name == 'cf_clearance', orElse: () => Cookie('cf_clearance', ''));
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  if ((now - int.tryParse(clearance.value.split('-')[1])!) > 3600) {
+
+    l.d('cf_clearance 已过期或不存在');
+    await _cloudflareAuthService.authenticate();
+    
+  } else {
+    l.d('cf_clearance 有效: ${clearance.value}');
+  }
+}
 
   /// 向上加载 获取更早的帖子
   /// 还有问题!!!
@@ -354,9 +418,9 @@ class TopicDetailController extends BaseController
         final postId = currentStream[index];
         if (!loadedPostIds.contains(postId)) {
           previousPostIds.insert(0, postId);
-          l.d('待加载的ID: $postId');
+          //l.d('待加载的ID: $postId');
         } else {
-          l.d('ID已加载过: $postId');
+          //l.d('ID已加载过: $postId');
         }
         index--;
       }
@@ -450,7 +514,7 @@ class TopicDetailController extends BaseController
         if (index >= 0) {
           initialScrollIndex.value = index + 1;
           currentPostIndex.value = index; // 使用实际的索引而不是楼层号减1
-          l.d('设置初始位置 - targetPostNumber: $targetPostNumber, index: $index');
+          // l.d('设置初始位置 - targetPostNumber: $targetPostNumber, index: $index');
         }
       }
 
@@ -502,7 +566,7 @@ class TopicDetailController extends BaseController
       final lastLoadedPostIndex = currentStream.indexOf(lastPost.id ?? 0);
       if (lastLoadedPostIndex == -1) return;
 
-      l.d('当前最后一个帖子ID: ${lastPost.id}, postNumber: ${lastPost.postNumber}');
+      // l.d('当前最后一个帖子ID: ${lastPost.id}, postNumber: ${lastPost.postNumber}');
 
       // 获取后续20个未加载的post ids
       final nextPostIds = <int>[];
@@ -511,7 +575,7 @@ class TopicDetailController extends BaseController
         final postId = currentStream[index];
         if (!loadedPostIds.contains(postId)) {
           nextPostIds.add(postId);
-          l.d('待加载的ID: $postId');
+          // l.d('待加载的ID: $postId');
         }
         index++;
       }
@@ -556,7 +620,7 @@ class TopicDetailController extends BaseController
       // 强制更新UI
       replyTree.refresh();
 
-      l.d('加载完成，当前帖子数: ${topic.value?.postStream?.posts?.length}, 最后一个帖子编号: ${topic.value?.postStream?.posts?.last.postNumber}');
+      // l.d('加载完成，当前帖子数: ${topic.value?.postStream?.posts?.length}, 最后一个帖子编号: ${topic.value?.postStream?.posts?.last.postNumber}');
     } catch (e) {
       l.e('加载更多失败: $e');
     } finally {
@@ -606,7 +670,7 @@ class TopicDetailController extends BaseController
       return PostNode(post, replies.map((reply) => PostNode(reply)).toList());
     }).toList();
 
-    l.d('构建树完成，节点数量: ${replyTree.length}');
+    // ('构建树完成，节点数量: ${replyTree.length}');
   }
 
   // 点赞/取消点赞
@@ -638,7 +702,7 @@ class TopicDetailController extends BaseController
         // postScores[postNumber] = likeAction['count'] ?? 0;
       }
 
-      l.d('点赞状态更新: postNumber=$postNumber, count=${postScores[postNumber]}');
+      // l.d('点赞状态更新: postNumber=$postNumber, count=${postScores[postNumber]}');
     } catch (e, s) {
       l.e('点赞失败: $e -  \n$s');
 
@@ -895,13 +959,13 @@ class TopicDetailController extends BaseController
         final sha1Checksum = _calculateSha1(bytes);
 
         // 创建 FormData
-        final formData = dio.FormData.fromMap({
+        final formData = d.FormData.fromMap({
           'upload_type': 'composer',
           'pasted': false,
           'name': shortFileName,
           'type': 'image/${shortFileName.split('.').last}',
           'sha1_checksum': sha1Checksum,
-          'file': await dio.MultipartFile.fromFile(
+          'file': await d.MultipartFile.fromFile(
             pickedFile.path,
             filename: shortFileName,
           ),
@@ -984,7 +1048,7 @@ class TopicDetailController extends BaseController
         );
       }
 
-      l.d('书签状态更新成功: ${post.id} - ${post.bookmarked}');
+      // l.d('书签状态更新成功: ${post.id} - ${post.bookmarked}');
     } catch (e, s) {
       // 发生错误,恢复原始状态
       bookmarkedPosts[post.postNumber!] = originalBookmarked;
@@ -1136,13 +1200,13 @@ class TopicDetailController extends BaseController
   // 跳转到某个楼层
   Future<void> jumpToPost(int postNumber) async {
     try {
-      l.d('尝试跳转到帖子楼层: $postNumber');
+      // ('尝试跳转到帖子楼层: $postNumber');
       setLoading(true);
-      
+
       // 检查该楼层帖子是否已加载
       final posts = topic.value?.postStream?.posts ?? [];
       final isPostLoaded = posts.any((post) => post.postNumber == postNumber);
-      
+
       if (isPostLoaded) {
         // 如果已加载，直接滚动到该楼层
         await scrollToPost(postNumber);

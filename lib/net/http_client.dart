@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -164,7 +165,7 @@ class NetClient {
         final csrfToken =
             StorageManager.getString(AppConst.identifier.csrfToken);
         if (csrfToken != null && csrfToken.isNotEmpty) {
-          l.d('添加 csrfToken : $csrfToken');
+          //l.d('添加 csrfToken : $csrfToken');
           options.headers['X-CSRF-Token'] = csrfToken;
         }
         return handler.next(options);
@@ -175,8 +176,14 @@ class NetClient {
           final csrfToken = response.headers.value('X-CSRF-Token');
           if (csrfToken != null) {
             StorageManager.setData(AppConst.identifier.csrfToken, csrfToken);
-            l.d('保存 csrfToken : $csrfToken');
+            //l.d('保存 csrfToken : $csrfToken');
           }
+
+            final username = response.headers.value('x-discourse-username');
+            if (username != null && username.isNotEmpty) {
+              StorageManager.setData(AppConst.identifier.username, username);
+            }
+
         } catch (e) {
           l.e('处理响应头错误: $e');
         }
@@ -189,89 +196,77 @@ class NetClient {
     ));
 
     // 添加日志拦截器
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) {
-          final sb = StringBuffer();
-          sb.writeln(
-              '┌─────────────────────────── Request ───────────────────────────');
-          sb.writeln('│ ${options.method} ${options.uri}');
-          sb.writeln('│ Headers:');
-          options.headers.forEach((key, value) {
-            sb.writeln('│   $key: $value');
-          });
-          if (options.data != null) {
-            sb.writeln('│ Body: ${options.data}');
-          }
-          if (options.queryParameters.isNotEmpty) {
-            sb.writeln('│ Query: ${options.queryParameters}');
-          }
-          sb.writeln(
-              '└─────────────────────────────────────────────────────────────────────');
-          l.d(sb.toString());
-          return handler.next(options);
-        },
-        onResponse: (response, handler) {
-          final sb = StringBuffer();
-          sb.writeln(
-              '┌─────────────────────────── Response ───────────────────────────');
-          sb.writeln('│ Status: ${response.statusCode}');
-          sb.writeln('│ Headers:');
-          response.headers.forEach((name, values) {
-            sb.writeln('│   $name: ${values.join(", ")}');
-          });
-          sb.writeln('│ Body: ${response.data}');
-          sb.writeln(
-              '└─────────────────────────────────────────────────────────────────────');
-          l.d(sb.toString());
+    // _dio.interceptors.add(
+    //   InterceptorsWrapper(
+    //     onRequest: (options, handler) {
+    //       final sb = StringBuffer();
+    //       sb.writeln(
+    //           '┌─────────────────────────── Request ───────────────────────────');
+    //       sb.writeln('│ ${options.method} ${options.uri}');
+    //       sb.writeln('│ Headers:');
+    //       options.headers.forEach((key, value) {
+    //         sb.writeln('│   $key: $value');
+    //       });
+    //       if (options.data != null) {
+    //         sb.writeln('│ Body: ${options.data}');
+    //       }
+    //       if (options.queryParameters.isNotEmpty) {
+    //         sb.writeln('│ Query: ${options.queryParameters}');
+    //       }
+    //       sb.writeln(
+    //           '└─────────────────────────────────────────────────────────────────────');
+    //       l.d(sb.toString());
+    //       return handler.next(options);
+    //     },
+    //     onResponse: (response, handler) {
+    //       final sb = StringBuffer();
+    //       sb.writeln(
+    //           '┌─────────────────────────── Response ───────────────────────────');
+    //       sb.writeln('│ Status: ${response.statusCode}');
+    //       sb.writeln('│ Headers:');
+    //       response.headers.forEach((name, values) {
+    //         sb.writeln('│   $name: ${values.join(", ")}');
+    //       });
+    //       sb.writeln('│ Body: ${response.data}');
+    //       sb.writeln(
+    //           '└─────────────────────────────────────────────────────────────────────');
+    //       l.d(sb.toString());
 
-          // 获取并存储用户名
-          String linuxDoUser =
-              StorageManager.getString(AppConst.identifier.username) ?? '';
-
-          if (linuxDoUser.isNotEmpty) {
-            return handler.next(response);
-          }
-
-          final username = response.headers.value('x-discourse-username');
-          if (username != null && username.isNotEmpty) {
-            StorageManager.setData(AppConst.identifier.username, username);
-          }
-          return handler.next(response);
-        },
-        onError: (error, handler) {
-          final sb = StringBuffer();
-          sb.writeln(
-              '┌─────────────────────────── Request Error ───────────────────────────');
-          sb.writeln(
-              '│ 请求类型: ${error.requestOptions.method} URL: ${error.requestOptions.uri}');
-          sb.writeln('│ Headers:');
-          error.requestOptions.headers.forEach((key, value) {
-            sb.writeln('│   $key: $value');
-          });
-          if (error.requestOptions.data != null) {
-            sb.writeln('│ 请求 Data: ${error.requestOptions.data}');
-          }
-          sb.writeln('│ 响应 Code: ${error.response?.statusCode}');
-          if (error.response?.headers != null) {
-            sb.writeln('│ 响应 Headers:');
-            error.response!.headers.forEach((name, values) {
-              sb.writeln('│   $name: ${values.join(", ")}');
-            });
-          }
-          if (error.response?.data != null) {
-            sb.writeln('│ 响应 Data: ${error.response?.data}');
-          }
-          if (error.message != null) {
-            sb.writeln('│ Error: ${error.message}');
-          }
-          sb.writeln(
-              '└─────────────────────────────────────────────────────────────────────');
-          l.e(sb.toString());
-          return handler.next(error);
-        },
-      ),
-    );
+    //       return handler.next(response);
+    //     },
+    //     onError: (error, handler) {
+    //       final sb = StringBuffer();
+    //       sb.writeln(
+    //           '┌─────────────────────────── Request Error ───────────────────────────');
+    //       sb.writeln(
+    //           '│ 请求类型: ${error.requestOptions.method} URL: ${error.requestOptions.uri}');
+    //       sb.writeln('│ Headers:');
+    //       error.requestOptions.headers.forEach((key, value) {
+    //         sb.writeln('│   $key: $value');
+    //       });
+    //       if (error.requestOptions.data != null) {
+    //         sb.writeln('│ 请求 Data: ${error.requestOptions.data}');
+    //       }
+    //       sb.writeln('│ 响应 Code: ${error.response?.statusCode}');
+    //       if (error.response?.headers != null) {
+    //         sb.writeln('│ 响应 Headers:');
+    //         error.response!.headers.forEach((name, values) {
+    //           sb.writeln('│   $name: ${values.join(", ")}');
+    //         });
+    //       }
+    //       if (error.response?.data != null) {
+    //         sb.writeln('│ 响应 Data: ${error.response?.data}');
+    //       }
+    //       if (error.message != null) {
+    //         sb.writeln('│ Error: ${error.message}');
+    //       }
+    //       sb.writeln(
+    //           '└─────────────────────────────────────────────────────────────────────');
+    //       l.e(sb.toString());
+    //       return handler.next(error);
+    //     },
+    //   ),
+    // );
   }
 
   Future<void> _handleCookies(Response response) async {
@@ -394,7 +389,7 @@ class NetClient {
       default:
         message = HttpConfig.networkErrorMessage;
     }
-    Get.snackbar('错误', message);
+    Fluttertoast.showToast(msg: message);
   }
 
   /// GET请求
@@ -598,5 +593,4 @@ class NetClient {
       l.d('cf_clearance 有效: ${clearance.value}');
     }
   }
-  
 }

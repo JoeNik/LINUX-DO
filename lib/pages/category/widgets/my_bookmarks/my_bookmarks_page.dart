@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/pages/topics/tab_views/topic_item/topic_item.dart';
+import 'package:linux_do/widgets/avatar_widget.dart';
 import '../../../../widgets/dis_refresh.dart';
 import '../../../../widgets/state_view.dart';
 import 'my_bookmarks_controller.dart';
@@ -52,6 +53,7 @@ class _MyBookmarksPageState extends State<MyBookmarksPage>
                       onDoNotDisturb: (topic) {
                         controller.doNotDisturb(topic.id);
                       },
+                      avatarActions: AvatarActions.openCard,
                     );
                   },
                   childCount: controller.topics.length,

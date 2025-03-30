@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:linux_do/controller/global_controller.dart';
+import 'package:linux_do/pages/topics/details/widgets/more_menu.dart';
+import 'package:linux_do/pages/topics/details/widgets/post_content_action.dart';
 import 'package:linux_do/pages/topics/details/widgets/post_reply.dart';
 import 'package:linux_do/pages/topics/details/widgets/replay_list.dart';
+import 'package:linux_do/utils/expand/num_expand.dart';
 import 'package:linux_do/utils/mixins/toast_mixin.dart';
 import 'package:linux_do/widgets/dis_button.dart';
-import 'package:linux_do/widgets/dis_popup.dart';
 import 'package:linux_do/widgets/owner_banner.dart';
 import 'package:linux_do/widgets/state_view.dart';
 import '../../../const/app_const.dart';
@@ -105,249 +108,26 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
       ),
       title: _buildHeader(context),
       actions: [
-        _buildMoreButton(context),
-        IconButton(
-          icon: Obx(() => Icon(
-                controller.isFooderVisible.value
-                    ? CupertinoIcons.chevron_up_circle
-                    : CupertinoIcons.chevron_down_circle,
-              )),
-          onPressed: () {
-            controller.isFooderVisible.toggle();
-          },
-        )
+        Get.find<GlobalController>().isAnonymousMode
+            ? const SizedBox.shrink()
+            : MoreMenu(controller: controller),
+        Get.find<GlobalController>().isAnonymousMode
+            ? const SizedBox.shrink()
+            : IconButton(
+                icon: Obx(() => Icon(
+                      controller.isFooderVisible.value
+                          ? CupertinoIcons.chevron_up_circle
+                          : CupertinoIcons.chevron_down_circle,
+                    )),
+                onPressed: () {
+                  controller.isFooderVisible.toggle();
+                },
+              )
       ],
     );
   }
 
-  CustomPopup _buildMoreButton(BuildContext context) {
-    return CustomPopup(
-      backgroundColor: Theme.of(context).cardColor,
-      arrowColor: Theme.of(context).cardColor,
-      contentPadding: const EdgeInsets.all(14).w,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
-            onTap: () => controller.handleOpenInBrowser(),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(CupertinoIcons.globe,
-                    size: 16.w,
-                    color: Theme.of(context).textTheme.bodyLarge?.color),
-                2.hGap,
-                Text(
-                  '浏览器打开',
-                  style: TextStyle(
-                    fontSize: 14.w,
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          8.vGap,
-          GestureDetector(
-              onTap: () => _showCategoryDialog(context),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(CupertinoIcons.star_circle,
-                      size: 16.w,
-                      color: Theme.of(context).textTheme.bodyLarge?.color),
-                  2.hGap,
-                  Text(
-                    '本地收藏',
-                    style: TextStyle(
-                      fontSize: 14.w,
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                  ),
-                ],
-              ))
-        ],
-      ),
-      child: const Icon(CupertinoIcons.ellipsis_circle),
-    );
-  }
-
-  void _showCategoryDialog(BuildContext context) {
-    Get.bottomSheet(
-      isScrollControlled: true,
-      Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16).w,
-            topRight: const Radius.circular(16).w,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              spreadRadius: 1,
-            ),
-          ],
-        ),
-        constraints: BoxConstraints(
-          maxHeight: Get.height * 0.7,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 顶部把手和标题
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12).w,
-              child: Column(
-                children: [
-                  Container(
-                    width: 40.w,
-                    height: 4.w,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).dividerColor,
-                      borderRadius: BorderRadius.circular(4.w),
-                    ),
-                  ),
-                  16.vGap,
-                  Text(
-                    '选择分类',
-                    style: TextStyle(
-                      fontSize: 18.w,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.titleLarge?.color,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const Divider(height: 1),
-
-            // 分类列表
-            Flexible(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16).w,
-                child: Wrap(
-                  spacing: 12.w,
-                  runSpacing: 16.w,
-                  children: AppConst.bookmarkCategories.map((category) {
-                    final hue = (category.hashCode % 12) * 30.0;
-                    final color =
-                        HSLColor.fromAHSL(1.0, hue, 0.6, 0.8).toColor();
-                    final iconData = _getCategoryIcon(category);
-
-                    return Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () async {
-                          Get.back(result: category);
-                          bool isSuccess =
-                              await controller.bookmarkTopic(category);
-                          if (isSuccess) {
-                            showSuccess('收藏成功');
-                          }
-                        },
-                        borderRadius: BorderRadius.circular(12).w,
-                        child: Container(
-                          width: (Get.width - 56.w) / 3,
-                          padding: const EdgeInsets.symmetric(vertical: 16).w,
-                          decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(12.w),
-                            border: Border.all(
-                              color: color.withValues(alpha: 0.3),
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                iconData,
-                                size: 28.w,
-                                color: color,
-                              ),
-                              8.vGap,
-                              Text(
-                                category,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 12.w,
-                                  fontWeight: FontWeight.w500,
-                                  color: Theme.of(context)
-                                      .textTheme
-                                      .bodyLarge
-                                      ?.color,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-
-            // 底部取消按钮
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16).w,
-              child: DisButton(
-                text: '取消',
-                type: ButtonType.outline,
-                onPressed: () => Get.back(),
-              ),
-            ),
-            12.vGap
-          ],
-        ),
-      ),
-      enterBottomSheetDuration: 300.milliseconds,
-      exitBottomSheetDuration: 200.milliseconds,
-    );
-  }
-
-  // 根据分类名获取对应的图标
-  IconData _getCategoryIcon(String category) {
-    switch (category) {
-      case '开发调优':
-        return CupertinoIcons.wand_rays;
-      case '文档共建':
-        return CupertinoIcons.doc_text;
-      case '非我莫属':
-        return CupertinoIcons.person_2;
-      case '扬帆起航':
-        return CupertinoIcons.paperplane_fill;
-      case '福利羊毛':
-        return CupertinoIcons.gift;
-      case '运营反馈':
-        return CupertinoIcons.chat_bubble_2;
-      case '资源荟萃':
-        return CupertinoIcons.rectangle_stack;
-      case '跳蚤市场':
-        return CupertinoIcons.cart;
-      case '读书成诗':
-        return CupertinoIcons.book;
-      case '前沿快讯':
-        return CupertinoIcons.news;
-      case '搞七捻三':
-        return CupertinoIcons.lightbulb;
-      case '深海幽域':
-        return CupertinoIcons.moon_stars;
-      default:
-        return CupertinoIcons.tag;
-    }
-  }
+  
 
   Widget _buildHeader(BuildContext context) {
     return PageHeader(controller: controller);
@@ -359,6 +139,7 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
         Positioned.fill(
           bottom: controller.isReplying.value ? 380.w : 0,
           child: Obx(() => ScrollablePositionedList.builder(
+                padding: const EdgeInsets.only(bottom: 20).w,
                 key: PageStorageKey('topic_detail_${topic.id}'),
                 itemScrollController: controller.itemScrollController,
                 itemPositionsListener: controller.itemPositionsListener,
@@ -403,7 +184,7 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
               )),
         ),
         AnimatedPositioned(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 500),
           top: controller.isFooderVisible.value ? 0.w : -200.w,
           left: 0,
           right: 0,
@@ -453,35 +234,7 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                       top: isReply ? 24.w : 12.w,
                       bottom: 12.w,
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        6.vGap,
-                        PostHeader(
-                            post: node.post,
-                            title: controller.topic.value?.title),
-                        2.vGap,
-                        PostContent(
-                            post: node.post,
-                            isReply: isReply,
-                            controller: controller),
-                        Divider(
-                          height: 1.h,
-                          color: Theme.of(context).dividerColor,
-                        ),
-                        12.vGap,
-
-                        if (node.post.replyCount != null &&
-                            node.post.replyCount! > 0) ...[
-                          
-                          ReplayList(controller: controller, post: node.post),
-                          12.vGap,
-                        ],
-
-                        PostFooter(post: node.post, controller: controller),
-                        
-                      ],
-                    ),
+                    child: buildPostContent(node.post, controller, context),
                   ),
                   Positioned(
                     top: 0,
@@ -526,7 +279,7 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                           ),
                         )
                       : const SizedBox(),
-                  node.post.isForumMaster(controller.topic.value?.userId ?? 0)
+                  node.post.isForumMaster(controller.topic.value?.userId ?? 0) && node.post.postType == 1
                       ? Positioned(
                           bottom: 14.w,
                           right: 14.w,
@@ -571,90 +324,181 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
           bottomRight: const Radius.circular(12).w,
         ),
       ),
-      child: Row(
+      child: Column(
         children: [
-          CachedImage(
-            imageUrl: createUser?.getAvatarUrl(),
-            width: 25.w,
-            height: 25.w,
-            circle: !(createUser?.isWebMaster() ?? false),
-            borderRadius: BorderRadius.circular(4).w,
-            placeholder: CircularProgressIndicator(
-              color: Theme.of(context).primaryColor,
-            ),
-            errorWidget: Icon(
-              Icons.account_circle,
-              size: 25.w,
-              color: theme.iconTheme.color?.withValues(alpha: 0.5),
+          Text(
+            topic.title ?? '',
+            style: theme.textTheme.titleMedium
+                ?.copyWith(fontSize: 10.sp, fontFamily: AppFontFamily.dinPro),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6, top: 4).w,
+            child: Divider(
+              height: 1.h,
+              color: theme.dividerColor,
             ),
           ),
-          4.hGap,
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  createUser?.name?.isEmpty ?? true
-                      ? createUser?.username ?? ''
-                      : createUser?.name ?? '',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: 10.sp,
-                      color: createUser?.isWebMaster() ?? false
-                          ? Theme.of(context).primaryColor
-                          : theme.textTheme.bodyMedium?.color,
-                      fontWeight: createUser?.isWebMaster() ?? false
-                          ? FontWeight.bold
-                          : FontWeight.normal),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+          Row(
+            children: [
+              CachedImage(
+                imageUrl: createUser?.getAvatarUrl(),
+                width: 25.w,
+                height: 25.w,
+                circle: !(createUser?.isWebMaster() ?? false),
+                borderRadius: BorderRadius.circular(4).w,
+                placeholder: CircularProgressIndicator(
+                  color: Theme.of(context).primaryColor,
                 ),
-                Row(
+                errorWidget: Icon(
+                  Icons.account_circle,
+                  size: 25.w,
+                  color: theme.iconTheme.color?.withValues(alpha: 0.5),
+                ),
+              ),
+              4.hGap,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (topic.postsCount != null) ...[
-                      Icon(
-                        Icons.article_outlined,
-                        size: 12.sp,
-                        color: Theme.of(context).hintColor,
-                      ),
-                      2.hGap,
-                      Text(
-                        '${topic.postsCount}',
-                        style: TextStyle(
+                    Text(
+                      createUser?.name?.isEmpty ?? true
+                          ? createUser?.username ?? ''
+                          : createUser?.name ?? '',
+                      style: theme.textTheme.bodyMedium?.copyWith(
                           fontSize: 10.sp,
-                          color: Theme.of(context).hintColor,
-                        ),
-                      ),
-                      8.hGap,
-                    ],
-                    if (topic.participantsCount != null) ...[
-                      Icon(
-                        Icons.remove_red_eye_outlined,
-                        size: 12.sp,
-                        color: Theme.of(context).hintColor,
-                      ),
-                      2.hGap,
-                      Text(
-                        '${topic.participantsCount}',
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          color: Theme.of(context).hintColor,
-                        ),
-                      ),
-                    ],
+                          fontFamily: AppFontFamily.dinPro,
+                          color: createUser?.isWebMaster() ?? false
+                              ? Theme.of(context).primaryColor
+                              : theme.textTheme.bodyMedium?.color,
+                          fontWeight: createUser?.isWebMaster() ?? false
+                              ? FontWeight.bold
+                              : FontWeight.normal),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Row(
+                      children: [
+                        if (topic.views != null) ...[
+                          Text(
+                            '${AppConst.posts.views}:',
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: Theme.of(context).hintColor,
+                            ),
+                          ),
+                          2.hGap,
+                          GestureDetector(
+                            onTap: () {
+                              //TODO 显示统计数据 后续添加
+                            },
+                            child: Text(
+                              '${topic.views?.toThousandsUnit()}',
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                color: Theme.of(context).primaryColor,
+                                fontFamily: AppFontFamily.dinPro,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                          ),
+                          8.hGap,
+                        ],
+                        if (topic.likeCount != null) ...[
+                          Text(
+                            '${AppConst.posts.likeCount}:',
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: Theme.of(context).hintColor,
+                            ),
+                          ),
+                          2.hGap,
+                          GestureDetector(
+                            onTap: () {
+                              //TODO 显示点赞数据统计,如 : Heart  +1 Clap 后续添加
+                            },
+                            child: Text(
+                              '${topic.likeCount}',
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                color: Theme.of(context).primaryColor,
+                                fontFamily: AppFontFamily.dinPro,
+                                fontWeight: FontWeight.w500,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              SizedBox(
+                height: 28.w,
+                child: DisButton(
+                  text: AppConst.posts.reply,
+                  fontSize: 12.w,
+                  onPressed: () {
+                    controller.startReply(
+                        null, topic.title, topic.details?.createdBy?.username);
+                  },
+                ),
+              )
+            ],
           ),
-          SizedBox(
-            child: IconButton(
-              onPressed: () {
-                controller.startReply(
-                    null, topic.title, topic.details?.createdBy?.username);
-              },
-              icon: Icon(CupertinoIcons.reply_thick_solid, size: 18.w),
+          if (topic.details?.links?.isNotEmpty ?? false) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6, top: 4).w,
+              child: Divider(
+                height: 1.h,
+                color: theme.dividerColor,
+              ),
             ),
-          )
+            SizedBox(
+              height:
+                  calculateLinkListHeight(topic.details?.links?.length ?? 0),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: topic.details?.links?.length ?? 0,
+                itemBuilder: (context, index) {
+                  final link = topic.details?.links?[index];
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4.h),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.link_rounded,
+                          size: 14.sp,
+                          color: theme.hintColor,
+                        ),
+                        4.hGap,
+                        Expanded(
+                          child: Text(
+                            link?.title ?? link?.url ?? '',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                                fontSize: 10.sp,
+                                fontFamily: AppFontFamily.dinPro),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        8.hGap,
+                        Text(
+                          link?.clicks?.toString() ?? '',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                              fontSize: 10.sp,
+                              fontFamily: AppFontFamily.dinPro),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -975,5 +819,52 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
         ],
       ),
     );
+  }
+
+  // 计算链接列表的高度，基于条目数量
+  double calculateLinkListHeight(int linkCount) {
+    if (linkCount == 0) return 0;
+    final double itemHeight = 20.w;
+    final calculatedHeight = linkCount * itemHeight;
+    final double minHeight = 16.w;
+    final double maxHeight = 100.w;
+
+    return calculatedHeight.clamp(minHeight, maxHeight);
+  }
+
+  // 根据Post_type 分别展示不同的楼层内容
+  Widget buildPostContent(
+      Post post, TopicDetailController controller, BuildContext context) {
+    /**
+     *  1：普通帖子（Regular Post）
+        2：版主操作帖子（Moderator Post）
+        3：小动作通知（Small Action Post）
+        4：私密帖子（Whisper Post）
+        5：系统消息（System Message）
+     */
+    switch (post.postType) {
+      case 3:
+        return PostContentAction(post: post, controller: controller, title: controller.topic.value?.title);
+      default:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            6.vGap,
+            PostHeader(post: post, title: controller.topic.value?.title),
+            2.vGap,
+            PostContent(post: post, isReply: false, controller: controller),
+            Divider(
+              height: 1.h,
+              color: Theme.of(context).dividerColor,
+            ),
+            12.vGap,
+            if (post.replyCount != null && post.replyCount! > 0) ...[
+              ReplayList(controller: controller, post: post),
+              12.vGap,
+            ],
+            PostFooter(post: post, controller: controller),
+          ],
+        );
+    }
   }
 }

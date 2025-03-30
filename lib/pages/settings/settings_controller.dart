@@ -91,11 +91,17 @@ class SettingsController extends BaseController {
     StorageManager.setData(AppConst.identifier.theme, themeValue);
   }
 
+
   Future<void> logout() async {
     await WebPage.clearCache();
     await NetClient.getInstance().clearCookies();
     await StorageManager.remove(AppConst.identifier.csrfToken);
+    await StorageManager.remove(AppConst.identifier.token);
+    await StorageManager.remove(AppConst.identifier.cfClearance);
+    await StorageManager.remove(AppConst.identifier.username);
+    await StorageManager.remove(AppConst.identifier.name);
     Get.find<GlobalController>().setIsLogin(false);
+    Get.find<GlobalController>().setIsAnonymousMode(false);
     Get.offAllNamed(Routes.LOGIN);
   }
 

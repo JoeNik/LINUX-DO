@@ -347,76 +347,93 @@ class LoginPage extends GetView<LoginController> {
                     const Spacer(),
                     // 底部协议
                     Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Column(
                         children: [
-                          Obx(() => GestureDetector(
-                            onTap: () => controller.isAgreementChecked.value = !controller.isAgreementChecked.value,
-                            child: Container(
-                              width: 16.w,
-                              height: 16.w,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: controller.isAgreementChecked.value
-                                      ? theme.primaryColor
-                                      : theme.hintColor.withValues(alpha: 0.3),
-                                  width: 1.5,
-                                ),
-                                borderRadius: BorderRadius.circular(3.w),
-                                color: controller.isAgreementChecked.value
-                                  ? theme.primaryColor 
-                                  : Colors.transparent,
-                              ),
-                              child: controller.isAgreementChecked.value
-                                ? Icon(
-                                    CupertinoIcons.checkmark,
-                                    size: 12.w,
-                                    color: Colors.white,
-                                  )
-                                : null,
-                            ),
-                          )),
-                          4.hGap,
-                          Flexible(
-                            child: Text.rich(
-                              TextSpan(
-                                text: AppConst.login.agreement,
+                          GestureDetector(
+                            onTap: () => controller.toHome(),
+                            child: Padding(
+                              padding: const EdgeInsets.all(6.0),
+                              child: Text(
+                                AppConst.login.anonymousMode,
                                 style: TextStyle(
                                   fontSize: 12.sp,
-                                  color: theme.hintColor,
+                                  color: theme.primaryColor,
                                 ),
-                                children: [
-                                  TextSpan(
-                                    text: AppConst.login.serviceAgreement,
-                                    style: TextStyle(
-                                      color: theme.primaryColor,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () => showAgreementDialog(
-                                            context,
-                                            AppConst.login.serviceAgreement,
-                                            AppConst.terms,
-                                          ),
-                                  ),
-                                  TextSpan(text: ' ${AppConst.login.and} '),
-                                  TextSpan(
-                                    text: AppConst.login.privacyPolicy,
-                                    style: TextStyle(
-                                      color: theme.primaryColor,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () => showAgreementDialog(
-                                            context,
-                                            AppConst.login.privacyPolicy,
-                                            AppConst.privacy,
-                                          ),
-                                  ),
-                                ],
                               ),
-                              textAlign: TextAlign.center,
                             ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Obx(() => GestureDetector(
+                                onTap: () => controller.isAgreementChecked.value = !controller.isAgreementChecked.value,
+                                child: Container(
+                                  width: 16.w,
+                                  height: 16.w,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: controller.isAgreementChecked.value
+                                          ? theme.primaryColor
+                                          : theme.hintColor.withValues(alpha: 0.3),
+                                      width: 1.5,
+                                    ),
+                                    borderRadius: BorderRadius.circular(3.w),
+                                    color: controller.isAgreementChecked.value
+                                      ? theme.primaryColor 
+                                      : Colors.transparent,
+                                  ),
+                                  child: controller.isAgreementChecked.value
+                                    ? Icon(
+                                        CupertinoIcons.checkmark,
+                                        size: 12.w,
+                                        color: Colors.white,
+                                      )
+                                    : null,
+                                ),
+                              )),
+                              4.hGap,
+                              Flexible(
+                                child: Text.rich(
+                                  TextSpan(
+                                    text: AppConst.login.agreement,
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      color: theme.hintColor,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: AppConst.login.serviceAgreement,
+                                        style: TextStyle(
+                                          color: theme.primaryColor,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () => showAgreementDialog(
+                                                context,
+                                                AppConst.login.serviceAgreement,
+                                                AppConst.terms,
+                                              ),
+                                      ),
+                                      TextSpan(text: ' ${AppConst.login.and} '),
+                                      TextSpan(
+                                        text: AppConst.login.privacyPolicy,
+                                        style: TextStyle(
+                                          color: theme.primaryColor,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () => showAgreementDialog(
+                                                context,
+                                                AppConst.login.privacyPolicy,
+                                                AppConst.privacy,
+                                              ),
+                                      ),
+                                    ],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

@@ -23,4 +23,13 @@ extension NumExpand on num {
     
     return result;
   }
+
+  // 数字转千分位
+  String toThousandsUnit() {
+    if (this >= 1000) {
+      double value = this / 1000;
+      return '${value.toStringAsFixed(1)}k';
+    }
+    return toString();
+  }
 } 

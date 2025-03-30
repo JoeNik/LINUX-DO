@@ -80,8 +80,9 @@ class DisRefreshController extends GetxController
 class DisRefreshLoading extends StatelessWidget {
   final controller = Get.put(DisRefreshController());
   final double? fontSize;
+  final double? opacity;
 
-  DisRefreshLoading({super.key, this.fontSize = 16.0});
+  DisRefreshLoading({super.key, this.fontSize = 16.0, this.opacity = 1});
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +104,7 @@ class DisRefreshLoading extends StatelessWidget {
           offset: controller.getCharOffset(index),
           color: Theme.of(context).primaryColor,
           fontSize: fontSize,
+          opacity: opacity,
         );
       }),
     );
@@ -114,12 +116,14 @@ class _DisBouncingChar extends StatelessWidget {
   final double offset;
   final Color color;
   final double? fontSize;
+  final double? opacity;
 
   const _DisBouncingChar(
       {required this.char,
       required this.offset,
       required this.color,
-      this.fontSize = 16.0});
+      this.fontSize = 16.0,
+      this.opacity = 1});
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +133,7 @@ class _DisBouncingChar extends StatelessWidget {
         char,
         style: TextStyle(
           fontSize: fontSize?.w,
-          color: color,
+          color: color.withValues(alpha: opacity),
           fontFamily: AppFontFamily.dinPro,
           fontWeight: FontWeight.bold,
         ),

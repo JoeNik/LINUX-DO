@@ -12,7 +12,7 @@ import 'package:linux_do/widgets/avatar_widget.dart';
 import 'package:linux_do/widgets/cached_image.dart';
 import 'package:linux_do/widgets/dis_button.dart';
 import 'package:linux_do/widgets/dis_refresh.dart';
-import 'package:linux_do/widgets/html_widget.dart';
+import 'package:linux_do/widgets/html/html_widget.dart';
 import 'package:linux_do/widgets/state_view.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:slide_switcher/slide_switcher.dart';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/pages/category/widgets/my_posts/my_posts_controller.dart';
 import 'package:linux_do/pages/topics/tab_views/topic_item/topic_item.dart';
+import 'package:linux_do/widgets/avatar_widget.dart';
 
 import '../../../../widgets/dis_refresh.dart';
 import '../../../../widgets/state_view.dart';
@@ -56,6 +57,7 @@ class _MyPostsPageState extends State<MyPostsPage>
                       onDelete: (topic) {
                         controller.deleteTopic(topic.id);
                       },
+                      avatarActions: AvatarActions.openCard,
                     );
                   },
                   childCount: controller.topics.length,

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:linux_do/models/topic_model.dart';
+import 'package:linux_do/pages/settings/font_size_controller.dart';
 import 'package:linux_do/pages/topics/tab_views/topic_item/topic_excerpt.dart';
 import 'package:linux_do/pages/topics/tab_views/topic_item/topic_footer.dart';
 import 'package:linux_do/pages/topics/tab_views/topic_item/topic_header.dart';
@@ -30,6 +33,17 @@ class TopicContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 获取布局密度设置
+    final fontSizeController = Get.find<FontSizeController>();
+    final density = fontSizeController.listDensity.value;
+    
+    // 根据密度设置不同的间距
+    final spacing = density == ListDensity.compact
+        ? 2.0
+        : density == ListDensity.normal
+            ? 4.0
+            : 8.0;
+
     return Stack(
       children: [
         Row(
@@ -45,6 +59,9 @@ class TopicContent extends StatelessWidget {
               toPersonalPage: toPersonalPage,
             ),
             
+            // 间距
+            SizedBox(width: spacing.w),
+            
             // 主要内容区域
             Expanded(
               child: Column(
@@ -54,20 +71,44 @@ class TopicContent extends StatelessWidget {
                   TopicHeader(
                     title: topic.title ?? '',
                     isPinned: topic.pinned ?? false,
+                    density: density,
                   ),
                   
-                  // 摘要
-                  if (topic.excerpt != null && topic.excerpt!.isNotEmpty)
-                    TopicExcerpt(excerpt: topic.excerpt!),
+                  // 标题和摘要之间的间距
+                  SizedBox(height: (spacing / 2).w),
                   
-                  // 标签
+                  // 摘要与标签
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 话题摘要
+                      // if (topic.excerpt != null && topic.excerpt!.isNotEmpty)
+                      //   TopicExcerpt(
+                      //     excerpt: topic.excerpt!,
+                      //     density: density,
+                      //   ),
+
+                      // 话题标签
+                      if (topic.tags != null && topic.tags!.isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.only(top: (spacing / 2).w),
+                          child: TopicTags(
+                            tags: topic.tags!,
+                            density: density,
+                          ),
+                        ),
+                    ],
+                  ),
+                  
+                  // 标签和底部信息之间的间距
                   if (topic.tags != null && topic.tags!.isNotEmpty)
-                    TopicTags(tags: topic.tags!),
+                    SizedBox(height: (spacing / 2).w),
                   
                   // 底部信息
                   TopicFooter(
                     topic: topic,
                     avatarUrls: avatarUrls ?? [],
+                    density: density,
                   ),
                 ],
               ),

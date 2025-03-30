@@ -2779,6 +2779,98 @@ class _ApiService implements ApiService {
     return _value;
   }
 
+  @override
+  Future<PollVote> submitVote(
+    String pollName,
+    List<String> options, {
+    int? postId,
+    String contentType = "application/x-www-form-urlencoded",
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{r'content-type': contentType};
+    _headers.removeWhere((k, v) => v == null);
+    final _data = {
+      'poll_name': pollName,
+      'options[]': options,
+      'post_id': postId,
+    };
+    _data.removeWhere((k, v) => v == null);
+    final _options = _setStreamType<PollVote>(Options(
+      method: 'PUT',
+      headers: _headers,
+      extra: _extra,
+      contentType: contentType,
+    )
+        .compose(
+          _dio.options,
+          'polls/vote',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late PollVote _value;
+    try {
+      _value = PollVote.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<PollVotersResponse> getPollVoters({
+    int? postId,
+    String? pollName,
+    int? page,
+    int? limit,
+    String? optionId,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'post_id': postId,
+      r'poll_name': pollName,
+      r'page': page,
+      r'limit': limit,
+      r'option_id': optionId,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<PollVotersResponse>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          'polls/voters.json',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late PollVotersResponse _value;
+    try {
+      _value = PollVotersResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {
     if (T != dynamic &&
         !(requestOptions.responseType == ResponseType.bytes ||

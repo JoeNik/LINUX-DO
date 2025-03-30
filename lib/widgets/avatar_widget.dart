@@ -17,7 +17,7 @@ import 'package:linux_do/utils/expand/datetime_expand.dart';
 import 'package:linux_do/widgets/cached_image.dart';
 import 'package:linux_do/widgets/dis_button.dart';
 import 'package:linux_do/widgets/dis_loading.dart';
-import 'package:linux_do/widgets/html_widget.dart';
+import 'package:linux_do/widgets/html/html_widget.dart';
 import 'package:dio/dio.dart' as dio;
 
 import '../const/app_colors.dart';
@@ -70,20 +70,22 @@ class AvatarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Get.dialog(
-          Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12).w,
+        if (avatarActions == AvatarActions.openCard) {
+          Get.dialog(
+            Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12).w,
+              ),
+              child: UserInfoCard(
+                username: username,
+                post: post,
+                title: title,
+                toPersonalPage: toPersonalPage ?? true,
+              ),
             ),
-            child: UserInfoCard(
-              username: username,
-              post: post,
-              title: title,
-              toPersonalPage: toPersonalPage ?? true,
-            ),
-          ),
-          barrierColor: Colors.black.withValues(alpha: 0.5),
-        );
+            barrierColor: Colors.black.withValues(alpha: 0.5),
+          );
+        }
       },
       child: CachedImage(
           imageUrl: avatarUrl,
@@ -114,10 +116,11 @@ class UserInfoCard extends GetView<UserInfoCardController> {
   Widget build(BuildContext context) {
     // 初始化controller
     Get.put(UserInfoCardController(username: username));
-
+    final globalController = Get.find<GlobalController>();
     return Container(
-      width: 380.w,
-      constraints: BoxConstraints(maxHeight: 450.w),
+      width: globalController.isAnonymousMode ? 300.w : 380.w,
+      constraints: BoxConstraints(
+          maxHeight: globalController.isAnonymousMode ? 380.w : 450.w),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.w),
@@ -149,7 +152,22 @@ class UserInfoCard extends GetView<UserInfoCardController> {
                     _buildBadges(context),
 
                     // 底部按钮
-                    _buildActions(context),
+                    globalController.isAnonymousMode
+                        ? Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                            child: Text(
+                                '尊贵的游客,该功能需要登录 🤨',
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.color,
+                                    fontSize: 10.w),
+                              ),
+                          ),
+                        )
+                        : _buildActions(context),
                   ],
                 ),
 

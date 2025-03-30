@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/models/topic_detail.dart';
-import 'package:linux_do/widgets/html_widget.dart';
+import 'package:linux_do/widgets/html/html_widget.dart';
 
 import '../topic_detail_controller.dart';
 
@@ -26,25 +26,24 @@ class PostContent extends StatelessWidget {
     if (post.cooked == null) {
       return const SizedBox();
     }
-    
+
     return RepaintBoundary(
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(2).w,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // if (isReply)
-                //   _ReplyQuote(post: node.post),
-                _PostBody(post: post,isReply: isReply, controller: controller),
-              ],
-            ),
+        child: Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(2).w,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // if (isReply)
+              //   _ReplyQuote(post: node.post),
+              _PostBody(post: post, isReply: isReply, controller: controller),
+            ],
           ),
-        ],
-      )
-    );
+        ),
+      ],
+    ));
   }
 }
 
@@ -61,10 +60,8 @@ class _ReplyQuote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
-    
     return Container(
-      margin: const EdgeInsets.only(bottom: 8,top: 4).w,
+      margin: const EdgeInsets.only(bottom: 8, top: 4).w,
       padding: const EdgeInsets.all(4).w,
       decoration: BoxDecoration(
         color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
@@ -102,15 +99,15 @@ class _ReplyQuote extends StatelessWidget {
                       if (posts == null || posts.isEmpty) {
                         return '(加载中...)';
                       }
-                      
+
                       final replyToPost = posts.firstWhereOrNull(
                         (p) => p.postNumber == post.replyToPostNumber,
                       );
-                      
+
                       if (replyToPost == null) {
                         return '(加载中...)';
                       }
-                      
+
                       return '(${replyToPost.name?.isNotEmpty == true ? replyToPost.name : replyToPost.username ?? "未知用户"})';
                     }(),
                     style: TextStyle(
@@ -136,7 +133,7 @@ class _ReplyQuote extends StatelessWidget {
 
 /// 帖子主体内容组件
 class _PostBody extends StatelessWidget {
-  _PostBody({
+  const _PostBody({
     required this.post,
     this.isReply = false,
     required this.controller,
@@ -148,13 +145,20 @@ class _PostBody extends StatelessWidget {
   final TopicDetailController controller;
   @override
   Widget build(BuildContext context) {
+    if (post.polls != null && post.polls!.isNotEmpty) {
+      final poll = post.polls?.first;
+      poll?.vote = post.polls_votes?.poll ?? [];
+      poll?.postId = post.id;
+      Get.put(PollController(poll!), tag: 'poll_${post.polls!.first.id}');
+    }
     return HtmlWidget(
       html: post.cooked ?? '',
       fontSize: isReply ? controller.replyFontSize : controller.fontSize,
       onLinkTap: (url) {
         controller.launchUrl(url);
       },
+      polls: post.polls,
       topicDetailController: controller,
     );
   }
-} 
+}

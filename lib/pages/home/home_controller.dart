@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_spacing.dart';
+import 'package:linux_do/controller/global_controller.dart';
 
 import '../../const/app_images.dart';
 import '../../controller/base_controller.dart';
@@ -57,11 +58,22 @@ class HomeController extends BaseController{
 
   // 切换tab
   void switchTab(int index) {
+
+    final globalController = Get.find<GlobalController>();
+
+    if (globalController.isAnonymousMode) {
+      if (index == 1 || index == 2 || index == 3) {
+        showWarning('当前为游客模式,无法查看改内容');
+        return;
+      }
+    }
+
     if (index == 2) {
       // 显示创建帖子对话框
       _showHintDialog();
       return;
     }
+
     currentTab.value = index;
   }
 

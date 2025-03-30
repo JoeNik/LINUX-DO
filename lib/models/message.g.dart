@@ -30,7 +30,7 @@ Map<String, dynamic> _$MessageResponseToJson(MessageResponse instance) =>
 User _$UserFromJson(Map<String, dynamic> json) => User(
       id: (json['id'] as num).toInt(),
       username: json['username'] as String,
-      name: json['name'] as String,
+      name: json['name'] as String?,
       avatarTemplate: json['avatar_template'] as String,
       admin: json['admin'] as bool?,
       trustLevel: (json['trust_level'] as num?)?.toInt(),

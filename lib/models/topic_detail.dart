@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:linux_do/utils/log.dart';
 
 import '../net/http_config.dart';
 
@@ -203,6 +204,9 @@ class Post {
   final String? bookmarkReminderAt;
   final String? bookmarkName;
   final bool? policyAccepted;
+  final List<Polls>? polls;
+  final PollsVotes? polls_votes;
+  final String? actionCode;
 
   List<Post>? replayList;
 
@@ -284,6 +288,9 @@ class Post {
     this.bookmarkReminderAt,
     this.bookmarkName,  
     this.policyAccepted,
+    this.polls,
+    this.polls_votes,
+    this.actionCode,
   });
 
 
@@ -377,6 +384,15 @@ class Post {
     bookmarkReminderAt: json['bookmark_reminder_at'] as String?,
     bookmarkName: json['bookmark_name'] as String?,
     policyAccepted: json['policy_accepted'] as bool?,
+    polls: json['polls'] != null
+        ? (json['polls'] as List<dynamic>)
+            .map((e) => Polls.fromJson(e as Map<String, dynamic>))
+            .toList()
+        : null,
+    polls_votes: json['polls_votes'] != null
+        ? PollsVotes.fromJson(json['polls_votes'] as Map<String, dynamic>)
+        : null,
+    actionCode: json['action_code'] as String?,
   );
 
 
@@ -417,6 +433,9 @@ class Post {
       'bookmarkable_type': bookmarkableType,
       'bookmark_reminder_at': bookmarkReminderAt,
       'policy_accepted': policyAccepted,
+      'polls': polls?.map((e) => e.toJson()).toList(),
+      'polls_votes': polls_votes?.toJson(),
+      'action_code': actionCode,
     };
   }
 }
@@ -446,14 +465,48 @@ class ActionSummary {
 class Detail {
   @JsonKey(name: 'created_by')
   final CreateBy? createdBy;
+  final List<Links>? links;
 
 
   Detail({
     this.createdBy,
+    this.links,
   });
 
   factory Detail.fromJson(Map<String, dynamic> json) => _$DetailFromJson(json);
   Map<String, dynamic> toJson() => _$DetailToJson(this);
+}
+
+
+@JsonSerializable()
+class Links {
+  
+  final bool? attachment;
+  final int? clicks;
+  final String? domain;
+  final bool? internal;
+  final bool? reflection;
+  @JsonKey(name: 'root_domain')
+  final String? rootDomain;
+  final String? title;
+  final String? url;
+  @JsonKey(name: 'user_id')
+  final int? userId;
+
+  Links({
+    this.attachment,
+    this.clicks,
+    this.domain,
+    this.internal,
+    this.reflection,
+    this.rootDomain,
+    this.title,
+    this.url,
+    this.userId,
+  });
+
+  factory Links.fromJson(Map<String, dynamic> json) => _$LinksFromJson(json);
+  Map<String, dynamic> toJson() => _$LinksToJson(this);
 }
 
 @JsonSerializable()
@@ -511,4 +564,177 @@ class Bookmarks {
 
   factory Bookmarks.fromJson(Map<String, dynamic> json) => _$BookmarksFromJson(json);
   Map<String, dynamic> toJson() => _$BookmarksToJson(this);
+}
+
+
+@JsonSerializable()
+class PollsVotes {
+  final List<String>? poll;
+
+  PollsVotes({this.poll});
+
+  factory PollsVotes.fromJson(Map<String, dynamic> json){
+    return PollsVotes(
+      poll: json['poll'] != null
+          ? (json['poll'] as List<dynamic>).cast<String>()
+          : null,
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'poll': poll,
+    };
+  }
+}
+
+@JsonSerializable()
+class Polls {
+  final int? id;
+  final String? name;
+  final String? type;
+  final String? status;
+  final bool? public;
+  final String? results;
+  final List<PollOption>? options;
+  final int? voters;
+  final Map<String, List<PollVoter>>? preloaded_voters;
+  final String? chart_type;
+  final String? title;
+  List<String>? vote;
+  int? postId;
+
+  Polls({
+    this.id,
+    this.name,
+    this.type,
+    this.status,
+    this.public,
+    this.results,
+    this.options,
+    this.voters,
+    this.preloaded_voters,
+    this.chart_type,
+    this.title,
+    this.vote,
+    this.postId,
+  });
+
+  factory Polls.fromJson(Map<String, dynamic> json) {
+    return Polls(
+      id: json['id'] as int?,
+      name: json['name'] as String?,
+      type: json['type'] as String?,
+      status: json['status'] as String?,
+      public: json['public'] as bool?,
+      results: json['results'] as String?,
+      options: (json['options'] as List<dynamic>?)
+          ?.map((e) => PollOption.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      voters: json['voters'] as int?,
+        preloaded_voters: (json['preloaded_voters'] as Map<String, dynamic>).map(
+        (k, e) => MapEntry(
+          k,
+          (e as List<dynamic>)
+              .map((v) => PollVoter.fromJson(v as Map<String, dynamic>))
+              .toList(),
+        ),
+      ),
+      chart_type: json['chart_type'] as String?,
+      title: json['title'] as String?,
+      vote: json['vote'] as List<String>?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'type': type,
+      'status': status,
+      'public': public,
+      'results': results,
+      'options': options?.map((e) => e.toJson()).toList(),
+      'voters': voters,
+      'preloaded_voters': preloaded_voters?.map(
+        (k, e) => MapEntry(k, e.map((v) => v.toJson()).toList()),
+      ),
+      'chart_type': chart_type,
+      'title': title,
+      'vote': vote,
+    };
+  }
+}
+
+@JsonSerializable()
+class PollOption {
+  final String? id;
+  final String? html;
+  final int? votes;
+
+  PollOption({
+    this.id,
+    this.html,
+    this.votes,
+  });
+
+  factory PollOption.fromJson(Map<String, dynamic> json) {
+    return PollOption(
+      id: json['id'] as String?,
+      html: json['html'] as String?,
+      votes: json['votes'] as int?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'html': html,
+      'votes': votes,
+    };
+  }
+}
+
+@JsonSerializable()
+class PollVoter {
+  final int? id;
+  final String? username;
+  final String? name;
+  final String? avatar_template;
+  final String? title;
+  final String? animated_avatar;
+
+  PollVoter({
+    this.id,
+    this.username,
+    this.name,
+    this.avatar_template,
+    this.title,
+    this.animated_avatar,
+  });
+
+  factory PollVoter.fromJson(Map<String, dynamic> json) {
+    return PollVoter(
+      id: json['id'] as int?,
+      username: json['username'] as String?,
+      name: json['name'] as String?,
+      avatar_template: json['avatar_template'] as String?,
+      title: json['title'] as String?,
+      animated_avatar: json['animated_avatar'] as String?,
+    );
+  }
+
+  String getAvatarUrl() {
+    return '${HttpConfig.baseUrl}${avatar_template!.replaceAll("{size}", "40")}';
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'username': username,
+      'name': name,
+      'avatar_template': avatar_template,
+      'title': title,
+      'animated_avatar': animated_avatar,
+    };
+  }
 }

@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/controller/base_controller.dart';
+import 'package:linux_do/models/topic_detail.dart';
 import 'package:linux_do/net/api_service.dart';
 import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/pages/topics/details/topic_detail_controller.dart';
@@ -25,9 +26,10 @@ import 'package:linux_do/widgets/dis_loading.dart';
 import 'package:linux_do/widgets/expandable.dart';
 import 'package:linux_do/widgets/video_player_widget.dart';
 import 'dart:ui';
-import 'cached_image.dart';
-import 'image_preview_dialog.dart';
-import 'code_preview_dialog.dart';
+import '../cached_image.dart';
+import '../image_preview_dialog.dart';
+import '../code_preview_dialog.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 // 自定义PageStorageBucket，用于防止滚动位置恢复错误
 // type 'ItemPosition' is not a subtype of type 'double?' in type cast ???????????????
@@ -50,6 +52,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
   final verticalController = ScrollController();
   final CustomPageStorageBucket _storageBucket = CustomPageStorageBucket();
   final TopicDetailController? topicDetailController;
+  final List<Polls>? polls;
 
   HtmlWidget({
     super.key,
@@ -58,6 +61,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
     this.fontSize,
     this.customWidgetBuilder,
     this.topicDetailController,
+    this.polls,
   });
 
   @override
@@ -212,6 +216,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
             // 添加处理用户提及的扩展
             _mentionExtension(context, theme),
 
+            // 添加表格扩展
             const TableHtmlExtension(),
 
             // 添加链接预览扩展
@@ -272,32 +277,41 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
     );
   }
 
-
   TagExtension _asideExtension(BuildContext context, ThemeData theme) {
     return TagExtension(
       tagsToExtend: {"aside"},
       builder: (extensionContext) {
         // 处理 GitHub 仓库的 onebox
-        if (extensionContext.classes.contains('githubrepo') && extensionContext.classes.contains('onebox')) {
-          final header = extensionContext.element?.getElementsByClassName('source').firstOrNull;
+        if (extensionContext.classes.contains('githubrepo') &&
+            extensionContext.classes.contains('onebox')) {
+          final header = extensionContext.element
+              ?.getElementsByClassName('source')
+              .firstOrNull;
           final link = header?.getElementsByTagName('a').firstOrNull;
           final href = link?.attributes['href'];
           final sourceText = link?.text ?? '';
-          
-          final article = extensionContext.element?.getElementsByClassName('onebox-body').firstOrNull;
-          final githubRow = article?.getElementsByClassName('github-row').firstOrNull;
-          
-          // 获取缩略图 
-          final thumbnailImg = githubRow?.getElementsByTagName('img').firstOrNull;
+
+          final article = extensionContext.element
+              ?.getElementsByClassName('onebox-body')
+              .firstOrNull;
+          final githubRow =
+              article?.getElementsByClassName('github-row').firstOrNull;
+
+          // 获取缩略图
+          final thumbnailImg =
+              githubRow?.getElementsByTagName('img').firstOrNull;
           final thumbnailSrc = thumbnailImg?.attributes['src'];
-          
+
           // 获取标题
-          final titleElement = githubRow?.getElementsByTagName('h3').firstOrNull;
+          final titleElement =
+              githubRow?.getElementsByTagName('h3').firstOrNull;
           final titleLink = titleElement?.getElementsByTagName('a').firstOrNull;
           final titleText = titleLink?.text ?? '';
-          
+
           // 获取描述
-          final descSpan = githubRow?.getElementsByClassName('github-repo-description').firstOrNull;
+          final descSpan = githubRow
+              ?.getElementsByClassName('github-repo-description')
+              .firstOrNull;
           final descriptionText = descSpan?.text ?? '';
 
           return Container(
@@ -353,14 +367,15 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                                 child: Icon(
                                   Icons.broken_image_outlined,
                                   size: 40.w,
-                                  color: theme.iconTheme.color?.withValues(alpha: 0.5),
+                                  color: theme.iconTheme.color
+                                      ?.withValues(alpha: 0.5),
                                 ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    
+
                     Padding(
                       padding: const EdgeInsets.all(12).w,
                       child: Column(
@@ -387,7 +402,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                             ],
                           ),
                           8.vGap,
-                          
+
                           // 仓库标题
                           Text(
                             titleText,
@@ -401,7 +416,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                             overflow: TextOverflow.ellipsis,
                           ),
                           8.vGap,
-                          
+
                           // 仓库描述
                           if (descriptionText.isNotEmpty)
                             Text(
@@ -423,11 +438,16 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
             ),
           );
         }
-        
+
         // 处理通用的 onebox
-        if (extensionContext.classes.contains('allowlistedgeneric') && extensionContext.classes.contains('onebox')) {
-          final header = extensionContext.element?.getElementsByClassName('source').firstOrNull;
-          final article = extensionContext.element?.getElementsByClassName('onebox-body').firstOrNull;
+        if (extensionContext.classes.contains('allowlistedgeneric') &&
+            extensionContext.classes.contains('onebox')) {
+          final header = extensionContext.element
+              ?.getElementsByClassName('source')
+              .firstOrNull;
+          final article = extensionContext.element
+              ?.getElementsByClassName('onebox-body')
+              .firstOrNull;
           final title = article?.getElementsByTagName('h3').firstOrNull;
           final description = article?.getElementsByTagName('p').firstOrNull;
           final link = header?.getElementsByTagName('a').firstOrNull;
@@ -504,7 +524,8 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                           style: TextStyle(
                             fontSize: 12.w,
                             fontFamily: AppFontFamily.dinPro,
-                            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
+                            color: theme.textTheme.bodyMedium?.color
+                                ?.withValues(alpha: 0.8),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -516,7 +537,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
             ),
           );
         }
-        
+
         // Handle quoted content
         final titleDiv = extensionContext.element
             ?.getElementsByClassName('title')
@@ -527,10 +548,10 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
         final avatarImg = titleDiv?.getElementsByTagName('img').firstOrNull;
         final avatarSrc = avatarImg?.attributes['src'];
         final content = extensionContext.element
-                                            ?.getElementsByTagName('blockquote')
-                                            .firstOrNull
-                                            ?.innerHtml ??
-                                        '';
+                ?.getElementsByTagName('blockquote')
+                .firstOrNull
+                ?.innerHtml ??
+            '';
 
         return ExpandableNotifier(
           child: ScrollOnExpand(
@@ -625,8 +646,11 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                                         if (topicId != null && postId != null)
                                           GestureDetector(
                                             onTap: () {
-                                              if (topicDetailController != null) {
-                                                topicDetailController!.scrollToPost(int.parse(postId));
+                                              if (topicDetailController !=
+                                                  null) {
+                                                topicDetailController!
+                                                    .scrollToPost(
+                                                        int.parse(postId));
                                               }
                                             },
                                             child: Container(
@@ -687,28 +711,37 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                       child: Column(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10).w,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10).w,
                             child: Obx(() {
                               final quotedContent = controller.getQuotedContent(
                                 int.parse(topicId ?? '0'),
                                 int.parse(postId ?? '0'),
                               );
-                              
+
                               // 如果有引用内容，检查并高亮匹配部分
                               String highlightedContent = quotedContent ?? '';
                               if (quotedContent != null && content.isNotEmpty) {
                                 // 移除HTML标签以进行纯文本比较
-                                final plainContent = content.replaceAll(RegExp(r'<[^>]*>'), '').trim();
-                                final plainQuoted = quotedContent.replaceAll(RegExp(r'<[^>]*>'), '').trim();
-                                
+                                final plainContent = content
+                                    .replaceAll(RegExp(r'<[^>]*>'), '')
+                                    .trim();
+                                final plainQuoted = quotedContent
+                                    .replaceAll(RegExp(r'<[^>]*>'), '')
+                                    .trim();
+
                                 if (plainQuoted.contains(plainContent)) {
                                   // 在原始HTML中查找并高亮匹配部分
-                                  final contentWithoutTags = content.replaceAll(RegExp(r'<[^>]*>'), '').trim();
-                                  final color = '#${theme.primaryColor.value.toRadixString(16).padLeft(8, '0').substring(2)}';
+                                  final contentWithoutTags = content
+                                      .replaceAll(RegExp(r'<[^>]*>'), '')
+                                      .trim();
+                                  // ignore: deprecated_member_use
+                                  final color =
+                                      // ignore: deprecated_member_use
+                                      '#${theme.primaryColor.value.toRadixString(16).padLeft(8, '0').substring(2)}';
                                   highlightedContent = quotedContent.replaceAll(
-                                    contentWithoutTags,
-                                    '<span style="color: $color">$contentWithoutTags</span>'
-                                  );
+                                      contentWithoutTags,
+                                      '<span style="color: $color">$contentWithoutTags</span>');
                                 }
                               }
 
@@ -788,8 +821,10 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
             final imgSrc = imgElement.attributes['src'];
             if (imgSrc != null) {
               // 处理相对路径，添加域名前缀
-              final src = imgSrc.startsWith('/') ? '${HttpConfig.baseUrl.replaceAll(RegExp(r'/$'), '')}$imgSrc' : imgSrc;
-              
+              final src = imgSrc.startsWith('/')
+                  ? '${HttpConfig.baseUrl.replaceAll(RegExp(r'/$'), '')}$imgSrc'
+                  : imgSrc;
+
               // 获取原始图片URL用于预览
               String previewUrl = src;
               // 尝试从 lightbox 链接获取原始图片 URL
@@ -798,8 +833,8 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                   .firstOrNull;
               final originalUrlAttr = lightboxElement?.attributes['href'];
               if (originalUrlAttr != null) {
-                final originalUrl = originalUrlAttr.startsWith('/') 
-                    ? '${HttpConfig.baseUrl.replaceAll(RegExp(r'/$'), '')}$originalUrlAttr' 
+                final originalUrl = originalUrlAttr.startsWith('/')
+                    ? '${HttpConfig.baseUrl.replaceAll(RegExp(r'/$'), '')}$originalUrlAttr'
                     : originalUrlAttr;
                 previewUrl = originalUrl;
               }
@@ -1046,7 +1081,48 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
           return const SizedBox.shrink();
         }
 
-        // 其他 div 正常显示
+        if (extensionContext.classes.contains('poll') &&
+            polls != null &&
+            polls!.isNotEmpty) {
+          final poll = polls!.first;
+          final pollController =
+              Get.find<PollController>(tag: 'poll_${poll.id}');
+          return _buildPollWidget(pollController);
+        }
+
+        if (extensionContext.classes.contains('d-image-grid')){
+            List<dom.Element> images = [];
+            extensionContext.element!.querySelectorAll('.lightbox-wrapper').forEach((wrapper) {
+              dom.Element? img = wrapper.querySelector('img');
+              if (img != null) {
+                images.add(img);
+              }
+            });
+            
+            if (images.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            // 根据图片数量确定网格布局样式
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 2),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  if (images.length == 1) {
+                    return _buildSingleImage(context, images[0]);
+                  } else if (images.length == 2) {
+                    return _buildTwoImagesRow(context, images);
+                  } else if (images.length == 3) {
+                    return _buildThreeImagesLayout(context, images);
+                  } else if (images.length == 4) {
+                    return _buildFourImagesGrid(context, images);
+                  } else {
+                    return _buildImageGrid(context, images);
+                  }
+                },
+              ),
+            );
+        }
         return const SizedBox.shrink();
       },
     );
@@ -1247,7 +1323,9 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
         }
 
         // 处理相对路径，添加域名前缀
-        final String imageUrl = src.startsWith('/') ? '${HttpConfig.baseUrl.replaceAll(RegExp(r'/$'), '')}$src' : src;
+        final String imageUrl = src.startsWith('/')
+            ? '${HttpConfig.baseUrl.replaceAll(RegExp(r'/$'), '')}$src'
+            : src;
 
         // 检查是否是回复中用户头像
         if (imageUrl.contains('user_avatar/linux.do') ||
@@ -1594,10 +1672,6 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                                   style: {
                                     "table": Style(
                                       backgroundColor: theme.cardColor,
-                                      border: Border.all(
-                                        color: theme.dividerColor,
-                                        width: 1,
-                                      ),
                                     ),
                                     "th": Style(
                                       padding: HtmlPaddings.all(12.w),
@@ -1650,6 +1724,615 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPollWidget(PollController controller) {
+    return Builder(
+      builder: (context) {
+        final theme = Theme.of(context);
+
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 10).w,
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: theme.shadowColor.withValues(alpha: .12),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10).w,
+                  decoration: BoxDecoration(
+                    color: theme.primaryColor.withValues(alpha: .1),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: theme.dividerColor,
+                        width: .5,
+                      ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        CupertinoIcons.chart_bar_square,
+                        size: 20,
+                        color: theme.primaryColor,
+                      ),
+                      8.hGap,
+                      Text(
+                        '投票',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: theme.textTheme.titleLarge?.color,
+                        ),
+                      ),
+                      const Spacer(),
+                      Obx(
+                        () => controller.pollStatus.value == 'open'
+                            ? Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withValues(alpha: .1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Text(
+                                  '进行中',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withValues(alpha: .1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Text(
+                                  '已结束',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // 投票选项
+                Padding(
+                  padding: const EdgeInsets.all(10).w,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ...controller.options.map((option) => Obx(() =>
+                          _buildPollOptionItem(context, controller, option))),
+
+                      // 投票信息
+                      Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.person_2,
+                            size: 16,
+                            color: theme.textTheme.bodySmall?.color,
+                          ),
+                          4.hGap,
+                          Obx(
+                            () => RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                      text: '${controller.voteCount.value}',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: theme.primaryColor,
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: AppFontFamily.dinPro)),
+                                  TextSpan(
+                                      text: ' 人参与投票',
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          color: theme
+                                              .textTheme.bodySmall?.color)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          SizedBox(
+                            height: 32.w,
+                            child: Obx(() => DisButton(
+                                  fontSize: 12,
+                                  text: controller.hasVoted.value
+                                      ? '修改投票'
+                                      : '提交投票',
+                                  type: ButtonType.transform,
+                                  loading: controller.isVoting.value,
+                                  onPressed: () => controller.submitVote(),
+                                )),
+                          ),
+                        ],
+                      ),
+
+                      // 如果公开投票，显示投票人列表
+                      Obx(() {
+                        List<PollVoter> allVoters = [];
+                        String voterType = '';
+
+                        if (controller.selectedOptionIds.isNotEmpty) {
+                          // 如果选择了一个选项，显示该选项的投票者
+                          if (controller.selectedOptionIds.length == 1) {
+                            final optionId = controller.selectedOptionIds.first;
+                            allVoters = controller.getVotersForOption(optionId);
+                            voterType = controller.getVoterType(optionId);
+                          } else {
+                            // 如果选择了多个选项，合并所有选中选项的投票者
+                            for (final optionId
+                                in controller.selectedOptionIds) {
+                              allVoters.addAll(
+                                  controller.getVotersForOption(optionId));
+                              if (voterType.isEmpty) {
+                                voterType = controller.getVoterType(optionId);
+                              } else {
+                                voterType +=
+                                    '、${controller.getVoterType(optionId)}';
+                              }
+                            }
+                            // 去重
+                            allVoters = allVoters.toSet().toList();
+                          }
+                        }
+
+                        if (allVoters.isEmpty) return const SizedBox.shrink();
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            16.vGap,
+                            const Divider(),
+                            8.vGap,
+                            _buildVotersList(
+                                context, controller, voterType, allVoters),
+                          ],
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildVotersList(BuildContext context, PollController controller,
+      String voterType, List<PollVoter> votersList) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 投票类型标题
+        // if (voterType.isNotEmpty)
+        //   Text(
+        //     '投票给"$voterType":',
+        //     style: TextStyle(
+        //       fontSize: 12,
+        //       color: theme.textTheme.bodySmall?.color,
+        //     ),
+        //   ),
+        8.vGap,
+
+        // 投票者列表
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            // 投票者头像列表
+            ...votersList.map((voter) => AvatarWidget(
+                  avatarUrl: voter.getAvatarUrl(),
+                  size: 21,
+                  borderRadius: 4,
+                  backgroundColor: theme.primaryColor.withValues(alpha: .1),
+                  username: voter.username ?? '',
+                  avatarActions: AvatarActions.openCard,
+                  toPersonalPage: false,
+                  borderColor: theme.primaryColor,
+                )),
+
+            // 加载更多按钮
+            Obx(() {
+              if (controller.hasMoreVotersForSelectedOptions()) {
+                if (controller.isLoadingMoreVoters.value) {
+                  return Container(
+                    width: 21,
+                    height: 21,
+                    decoration: BoxDecoration(
+                      color: theme.primaryColor.withValues(alpha: .1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Center(
+                      child: SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: theme.primaryColor,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                return InkWell(
+                  onTap: () => controller.loadMoreVoters(),
+                  child: Container(
+                    width: 21,
+                    height: 21,
+                    decoration: BoxDecoration(
+                      color: theme.primaryColor.withValues(alpha: .1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Icon(
+                      CupertinoIcons.add,
+                      size: 14,
+                      color: theme.primaryColor,
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            })
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPollOptionItem(
+      BuildContext context, PollController controller, PollOption option) {
+    final theme = Theme.of(context);
+    final isSelected = controller.isOptionSelected(option.id ?? '');
+    final votePercent = controller.getOptionPercent(option.id ?? '');
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12).w,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => controller.toggleOption(option.id ?? ''),
+          borderRadius: BorderRadius.circular(12).w,
+          child: Container(
+            height: 34.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12).w,
+              border: Border.all(
+                color: isSelected ? theme.primaryColor : theme.dividerColor,
+                width: 1,
+              ),
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (controller.shouldShowResults.value) ...[
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return RepaintBoundary(
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 500),
+                              width: constraints.maxWidth * votePercent / 100,
+                              height: double.infinity,
+                              decoration: BoxDecoration(
+                                  color:
+                                      theme.primaryColor.withValues(alpha: .2),
+                                  borderRadius: BorderRadius.circular(12).w),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+
+                // 选项内容
+                Row(
+                  children: [
+                    16.hGap,
+                    Container(
+                      width: 15.w,
+                      height: 15.w,
+                      decoration: BoxDecoration(
+                        shape: controller.isMultipleChoice
+                            ? BoxShape.rectangle
+                            : BoxShape.circle,
+                        borderRadius: controller.isMultipleChoice
+                            ? BorderRadius.circular(3)
+                            : null,
+                        border: Border.all(
+                          color: isSelected
+                              ? theme.primaryColor
+                              : theme.primaryColor.withValues(alpha: .2),
+                          width: 1,
+                        ),
+                        color: isSelected
+                            ? theme.primaryColor
+                            : Colors.transparent,
+                      ),
+                      child: isSelected
+                          ? Icon(
+                              CupertinoIcons.check_mark,
+                              size: 10.w,
+                              color: Colors.white,
+                            )
+                          : null,
+                    ),
+                    12.hGap,
+
+                    // 选项文本
+                    Expanded(
+                      child: Text(
+                        option.html ?? '',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.textTheme.bodyLarge?.color,
+                          fontWeight:
+                              isSelected ? FontWeight.w500 : FontWeight.normal,
+                        ),
+                      ),
+                    ),
+
+                    // 投票结果百分比
+                    if (controller.shouldShowResults.value) ...[
+                      Text(
+                        '${votePercent.toStringAsFixed(1)}%',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: AppFontFamily.dinPro,
+                          color: theme.primaryColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                    16.hGap,
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 辅助方法：构建单图布局
+  Widget _buildSingleImage(BuildContext context, dom.Element imgElement) {
+    final src = imgElement.attributes['src'];
+    final alt = imgElement.attributes['alt'] ?? '';
+    final width = double.tryParse(imgElement.attributes['width'] ?? '0') ?? 0;
+    final height = double.tryParse(imgElement.attributes['height'] ?? '0') ?? 0;
+    
+    if (src == null) return const SizedBox.shrink();
+    
+    // 使用固定的宽高比，若原始尺寸可用则使用，否则使用默认比例
+    final double aspectRatio;
+    if (width > 0 && height > 0) {
+      aspectRatio = width / height;
+    } else {
+      // 默认使用4:3比例作为通用显示比例
+      aspectRatio = 4 / 3;
+    }
+    
+    return GestureDetector(
+      onTap: () => showImagePreview(context, src),
+      child: AspectRatio(
+        aspectRatio: aspectRatio,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(4).w,
+          child: CachedNetworkImage(
+            imageUrl: src,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+              child: Center(
+                child: DisRefreshLoading(
+                  opacity: 0.5,
+                ),
+              ),
+            ),
+            errorWidget: (context, url, error) => Container(
+              color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+              child: Center(
+                child: Icon(
+                  Icons.broken_image,
+                  color: Theme.of(context).disabledColor,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  
+  // 辅助方法：构建两图布局
+  Widget _buildTwoImagesRow(BuildContext context, List<dom.Element> images) {
+    const gap = 6.0;
+    const fixedHeight = 160.0; // 两图布局使用较大的高度
+    
+    return Row(
+      children: [
+        Expanded(
+          child: _buildGridItemImage(context, images[0], fixedHeight: fixedHeight),
+        ),
+        gap.hGap,
+        Expanded(
+          child: _buildGridItemImage(context, images[1], fixedHeight: fixedHeight),
+        ),
+      ],
+    );
+  }
+  
+  // 辅助方法：构建三图布局
+  Widget _buildThreeImagesLayout(BuildContext context, List<dom.Element> images) {
+    const gap = 6.0;
+    const mainImageHeight = 180.0; // 主图较大
+    const smallImageHeight = 120.0; // 小图较小
+    
+    return Column(
+      children: [
+        _buildGridItemImage(context, images[0], fixedHeight: mainImageHeight),
+        gap.vGap,
+        Row(
+          children: [
+            Expanded(
+              child: _buildGridItemImage(context, images[1], fixedHeight: smallImageHeight),
+            ),
+            gap.hGap,
+            Expanded(
+              child: _buildGridItemImage(context, images[2], fixedHeight: smallImageHeight),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+  
+  // 辅助方法：构建四图网格
+  Widget _buildFourImagesGrid(BuildContext context, List<dom.Element> images) {
+    const gap = 6.0;
+    const fixedHeight = 140.0; // 四图布局中每张图片的高度
+    
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildGridItemImage(context, images[0], fixedHeight: fixedHeight),
+            ),
+            gap.hGap,
+            Expanded(
+              child: _buildGridItemImage(context, images[1], fixedHeight: fixedHeight),
+            ),
+          ],
+        ),
+        gap.vGap,
+        Row(
+          children: [
+            Expanded(
+              child: _buildGridItemImage(context, images[2], fixedHeight: fixedHeight),
+            ),
+            gap.hGap,
+            Expanded(
+              child: _buildGridItemImage(context, images[3], fixedHeight: fixedHeight),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+  
+  // 辅助方法：构建多图网格
+  Widget _buildImageGrid(BuildContext context, List<dom.Element> images) {
+    // 统一使用更大的间距
+    const gap = 6.0;
+    const columns = 3; // 固定3列
+    const gridItemHeight = 120.0; // 每行固定高度
+    
+    // 计算行数
+    final rows = (images.length / columns).ceil();
+    
+    return Column(
+      children: List.generate(rows, (rowIndex) {
+        final startIndex = rowIndex * columns;
+        final endIndex = (startIndex + columns > images.length) 
+            ? images.length 
+            : startIndex + columns;
+        
+        return Padding(
+          padding: EdgeInsets.only(bottom: rowIndex < rows - 1 ? gap : 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: List.generate(endIndex - startIndex, (colIndex) {
+              final index = startIndex + colIndex;
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: colIndex < endIndex - startIndex - 1 ? gap : 0,
+                  ),
+                  child: _buildGridItemImage(context, images[index], fixedHeight: gridItemHeight),
+                ),
+              );
+            }),
+          ),
+        );
+      }),
+    );
+  }
+
+  // 辅助方法：构建固定高度的单张图片
+  Widget _buildGridItemImage(BuildContext context, dom.Element imgElement, {double fixedHeight = 120}) {
+    final src = imgElement.attributes['src'];
+    if (src == null) return const SizedBox.shrink();
+    
+    return GestureDetector(
+      onTap: () => showImagePreview(context, src),
+      child: Container(
+        height: fixedHeight.w,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4).w,
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+            width: 0.5,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(4).w,
+          child: CachedNetworkImage(
+            imageUrl: src,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => Container(
+              color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+              child: Center(
+                child: DisRefreshLoading(
+                  opacity: 0.5,
+                ),
+              ),
+            ),
+            errorWidget: (context, url, error) => Container(
+              color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+              child: Center(
+                child: Icon(
+                  Icons.broken_image,
+                  color: Theme.of(context).disabledColor,
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -1722,3 +2405,225 @@ class HtmlController extends BaseController {
   }
 }
 
+class PollController extends BaseController {
+  final Rx<Polls> poll;
+  final RxMap<String, RxList<PollVoter>> voters =
+      <String, RxList<PollVoter>>{}.obs;
+  final RxList<String> selectedOptionIds = <String>[].obs;
+  final RxBool hasVoted = false.obs;
+  final RxBool showVoters = true.obs;
+  final RxBool shouldShowResults = false.obs;
+  final RxBool isVoting = false.obs;
+  final RxBool isLoadingMoreVoters = false.obs;
+  final RxMap<String, int> votersPage = <String, int>{}.obs;
+  final int votersPerPage = 25; // 每页显示的投票者数量
+  final ApiService _apiService = Get.find<ApiService>();
+
+  // 计算属性
+  String get pollName => poll.value.name ?? '';
+  String get pollType => poll.value.type ?? '';
+  String get chartType => poll.value.chart_type ?? '';
+  bool get isPublic => poll.value.public ?? false;
+  String get resultsVisibility => poll.value.results ?? '';
+  int get totalVoters => poll.value.voters ?? 0;
+  bool get isMultipleChoice => pollType == 'multiple';
+
+  RxInt get voteCount => RxInt(poll.value.voters ?? 0);
+  RxString get pollStatus => RxString(poll.value.status ?? '');
+  RxList<PollOption> get options => RxList(poll.value.options ?? []);
+
+  @override
+  void onInit() {
+    updateSelectedOptions();
+    super.onInit();
+  }
+
+  PollController(Polls initialPoll) : poll = initialPoll.obs {
+    updatePoll(initialPoll);
+  }
+
+  void updatePoll(Polls newPoll) {
+    poll.value = newPoll;
+
+    updateSelectedOptions();
+
+    // 更新投票者数据
+    if (newPoll.preloaded_voters != null) {
+      voters.clear();
+      votersPage.clear();
+
+      newPoll.preloaded_voters!.forEach((optionId, votersList) {
+        voters[optionId] = RxList<PollVoter>(votersList);
+        votersPage[optionId] = 1; // 初始化页码
+      });
+    }
+
+    updateResultsVisibility();
+  }
+
+  void updateSelectedOptions() {
+    selectedOptionIds.clear();
+
+    // 如果有vote数据，将其添加到selectedOptionIds
+    if (poll.value.vote != null && poll.value.vote!.isNotEmpty) {
+      selectedOptionIds.addAll(poll.value.vote!);
+      hasVoted.value = true;
+    } else {
+      hasVoted.value = false;
+    }
+  }
+
+  String getVoterType(String optionId) {
+    return options
+            .firstWhere((opt) => opt.id == optionId,
+                orElse: () => PollOption(id: '', html: '', votes: 0))
+            .html ??
+        '';
+  }
+
+  // 获取特定选项的投票者列表
+  List<PollVoter> getVotersForOption(String optionId) {
+    return voters[optionId]?.toList() ?? [];
+  }
+
+  // 检查是否有更多投票者可以加载
+  bool hasMoreVoters(String optionId) {
+    // 找到该选项的总投票数
+    final option = options.firstWhere((opt) => opt.id == optionId,
+        orElse: () => PollOption(id: '', html: '', votes: 0));
+
+    final totalVotes = option.votes ?? 0;
+    final loadedVoters = voters[optionId]?.length ?? 0;
+
+    return loadedVoters < totalVotes;
+  }
+
+  // 检查当前选中的所有选项是否有更多投票者可以加载
+  bool hasMoreVotersForSelectedOptions() {
+    if (selectedOptionIds.isEmpty) return false;
+
+    for (final optionId in selectedOptionIds) {
+      if (hasMoreVoters(optionId)) return true;
+    }
+
+    return false;
+  }
+
+  // 加载更多投票者
+  Future<void> loadMoreVoters() async {
+    if (isLoadingMoreVoters.value || selectedOptionIds.isEmpty) return;
+
+    try {
+      isLoadingMoreVoters.value = true;
+
+      final response = await _apiService.getPollVoters(
+        pollName: poll.value.name ?? '',
+        page: votersPage[selectedOptionIds.first] ?? 1,
+        limit: votersPerPage,
+        optionId: selectedOptionIds.first,
+        postId: poll.value.postId,
+      );
+
+      if (response.voters != null) {
+        for (final optionId in selectedOptionIds) {
+          if (response.voters!.containsKey(optionId) && response.voters![optionId] != null) {
+            final newVoters = response.voters![optionId]!;
+            if (newVoters.isNotEmpty) {
+              // 更新页码
+              votersPage[optionId] = (votersPage[optionId] ?? 1) + 1;
+              if (!voters.containsKey(optionId)) {
+                voters[optionId] = RxList<PollVoter>([]);
+              }
+              
+              voters[optionId]!.addAll(newVoters);
+            }
+          }
+        }
+        
+        voters.refresh();
+      }
+    } catch (e, s) {
+      l.e('加载更多投票者失败: $e \n$s');
+    } finally {
+      isLoadingMoreVoters.value = false;
+    }
+  }
+
+  double getOptionPercent(String optionId) {
+    if (totalVoters == 0) return 0;
+
+    // 查找对应选项的票数
+    final option = options.firstWhere((opt) => opt.id == optionId,
+        orElse: () => PollOption(id: '', html: '', votes: 0));
+
+    // 计算百分比
+    return (option.votes ?? 0) * 100.0 / totalVoters;
+  }
+
+  // 修改：选择/取消选择选项
+  void toggleOption(String optionId) {
+    if (isMultipleChoice) {
+      if (selectedOptionIds.contains(optionId)) {
+        selectedOptionIds.remove(optionId);
+      } else {
+        selectedOptionIds.add(optionId);
+      }
+    } else {
+      selectedOptionIds.clear();
+      selectedOptionIds.add(optionId);
+    }
+  }
+
+  bool isOptionSelected(String optionId) {
+    return selectedOptionIds.contains(optionId);
+  }
+
+  void updateResultsVisibility() {
+    switch (resultsVisibility) {
+      case 'always':
+        shouldShowResults.value = true;
+        break;
+      case 'on_vote':
+        shouldShowResults.value = hasVoted.value;
+        break;
+      case 'on_close':
+        shouldShowResults.value = pollStatus.value == 'closed';
+        break;
+      default:
+        shouldShowResults.value = false;
+    }
+  }
+
+  // 修改：提交投票
+  Future<void> submitVote() async {
+    try {
+      isVoting.value = true;
+
+      if (selectedOptionIds.isEmpty) {
+        showWarning('请选择投票选项');
+        return;
+      }
+
+      // 调用API提交投票
+      final response = await _apiService.submitVote(
+          poll.value.name ?? 'poll', selectedOptionIds.toList(),
+          postId: poll.value.postId);
+
+      if (response.poll != null) {
+        final poll = response.poll;
+        poll?.vote = response.vote;
+        updatePoll(poll!);
+
+        // 更新结果显示状态
+        updateResultsVisibility();
+        showSuccess('投票成功');
+      } else {
+        showError('投票失败，请稍后重试');
+      }
+    } catch (e, s) {
+      l.e('投票提交失败: $e \n$s');
+    } finally {
+      isVoting.value = false;
+    }
+  }
+}

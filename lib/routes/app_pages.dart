@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:linux_do/controller/share_controller.dart';
 import 'package:linux_do/pages/category/category_list_controller.dart';
 import 'package:linux_do/pages/profile/edit_profile_controller.dart';
 import 'package:linux_do/pages/profile/edit_profile_page.dart';
@@ -20,7 +21,7 @@ import 'package:linux_do/pages/settings/security_settings_controller.dart';
 import 'package:linux_do/pages/settings/security_settings_page.dart';
 import 'package:linux_do/utils/bookmark_service.dart';
 import 'package:linux_do/utils/cloudflare_auth_service.dart';
-import 'package:linux_do/widgets/html_widget.dart';
+import 'package:linux_do/widgets/html/html_widget.dart';
 import '../pages/chat/chat_detail_controller.dart';
 import '../pages/chat/chat_detail_page.dart';
 import '../pages/create/create_post_controller.dart';
@@ -78,6 +79,7 @@ class AppPages {
         Get.lazyPut(() => ChatListController());
         Get.lazyPut(() => ProfileController());
         Get.lazyPut(() => BookmarkService());
+        Get.lazyPut(() => FontSizeController());
       }),
     ),
 
@@ -106,6 +108,7 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.lazyPut(() => TopicDetailController());
         Get.lazyPut(() => HtmlController());
+        Get.lazyPut(() => ShareController());
         Get.lazyPut(() => CloudflareAuthService());
       }),
     ),
@@ -213,10 +216,7 @@ class AppPages {
     /// 字体设置页
     GetPage(
       name: Routes.FONT_SIZE_SETTINGS,
-      page: () => const FontSizePage(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut(() => FontSizeController());
-      }),
+      page: () => const FontSizePage()
     ),
 
     /// 分类页

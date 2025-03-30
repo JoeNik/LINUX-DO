@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
+import 'package:linux_do/controller/global_controller.dart';
 import 'package:linux_do/models/topic_detail.dart';
 import 'package:linux_do/widgets/dis_button.dart';
 import '../topic_detail_controller.dart';
@@ -21,36 +22,42 @@ class PostFooter extends StatelessWidget {
   final TopicDetailController controller;
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        if (post.yours != true) ...[
-          _LikeButton(post: post, controller: controller),
-          16.hGap,
-        ],
-        _CopyButton(post: post, controller: controller),
-        16.hGap,
-        _BookmarkButton(post: post, controller: controller),
-        16.hGap,
-        // 举报按钮
-        _ReportButton(post: post, controller: controller),
+    return Get.find<GlobalController>().isAnonymousMode
+        ? Text(
+            '尊贵的游客,该功能需要登录 🤨',
+            style:
+                TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,fontSize: 10.w),
+          )
+        : Row(
+            children: [
+              if (post.yours != true) ...[
+                _LikeButton(post: post, controller: controller),
+                16.hGap,
+              ],
+              _CopyButton(post: post, controller: controller),
+              16.hGap,
+              _BookmarkButton(post: post, controller: controller),
+              16.hGap,
+              // 举报按钮
+              _ReportButton(post: post, controller: controller),
 
-        // 16.hGap,
-        // if (post.canEdit == true) _EditButton(post: post),
-        16.hGap,
-        if (post.canDelete == true) _DeleteButton(post: post, controller: controller),
+              // 16.hGap,
+              // if (post.canEdit == true) _EditButton(post: post),
+              16.hGap,
+              if (post.canDelete == true)
+                _DeleteButton(post: post, controller: controller),
 
-        //ExpandMenu(controller: controller, post: post),
+              //ExpandMenu(controller: controller, post: post),
 
-        const Spacer(),
+              const Spacer(),
 
+              _ReplyButton(post: post, controller: controller),
 
-        _ReplyButton(post: post, controller: controller),
-
-        post.isForumMaster(controller.topic.value?.userId ?? 0)
-            ? 10.hGap
-            : const SizedBox.shrink()
-      ],
-    );
+              post.isForumMaster(controller.topic.value?.userId ?? 0)
+                  ? 10.hGap
+                  : const SizedBox.shrink()
+            ],
+          );
   }
 }
 
@@ -179,7 +186,9 @@ class _ReportButton extends StatelessWidget {
                                     color: isSelected
                                         ? Get.theme.primaryColor
                                         : Colors.white,
-                                    borderRadius: const BorderRadius.all(Radius.circular(8)).w,
+                                    borderRadius: const BorderRadius.all(
+                                            Radius.circular(8))
+                                        .w,
                                     boxShadow: [
                                       BoxShadow(
                                         color:
@@ -305,7 +314,6 @@ class _LikeButton extends StatelessWidget {
   final TopicDetailController controller;
   @override
   Widget build(BuildContext context) {
-
     return InkWell(
       onTap: () => controller.toggleLike(post),
       child: Row(

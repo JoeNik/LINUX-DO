@@ -172,6 +172,13 @@ Post _$PostFromJson(Map<String, dynamic> json) => Post(
       bookmarkReminderAt: json['bookmarkReminderAt'] as String?,
       bookmarkName: json['bookmarkName'] as String?,
       policyAccepted: json['policyAccepted'] as bool?,
+      polls: (json['polls'] as List<dynamic>?)
+          ?.map((e) => Polls.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      polls_votes: json['polls_votes'] == null
+          ? null
+          : PollsVotes.fromJson(json['polls_votes'] as Map<String, dynamic>),
+      actionCode: json['actionCode'] as String?,
     )..replayList = (json['replayList'] as List<dynamic>?)
         ?.map((e) => Post.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -253,6 +260,9 @@ Map<String, dynamic> _$PostToJson(Post instance) => <String, dynamic>{
       'bookmarkReminderAt': instance.bookmarkReminderAt,
       'bookmarkName': instance.bookmarkName,
       'policyAccepted': instance.policyAccepted,
+      'polls': instance.polls,
+      'polls_votes': instance.polls_votes,
+      'actionCode': instance.actionCode,
       'replayList': instance.replayList,
     };
 
@@ -276,10 +286,38 @@ Detail _$DetailFromJson(Map<String, dynamic> json) => Detail(
       createdBy: json['created_by'] == null
           ? null
           : CreateBy.fromJson(json['created_by'] as Map<String, dynamic>),
+      links: (json['links'] as List<dynamic>?)
+          ?.map((e) => Links.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$DetailToJson(Detail instance) => <String, dynamic>{
       'created_by': instance.createdBy,
+      'links': instance.links,
+    };
+
+Links _$LinksFromJson(Map<String, dynamic> json) => Links(
+      attachment: json['attachment'] as bool?,
+      clicks: (json['clicks'] as num?)?.toInt(),
+      domain: json['domain'] as String?,
+      internal: json['internal'] as bool?,
+      reflection: json['reflection'] as bool?,
+      rootDomain: json['root_domain'] as String?,
+      title: json['title'] as String?,
+      url: json['url'] as String?,
+      userId: (json['user_id'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$LinksToJson(Links instance) => <String, dynamic>{
+      'attachment': instance.attachment,
+      'clicks': instance.clicks,
+      'domain': instance.domain,
+      'internal': instance.internal,
+      'reflection': instance.reflection,
+      'root_domain': instance.rootDomain,
+      'title': instance.title,
+      'url': instance.url,
+      'user_id': instance.userId,
     };
 
 CreateBy _$CreateByFromJson(Map<String, dynamic> json) => CreateBy(
@@ -314,4 +352,85 @@ Map<String, dynamic> _$BookmarksToJson(Bookmarks instance) => <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'reminder_at': instance.reminderAt,
+    };
+
+PollsVotes _$PollsVotesFromJson(Map<String, dynamic> json) => PollsVotes(
+      poll: (json['poll'] as List<dynamic>?)?.map((e) => e as String).toList(),
+    );
+
+Map<String, dynamic> _$PollsVotesToJson(PollsVotes instance) =>
+    <String, dynamic>{
+      'poll': instance.poll,
+    };
+
+Polls _$PollsFromJson(Map<String, dynamic> json) => Polls(
+      id: (json['id'] as num?)?.toInt(),
+      name: json['name'] as String?,
+      type: json['type'] as String?,
+      status: json['status'] as String?,
+      public: json['public'] as bool?,
+      results: json['results'] as String?,
+      options: (json['options'] as List<dynamic>?)
+          ?.map((e) => PollOption.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      voters: (json['voters'] as num?)?.toInt(),
+      preloaded_voters:
+          (json['preloaded_voters'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+            k,
+            (e as List<dynamic>)
+                .map((e) => PollVoter.fromJson(e as Map<String, dynamic>))
+                .toList()),
+      ),
+      chart_type: json['chart_type'] as String?,
+      title: json['title'] as String?,
+      vote: (json['vote'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      postId: (json['postId'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$PollsToJson(Polls instance) => <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'type': instance.type,
+      'status': instance.status,
+      'public': instance.public,
+      'results': instance.results,
+      'options': instance.options,
+      'voters': instance.voters,
+      'preloaded_voters': instance.preloaded_voters,
+      'chart_type': instance.chart_type,
+      'title': instance.title,
+      'vote': instance.vote,
+      'postId': instance.postId,
+    };
+
+PollOption _$PollOptionFromJson(Map<String, dynamic> json) => PollOption(
+      id: json['id'] as String?,
+      html: json['html'] as String?,
+      votes: (json['votes'] as num?)?.toInt(),
+    );
+
+Map<String, dynamic> _$PollOptionToJson(PollOption instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'html': instance.html,
+      'votes': instance.votes,
+    };
+
+PollVoter _$PollVoterFromJson(Map<String, dynamic> json) => PollVoter(
+      id: (json['id'] as num?)?.toInt(),
+      username: json['username'] as String?,
+      name: json['name'] as String?,
+      avatar_template: json['avatar_template'] as String?,
+      title: json['title'] as String?,
+      animated_avatar: json['animated_avatar'] as String?,
+    );
+
+Map<String, dynamic> _$PollVoterToJson(PollVoter instance) => <String, dynamic>{
+      'id': instance.id,
+      'username': instance.username,
+      'name': instance.name,
+      'avatar_template': instance.avatar_template,
+      'title': instance.title,
+      'animated_avatar': instance.animated_avatar,
     };

@@ -1,13 +1,11 @@
 import 'package:get/get.dart';
 import 'package:linux_do/controller/base_controller.dart';
-import 'package:linux_do/models/login.dart';
 import 'package:linux_do/net/api_service.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import '../../const/app_const.dart';
 import '../../utils/mixins/toast_mixin.dart';
 import '../../utils/log.dart';
 import '../../controller/global_controller.dart';
-import 'package:dio/dio.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:linux_do/net/http_config.dart';
@@ -184,5 +182,14 @@ class LoginController extends BaseController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void toHome() {
+    if (!isAgreementChecked.value) {
+      showError('请先阅读并同意服务协议');
+      return;
+    }
+    Get.find<GlobalController>().setIsAnonymousMode(true);
+    Get.offAllNamed(Routes.HOME);
   }
 }

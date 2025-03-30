@@ -8,7 +8,7 @@ import 'package:linux_do/widgets/state_view.dart';
 import 'package:slide_switcher/slide_switcher.dart';
 import '../../../const/app_colors.dart';
 import '../../../widgets/badge_widget.dart';
-import '../../../widgets/html_widget.dart';
+import '../../../widgets/html/html_widget.dart';
 import 'badge_controller.dart';
 import 'package:linux_do/utils/badge.dart';
 

@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_images.dart';
+import 'package:linux_do/controller/global_controller.dart';
 import '../../routes/app_pages.dart';
 import '../../models/search_result.dart';
 import '../../controller/base_controller.dart';
@@ -20,6 +21,7 @@ import 'dart:io';
 class TopicsController extends BaseController
     with GetSingleTickerProviderStateMixin {
   final ApiService _apiService = Get.find<ApiService>();
+  final GlobalController globalController = Get.find<GlobalController>();
 
   // 搜索相关控制器和状态
   final searchFocusNode = FocusNode();
@@ -43,10 +45,10 @@ class TopicsController extends BaseController
   final RxBool isSearchFocused = false.obs;
 
   // 路径
-  final paths = ['latest', 'new', 'unread', 'unseen', 'top', 'hot'];
+  List<String> paths = const ['latest', 'new', 'unread', 'unseen', 'top', 'hot'];
 
   // 简单一些，本地定义tab
-  final tabs = const [
+  List<Tab> tabs = const [
     Tab(text: '最新'),
     Tab(text: '新帖'),
     Tab(text: '未读'),
@@ -72,6 +74,18 @@ class TopicsController extends BaseController
   // 添加banner设置
   final Rx<BannerSettings> bannerSettings = BannerSettings().obs;
   static const String bannerSettingsKey = 'banner_settings';
+
+  // 检查是否是游客模式  
+  void changeTabs() {
+    if (globalController.isAnonymousMode) {
+      tabs = const [
+        Tab(text: '最新', ),
+        Tab(text: '排行', ),
+        Tab(text: '热门', ),
+      ];
+      paths = const ['latest', 'top', 'hot'];
+    }
+  }
 
   // 移除 tabViews getter，改用 _buildTabView 方法
   Widget _buildTabView(int index) {
@@ -114,6 +128,8 @@ class TopicsController extends BaseController
   @override
   void onInit() {
     super.onInit();
+
+    changeTabs();
     tabController = TabController(length: tabs.length, vsync: this);
     tabController.addListener(_handleTabChange);
     // 只初始化当前tab的controller
@@ -401,4 +417,5 @@ class TopicsController extends BaseController
       fit: BoxFit.contain,
     );
   }
+
 }

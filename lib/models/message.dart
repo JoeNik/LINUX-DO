@@ -29,7 +29,7 @@ class MessageResponse {
 class User {
   final int id;
   final String username;
-  final String name;
+  final String? name;
   @JsonKey(name: 'avatar_template')
   final String avatarTemplate;
   final bool? admin;
@@ -42,7 +42,7 @@ class User {
   User({
     required this.id,
     required this.username,
-    required this.name,
+    this.name,
     required this.avatarTemplate,
     this.admin,
     this.trustLevel,

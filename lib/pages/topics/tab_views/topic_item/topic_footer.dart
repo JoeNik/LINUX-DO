@@ -4,22 +4,31 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/models/topic_model.dart';
+import 'package:linux_do/pages/settings/font_size_controller.dart';
 import 'package:linux_do/utils/expand/datetime_expand.dart';
 import 'package:linux_do/widgets/user_avatar_group.dart';
 
-/// 话题底部信息组件
+/// 话题底部组件
 class TopicFooter extends StatelessWidget {
   final Topic topic;
   final List<String> avatarUrls;
+  final ListDensity? density;
 
   const TopicFooter({
     Key? key,
     required this.topic,
     required this.avatarUrls,
+    this.density,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final fontSize = density == ListDensity.compact
+        ? 8.0
+        : density == ListDensity.normal
+            ? 10.0
+            : 11.0;
+
     return Padding(
       padding: const EdgeInsets.only(top: 8).w,
       child: Row(
@@ -28,7 +37,7 @@ class TopicFooter extends StatelessWidget {
           Text(
             topic.lastPosterUsername ?? '',
             style: TextStyle(
-              fontSize: 10.w,
+              fontSize: fontSize.w,
               fontFamily: AppFontFamily.dinPro,
               color: Theme.of(context).textTheme.bodySmall?.color,
             ),
@@ -49,7 +58,7 @@ class TopicFooter extends StatelessWidget {
           Text(
             _getRelativeTime(),
             style: TextStyle(
-              fontSize: 10.w,
+              fontSize: fontSize.w,
               fontFamily: AppFontFamily.dinPro,
               color: Theme.of(context).textTheme.bodySmall?.color,
             ),
@@ -73,7 +82,7 @@ class TopicFooter extends StatelessWidget {
             children: [
               Icon(
                 CupertinoIcons.arrowshape_turn_up_left_2_fill,
-                size: 13.w,
+                size: fontSize.w + 3,
                 color: Theme.of(context)
                     .textTheme
                     .bodySmall
@@ -84,7 +93,7 @@ class TopicFooter extends StatelessWidget {
               Text(
                 '${topic.postsCount ?? 0}',
                 style: TextStyle(
-                  fontSize: 13.w,
+                  fontSize: fontSize.w + 3,
                   fontFamily: AppFontFamily.dinPro,
                   color: Theme.of(context)
                       .textTheme
@@ -107,3 +116,5 @@ class TopicFooter extends StatelessWidget {
     return DateTime.parse(time).friendlyDateTime;
   }
 }
+
+

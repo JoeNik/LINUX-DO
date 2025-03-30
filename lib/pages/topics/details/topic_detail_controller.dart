@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/controller/base_controller.dart';
+import 'package:linux_do/controller/share_controller.dart';
 import 'package:linux_do/net/http_client.dart';
 import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/utils/browser_util.dart';
@@ -14,7 +14,7 @@ import 'package:linux_do/utils/cloudflare_auth_service.dart';
 import 'package:linux_do/utils/device_util.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:linux_do/widgets/browser_tips_sheet.dart';
-import 'package:linux_do/widgets/html_widget.dart';
+import 'package:linux_do/widgets/html/html_widget.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../controller/global_controller.dart';
 import '../../../models/request/update_post.dart';
@@ -112,6 +112,8 @@ class TopicDetailController extends BaseController
   final contentController = TextEditingController();
 
   final htmlController = Get.find<HtmlController>();
+
+  final shareController = Get.find<ShareController>();
 
   // 书签服务
   final BookmarkService _bookmarkService = Get.find<BookmarkService>();
@@ -542,8 +544,8 @@ class TopicDetailController extends BaseController
 
       // 初始化点赞和书签数据
       _initPostScores();
-    } catch (e) {
-      l.e('获取帖子详情失败: $e');
+    } catch (e,s) {
+      l.e('获取帖子详情失败: $e \n$s');
       setError('获取帖子详情失败');
     } finally {
       isLoading.value = false;

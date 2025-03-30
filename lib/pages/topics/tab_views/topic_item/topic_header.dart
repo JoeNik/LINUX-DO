@@ -2,20 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_theme.dart';
+import 'package:linux_do/pages/settings/font_size_controller.dart';
 
 /// 话题标题组件
 class TopicHeader extends StatelessWidget {
   final String title;
   final bool isPinned;
+  final ListDensity? density;
 
   const TopicHeader({
     Key? key,
     required this.title,
-    this.isPinned = false,
+    required this.isPinned,
+    this.density,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    // 根据密度设置不同的字体大小
+    final fontSize = density == ListDensity.compact
+        ? 12.0
+        : density == ListDensity.normal
+            ? 14.0
+            : 16.0;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -42,7 +52,7 @@ class TopicHeader extends StatelessWidget {
           child: Text(
             title,
             style: TextStyle(
-              fontSize: 14.w,
+              fontSize: fontSize.w,
               fontFamily: AppFontFamily.dinPro,
               fontWeight: FontWeight.w500,
               height: 1.4,

@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/const/app_spacing.dart';
-import '../../controller/global_controller.dart';
+import 'package:linux_do/controller/global_controller.dart';
 import '../../widgets/dis_switch.dart';
 import '../../widgets/dis_button.dart';
 import 'settings_controller.dart';
@@ -129,7 +129,8 @@ class SettingsPage extends GetView<SettingsController> {
             context,
             AppConst.settings.appearance,
             [
-              _buildThemeDropdown(context, const Color(0xFFFFB300), CupertinoIcons.moon_stars_fill),
+              _buildThemeDropdown(context, const Color(0xFFFFB300),
+                  CupertinoIcons.moon_stars_fill),
               // _buildNavigationItem(
               //   context,
               //   AppConst.settings.themeCustom,
@@ -145,7 +146,7 @@ class SettingsPage extends GetView<SettingsController> {
                 CupertinoIcons.textformat_size,
                 iconColor: const Color(0xFFFFB300),
                 onTap: () {
-                    controller.toFontSizeSettings();
+                  controller.toFontSizeSettings();
                 },
               ),
             ],
@@ -210,7 +211,7 @@ class SettingsPage extends GetView<SettingsController> {
               ),
             ],
           ),
-          32.vGap,
+          26.vGap,
           _buildLogoutButton(context),
           16.vGap,
         ],
@@ -218,7 +219,8 @@ class SettingsPage extends GetView<SettingsController> {
     );
   }
 
-  Widget _buildThemeDropdown(BuildContext context, Color? iconColor, IconData icon) {
+  Widget _buildThemeDropdown(
+      BuildContext context, Color? iconColor, IconData icon) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       decoration: BoxDecoration(
@@ -231,18 +233,19 @@ class SettingsPage extends GetView<SettingsController> {
       child: Row(
         children: [
           Container(
-              width: 30.w,
-              height: 30.w,
-              decoration: BoxDecoration(
-                color: (iconColor ?? Theme.of(context).primaryColor).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(4.w),
-              ),
-              child:  Icon(
-                icon,
-                size: 20.w,
-                color: iconColor ?? Theme.of(context).primaryColor,
-              ),
-              ),
+            width: 30.w,
+            height: 30.w,
+            decoration: BoxDecoration(
+              color: (iconColor ?? Theme.of(context).primaryColor)
+                  .withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4.w),
+            ),
+            child: Icon(
+              icon,
+              size: 20.w,
+              color: iconColor ?? Theme.of(context).primaryColor,
+            ),
+          ),
           12.hGap,
           Expanded(
             child: Obx(() => DropdownButton(
@@ -267,6 +270,7 @@ class SettingsPage extends GetView<SettingsController> {
 
   Widget _buildSection(
       BuildContext context, String title, List<Widget> children) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -301,12 +305,18 @@ class SettingsPage extends GetView<SettingsController> {
                   entry.value,
                   if (index < children.length - 1)
                     Divider(
-                      height: .5.w,
-                      thickness: 1.w,
-                      indent: 16.w,
-                      color:
-                          Theme.of(context).dividerColor.withValues(alpha: .4),
-                    ),
+                        height: .25.w,
+                        thickness: .25.w,
+                        indent: 16.w,
+                        color: isDark
+                            ? Theme.of(context)
+                                .dividerColor
+                                .withValues(alpha: .2)
+                            : Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.color
+                                ?.withValues(alpha: .1)),
                 ],
               );
             }).toList(),
@@ -329,13 +339,6 @@ class SettingsPage extends GetView<SettingsController> {
         onTap: onTap,
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.w),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
-              ),
-            ),
-          ),
           child: Row(
             children: [
               Container(
@@ -375,17 +378,24 @@ class SettingsPage extends GetView<SettingsController> {
   }
 
   Widget _buildLogoutButton(BuildContext context) {
+    final globalController = Get.find<GlobalController>();
     return ElevatedButton(
-      onPressed: () => _showLogoutDialog(context),
+      onPressed: () => globalController.isAnonymousMode
+          ? controller.logout()
+          : _showLogoutDialog(context),
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.error,
+        backgroundColor: globalController.isAnonymousMode
+            ? AppColors.success
+            : AppColors.error,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.w),
+          borderRadius: BorderRadius.circular(6.w),
         ),
         padding: EdgeInsets.symmetric(vertical: 12.w),
       ),
       child: Text(
-        AppConst.settings.logout,
+        globalController.isAnonymousMode
+            ? AppConst.settings.login
+            : AppConst.settings.logout,
         style: TextStyle(
           fontSize: 14.sp,
           fontWeight: FontWeight.w500,
@@ -435,7 +445,11 @@ class SettingsPage extends GetView<SettingsController> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.8),
+                  color: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.color
+                      ?.withValues(alpha: 0.8),
                   height: 1.4,
                 ),
               ),
@@ -484,18 +498,19 @@ class SettingsPage extends GetView<SettingsController> {
       child: Row(
         children: [
           Container(
-              width: 30.w,
-              height: 30.w,
-              decoration: BoxDecoration(
-                color: (iconColor ?? Theme.of(context).primaryColor).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(4.w),
-              ),
-              child:  Icon(
-                icon,
-                size: 20.w,
-                color: iconColor ?? Theme.of(context).primaryColor,
-              ),
-              ),
+            width: 30.w,
+            height: 30.w,
+            decoration: BoxDecoration(
+              color: (iconColor ?? Theme.of(context).primaryColor)
+                  .withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4.w),
+            ),
+            child: Icon(
+              icon,
+              size: 20.w,
+              color: iconColor ?? Theme.of(context).primaryColor,
+            ),
+          ),
           12.hGap,
           Expanded(
             child: Text(
@@ -509,9 +524,9 @@ class SettingsPage extends GetView<SettingsController> {
           SizedBox(
             height: 28.w,
             child: Obx(() => DisSwitch(
-              value: value.value,
-              onChanged: onChanged,
-            )),
+                  value: value.value,
+                  onChanged: onChanged,
+                )),
           ),
         ],
       ),

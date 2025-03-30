@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/pages/category/category_list_controller.dart';
 import 'package:linux_do/pages/topics/tab_views/topic_item/topic_item.dart';
+import 'package:linux_do/widgets/avatar_widget.dart';
 import 'package:linux_do/widgets/dis_refresh.dart';
 import 'package:linux_do/widgets/state_view.dart';
 
@@ -36,6 +37,7 @@ class CategoryListView extends GetView<CategoryListController> {
                       onTap: () => controller.toTopicDetail(topic.id),
                       onDoNotDisturb: (topic) => controller.doNotDisturb(topic.id),
                       onDelete: (topic) => controller.deleteTopic(topic.id),
+                      avatarActions: AvatarActions.openCard
                     );
                   },
                   childCount: controller.topics.length,

@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import '../../const/app_const.dart';
 import '../../const/app_spacing.dart';
 import '../../utils/tag.dart';
-import '../../widgets/html_widget.dart';
+import '../../widgets/html/html_widget.dart';
 import 'preview_post_controller.dart';
 
 class PreviewPostPage extends GetView<PreviewPostController> {

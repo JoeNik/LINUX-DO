@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_const.dart';
+import 'package:linux_do/models/topic_model.dart';
 import '../models/user.dart';
 import '../net/api_service.dart';
 import '../net/http_client.dart';
@@ -24,7 +25,7 @@ class GlobalController extends BaseController with Concatenated {
 
   final _isLogin = false.obs;
 
-  final isAnonymousMode = false.obs;
+  final _isAnonymousMode = false.obs;
 
   /// 获取是否登录
   bool get isLogin => _isLogin.value;
@@ -39,6 +40,17 @@ class GlobalController extends BaseController with Concatenated {
   }
 
   UserResponse? get userInfo => _userInfo.value;
+
+
+  final topics = <Topic>[].obs;
+
+
+  // 游客模式
+  bool get isAnonymousMode => _isAnonymousMode.value;
+
+  void setIsAnonymousMode(bool value) {
+    _isAnonymousMode.value = value;
+  }
 
   @override
   void onInit() {

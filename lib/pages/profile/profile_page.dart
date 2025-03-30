@@ -44,7 +44,8 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
 
     return Scaffold(
       body: Obx(() {
-        final userInfo = Get.find<GlobalController>().userInfo;
+        final globalController = Get.find<GlobalController>();
+        final userInfo = globalController.userInfo;
         final expandedHeight =
             userInfo?.user?.backgroundUrl != null ? 380.w : 280.w;
         final user = userInfo?.user;
@@ -194,7 +195,9 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
 
             // 统计信息及菜单按钮
             SliverToBoxAdapter(
-              child: ProfileMenu(controller: controller),
+              child: globalController.isAnonymousMode
+                  ? const SizedBox.shrink()
+                  : ProfileMenu(controller: controller),
             ),
 
             // Tab栏
@@ -243,9 +246,22 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
               ),
             ),
           ],
-          body: Obx(() => Get.find<GlobalController>().userInfo == null
-              ? const Center(child: DisSquareLoading())
-              : controller.createCurrent()),
+          body: Obx(() => 
+              globalController.isAnonymousMode
+                  ? GestureDetector(
+                      onLongPress: () {
+                        showSuccess('没有惊喜 😜');
+                      },
+                      child: Center(
+                        child: Text(
+                          '尊贵的游客,长按此处3秒没有惊喜哦',
+                          style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color),
+                        ),
+                      ),
+                  )
+                  : Get.find<GlobalController>().userInfo == null
+                      ? const Center(child: DisSquareLoading())
+                  : controller.createCurrent()),
         );
       }),
     );
@@ -253,6 +269,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
 
   Widget _buildProfile(
       CurrentUser? user, double progress, BuildContext context) {
+    final globalController = Get.find<GlobalController>();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -299,7 +316,10 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                     Row(
                       children: [
                         GlowingTextSweep(
-                          text: user?.name ?? '',
+                          text: user?.name ??
+                              (globalController.isAnonymousMode
+                                  ? '旅途雅士'
+                                  : ''),
                           style: TextStyle(
                             color: AppColors.white,
                             fontSize: 18.w,
@@ -315,10 +335,12 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                           ),
                           glowColor: Colors.white,
                         ),
-                        IconButton(
-                            onPressed: () {
-                              Get.toNamed(Routes.EDIT_PROFILE);
-                            },
+                        globalController.isAnonymousMode
+                            ? const SizedBox.shrink()
+                            : IconButton(
+                                onPressed: () {
+                                  Get.toNamed(Routes.EDIT_PROFILE);
+                                },
                             icon: Icon(
                               CupertinoIcons.pencil,
                               color: AppColors.white.withValues(alpha: .9),
@@ -326,10 +348,12 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                             ))
                       ],
                     ),
-                    Text(
-                      user?.email ?? '',
-                      style: TextStyle(
-                        color: AppColors.white.withValues(alpha: .9),
+                    globalController.isAnonymousMode
+                        ? const SizedBox.shrink()
+                        : Text(
+                            user?.email ?? '',
+                            style: TextStyle(
+                              color: AppColors.white.withValues(alpha: .9),
                         fontFamily: AppFontFamily.dinPro,
                         fontSize: 12.sp,
                       ),
@@ -341,10 +365,12 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
           ],
         ),
         10.vGap,
-        Row(
-          children: [
-            Container(
-              height: 28.w,
+        globalController.isAnonymousMode
+            ? const SizedBox.shrink()
+            : Row(
+                children: [
+                  Container(
+                    height: 28.w,
               padding: EdgeInsets.symmetric(horizontal: 12.w),
               decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
@@ -374,10 +400,12 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
               ),
             ),
             12.hGap,
-            SizedBox(
-              height: 28.w,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+            globalController.isAnonymousMode
+                ? const SizedBox.shrink()
+                : SizedBox(
+                    height: 28.w,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                 children: [
                   DisSwitch(
                     value: (user?.userAction?.hidePresence ?? false),

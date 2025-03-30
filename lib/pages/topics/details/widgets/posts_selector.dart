@@ -30,7 +30,7 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
   late double _dragPosition;
   late int _currentIndex;
   final double _defaultHeight = 120.w;
-  final double _handleHeight = 32.w;
+  final double _handleHeight = 22.w;
   bool _isLongPressed = false;
   double _expandedHeight = 0.0;
   Timer? _loadDataTimer;
@@ -211,6 +211,8 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     _updateExpandedHeight(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     
     return AnimatedBuilder(
       animation: _heightAnimation,
@@ -222,18 +224,12 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
           onLongPressEnd: _handleLongPressEnd,
           onLongPressMoveUpdate: _handleLongPressMoveUpdate,
           child: Container(
-            width: 32.w,
+            width: 22.w,
             height: _heightAnimation.value,
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
+              color: Theme.of(context).cardColor.withValues(alpha: 0.7),
               borderRadius: const BorderRadius.all(Radius.circular(16)).w,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.15)),
             ),
             child: Stack(
               children: [
@@ -242,7 +238,7 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
                   right: 0,
                   top: _dragPosition,
                   child: Container(
-                    width: 32.w,
+                    width: 22.w,
                     height: _handleHeight,
                     decoration: BoxDecoration(
                       color: Theme.of(context).primaryColor,
@@ -253,9 +249,9 @@ class _PostsSelectorState extends State<PostsSelector> with SingleTickerProvider
                         '${_currentIndex + 1}',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 12.w,
+                          fontSize: 11.w,
                           fontFamily: AppFontFamily.dinPro,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ),

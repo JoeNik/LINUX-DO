@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_const.dart';
+import 'package:linux_do/controller/global_controller.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../../controller/base_controller.dart';
 import '../../../models/topic_model.dart';
@@ -18,6 +21,7 @@ class TopicTabController extends BaseController
   final topics = <Topic>[].obs;
   final hasMore = true.obs;
   final currentPage = 0.obs;
+  final globalController = Get.find<GlobalController>();
 
   // 加载状态
   final isRefreshing = false.obs;
@@ -55,12 +59,27 @@ class TopicTabController extends BaseController
       topics.value = response.topicList?.topics ?? [];
       hasMore.value = response.topicList?.moreTopicsUrl != null;
       currentPage.value = 1;
-      l.d('获取话题列表成功: ${topics.length} 条数据');
+      takeRandomSelected();
     } catch (e) {
       l.e('获取话题列表失败: $e');
       setError('获取话题列表失败');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void takeRandomSelected() {
+    if (globalController.topics.isEmpty) {
+      final random = Random();
+      final randomTopics = <Topic>[];
+      final usedIndices = <int>{};
+      while (randomTopics.length < 2 && usedIndices.length < topics.length) {
+        final index = random.nextInt(topics.length);
+        if (usedIndices.add(index)) {
+          randomTopics.add(topics[index]);
+        }
+      }
+      globalController.topics.assignAll(randomTopics);
     }
   }
 
@@ -70,7 +89,6 @@ class TopicTabController extends BaseController
       currentPage.value = 0;
       isRefreshing.value = true;
       clearError(); // 清除之前的错误
-
 
       final response = await apiService.getTopics(path);
 
@@ -109,14 +127,15 @@ class TopicTabController extends BaseController
 
       // 获取新加载的话题
       final newTopics = response.topicList?.topics ?? [];
-      
+
       // 去重：过滤掉已经存在的话题
       final existingIds = topics.map((topic) => topic.id).toSet();
-      final uniqueNewTopics = newTopics.where((topic) => !existingIds.contains(topic.id)).toList();
-      
+      final uniqueNewTopics =
+          newTopics.where((topic) => !existingIds.contains(topic.id)).toList();
+
       // 只添加不重复的话题
       topics.addAll(uniqueNewTopics);
-      
+
       hasMore.value = response.topicList?.moreTopicsUrl != null;
       currentPage.value = nextPage;
 
@@ -193,8 +212,11 @@ class TopicTabController extends BaseController
   }
 
   List<String> getAvatarUrls(Topic topic) {
-     // 通过_userCache获取头像
+    // 通过_userCache获取头像
     final avatarUrls = topic.getAvatarUrls();
-    return avatarUrls.map((id) => _userCache.getAvatarUrl(id)).whereType<String>().toList();
+    return avatarUrls
+        .map((id) => _userCache.getAvatarUrl(id))
+        .whereType<String>()
+        .toList();
   }
 }

@@ -36,6 +36,7 @@ class DisButton extends StatefulWidget {
   final Widget? loadingStateWidget; // 自定义加载组件(仅transform类型有效)
   final bool? disabled; // 是否禁用按钮
   final double? spacing; // Add spacing property
+  final double? fontSize; // 字体大小
 
   const DisButton({
     super.key,
@@ -52,6 +53,7 @@ class DisButton extends StatefulWidget {
     this.loadingStateWidget,
     this.disabled,
     this.spacing,
+    this.fontSize,
   });
 
   @override
@@ -184,7 +186,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
   }
 
   Widget _buildChild(ThemeData theme) {
-    final fontSize = _getFontSize();
+    final fontSize = widget.fontSize ?? _getFontSize();
     final iconSize = _getIconSize();
 
     Widget child = Row(
@@ -318,6 +320,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
   ButtonStyle _getButtonStyle(ThemeData theme) {
     final baseStyle = switch (widget.type) {
       ButtonType.primary => ElevatedButton.styleFrom(
+          textStyle: TextStyle(fontSize: widget.fontSize),
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
           padding: _getPadding(),
@@ -328,6 +331,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
         ),
       ButtonType.secondary => ElevatedButton.styleFrom(
           backgroundColor: theme.primaryColor.withValues(alpha: .1),
+          textStyle: TextStyle(fontSize: widget.fontSize),
           foregroundColor: theme.primaryColor,
           padding: _getPadding(),
           elevation: 0,
@@ -338,6 +342,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
       ButtonType.text => TextButton.styleFrom(
           foregroundColor: theme.primaryColor,
           padding: _getPadding(),
+          textStyle: TextStyle(fontSize: widget.fontSize),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4.w),
           ),
@@ -354,6 +359,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
       ButtonType.outline => OutlinedButton.styleFrom(
           foregroundColor: theme.primaryColor,
           padding: _getPadding(),
+          textStyle: TextStyle(fontSize: widget.fontSize),
           side: BorderSide(color: theme.primaryColor),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4.w),
@@ -371,6 +377,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
       ButtonType.transform => ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
+          textStyle: TextStyle(fontSize: widget.fontSize),
           padding: _getPadding(),
           elevation: 0,
           shape: RoundedRectangleBorder(

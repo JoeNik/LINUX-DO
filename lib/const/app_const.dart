@@ -176,6 +176,7 @@ class _Identifier {
   String get themeColor => 'themeColor';
   String get postFontSize => 'postFontSize';
   String get replyFontSize => 'replyFontSize';
+  String get listDensity => 'list_density';
 
   String get browserTips => 'browserTips';
 }
@@ -197,6 +198,7 @@ class _LoginConst {
   String get serviceAgreement => '服务协议';
   String get and => '和';
   String get privacyPolicy => '隐私政策';
+  String get anonymousMode => '使用游客模式浏览';
 
   // 提示信息
   String get emptyUsername => '请输入账号';
@@ -249,6 +251,7 @@ class _Settings {
   String get terms => '服务条款';
   String get privacy => '隐私政策';
   String get logout => '退出';
+  String get login => '去登录';
   String get logoutConfirmTitle => '确认退出';
   String get logoutConfirmMessage => '确定要退出登录吗？';
   String get cancel => '取消';
@@ -410,6 +413,7 @@ class _Settings {
 }
 
 class _Posts {
+
   const _Posts();
 
   String get disturbSuccess => '设置免打扰成功';
@@ -427,6 +431,8 @@ class _Posts {
   String get openBrowser => '选择浏览器';
   String get openInApp => '应用内打开';
   String get openInBrowser => '系统浏览器打开';
+  String get views => '浏览量';
+  String get likeCount => '点赞数';
   // 举报相关
   List<Map<String, String>> get reasons => [
         {

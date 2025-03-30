@@ -3,6 +3,7 @@ import 'package:linux_do/models/chat_direct.dart';
 import 'package:linux_do/models/docs.dart';
 import 'package:linux_do/models/follow.dart';
 import 'package:linux_do/models/leaderboard.dart';
+import 'package:linux_do/models/poll_vote.dart';
 import 'package:linux_do/models/request/update_post.dart';
 import 'package:linux_do/net/success_response.dart';
 import 'package:retrofit/retrofit.dart';
@@ -79,23 +80,24 @@ abstract class ApiService {
   });
 
   /// 更新帖子阅读时间
-@POST("topics/timings")
-@MultiPart()
-Future<void> updateTopicTiming(
-  @Part(name : "topic_id") String topicId,
-  @Part(name : "topic_time") String topicTime,
-  @Part(name : "timings") Map<String, String> timingsMap,
-  {@Header("discourse-background") String background = "true",
-   @Header("discourse-logged-in") String loggedIn = "true",
-   @Header("discourse-present") String present = "true",
-   @Header("x-silence-logger") String silence = "true",
-   @Header("Accept") String accept = "application/json, text/plain, */*",
-   @Header("Accept-Language") String acceptLanguage = "zh-CN,zh;q=0.9,en;q=0.8",
-   @Header("X-Requested-With") String requestedWith = "XMLHttpRequest",
-   @Header("sec-ch-ua") String secChUa = "\"Chromium\";v=\"134\", \"Not:A-Brand\";v=\"24\", \"Google Chrome\";v=\"134\"",
-   @Header("sec-ch-ua-mobile") String secChUaMobile = "?0",
-   @Header("sec-ch-ua-platform") String secChUaPlatform = "\"macOS\""}
-);
+  @POST("topics/timings")
+  @MultiPart()
+  Future<void> updateTopicTiming(
+      @Part(name: "topic_id") String topicId,
+      @Part(name: "topic_time") String topicTime,
+      @Part(name: "timings") Map<String, String> timingsMap,
+      {@Header("discourse-background") String background = "true",
+      @Header("discourse-logged-in") String loggedIn = "true",
+      @Header("discourse-present") String present = "true",
+      @Header("x-silence-logger") String silence = "true",
+      @Header("Accept") String accept = "application/json, text/plain, */*",
+      @Header("Accept-Language")
+      String acceptLanguage = "zh-CN,zh;q=0.9,en;q=0.8",
+      @Header("X-Requested-With") String requestedWith = "XMLHttpRequest",
+      @Header("sec-ch-ua") String secChUa =
+          "\"Chromium\";v=\"134\", \"Not:A-Brand\";v=\"24\", \"Google Chrome\";v=\"134\"",
+      @Header("sec-ch-ua-mobile") String secChUaMobile = "?0",
+      @Header("sec-ch-ua-platform") String secChUaPlatform = "\"macOS\""});
 
   /// 用户信息
   @GET('u/{current}.json')
@@ -523,4 +525,22 @@ Future<void> updateTopicTiming(
   @GET('posts/by_number/{topic_id}/{post_number}')
   Future<Post> getPostLinkRow(
       @Path('topic_id') String topicId, @Path('post_number') String postNumber);
+
+  /// 提交投票
+  @PUT('polls/vote')
+  Future<PollVote> submitVote(@Field('poll_name') String pollName,
+      @Field('options[]') List<String> options,
+      {@Field('post_id') int? postId,
+      @Header("content-type")
+      String contentType = "application/x-www-form-urlencoded"});
+
+  /// 获取投票者列表
+  @GET('polls/voters.json')
+  Future<PollVotersResponse> getPollVoters({
+    @Query('post_id') int? postId,
+    @Query('poll_name') String? pollName,
+    @Query('page') int? page,
+    @Query('limit') int? limit,
+    @Query('option_id') String? optionId,
+  });
 }

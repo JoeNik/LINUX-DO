@@ -1,7 +1,17 @@
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/controller/base_controller.dart';
+import 'package:linux_do/models/topic_model.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_tab_controller.dart';
+import 'package:linux_do/utils/bookmark_service.dart';
 import 'package:linux_do/utils/storage_manager.dart';
+import 'package:linux_do/utils/user_cache.dart';
+
+enum ListDensity {
+  compact,
+  normal,
+  loose,
+}
 
 class FontSizeController extends BaseController {
   // 帖子内容字体大小
@@ -12,6 +22,9 @@ class FontSizeController extends BaseController {
   // 字体大小范围 字体太多不太好看的样子
   final double minFontSize = 10.0;
   final double maxFontSize = 20.0;
+
+  // 布局密度设置
+  final Rx<ListDensity> listDensity = ListDensity.normal.obs;
 
   // 示例文本
   final String exampleText =
@@ -31,11 +44,12 @@ class FontSizeController extends BaseController {
 </blockquote>
 
 ''';
-  final String exampleCode = '''```dart
+  final String exampleCode =
+      '''<pre data-code-wrap="dart"><code class="lang-dart">
 void main() {
   print('Hello, ${AppConst.siteName}!');
 }
-```''';
+</code></pre>''';
 
   final String replyExampleText = '''
 字体大小示例文本 - Sincere, friendly, united, and professional, let`s jointly build a community that we are proud of.
@@ -51,15 +65,18 @@ void main() {
 
 ''';
 
+  final _userCache = UserCache();
+
   @override
   void onInit() {
     super.onInit();
     _loadFontSizeSettings();
+    _loadListDensitySettings();
   }
 
   /// 加载字体大小设置
   void _loadFontSizeSettings() {
-    // 从存储中读取设
+    // 从存储中读取设置
     final savedPostFontSize =
         StorageManager.getDouble(AppConst.identifier.postFontSize);
     final savedReplyFontSize =
@@ -74,6 +91,15 @@ void main() {
     }
   }
 
+  /// 加载布局密度设置
+  void _loadListDensitySettings() {
+    // 从存储中读取设置
+    final savedDensity = StorageManager.getInt(AppConst.identifier.listDensity);
+    if (savedDensity != null && savedDensity < ListDensity.values.length) {
+      listDensity.value = ListDensity.values[savedDensity];
+    }
+  }
+
   void setPostFontSize(double size) {
     postFontSize.value = size;
     StorageManager.setData(AppConst.identifier.postFontSize, size);
@@ -84,16 +110,52 @@ void main() {
     StorageManager.setData(AppConst.identifier.replyFontSize, size);
   }
 
+  void setListDensity(ListDensity density) {
+    listDensity.value = density;
+    StorageManager.setData(AppConst.identifier.listDensity, density.index);
+  }
+
   /// 重置字体大小为默认值
   void resetToDefaults() {
     setPostFontSize(14.0);
     setReplyFontSize(11.0);
-    showSuccess('已重置为默认字体大小');
+    setListDensity(ListDensity.normal);
+    showSuccess('已重置为默认设置');
   }
 
   /// 保存设置并返回
   void saveAndExit() {
-    showSuccess('字体大小设置已保存');
+    showSuccess('设置已保存');
     Get.back();
+  }
+
+  // 获取最新发帖人头像
+  String? getLatestPosterAvatar(Topic topic) {
+    final latestPosterId = topic.getOriginalPosterId();
+    if (latestPosterId == null) return null;
+    return _userCache.getAvatarUrl(latestPosterId);
+  }
+
+  // 获取昵称
+  String? getNickName(Topic topic) {
+    final latestPosterId = topic.getOriginalPosterId();
+    if (latestPosterId == null) return null;
+    return _userCache.getNickName(latestPosterId);
+  }
+
+  // 获取用户名
+  String? getUserName(Topic topic) {
+    final id = topic.getOriginalPosterId();
+    if (id == null) return null;
+    return _userCache.getUserName(id);
+  }
+
+  List<String> getAvatarUrls(Topic topic) {
+    // 通过_userCache获取头像
+    final avatarUrls = topic.getAvatarUrls();
+    return avatarUrls
+        .map((id) => _userCache.getAvatarUrl(id))
+        .whereType<String>()
+        .toList();
   }
 }

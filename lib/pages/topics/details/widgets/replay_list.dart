@@ -11,7 +11,7 @@ import 'package:linux_do/pages/topics/details/widgets/post_content.dart';
 import 'package:linux_do/pages/topics/details/widgets/post_header.dart';
 import 'package:linux_do/widgets/dis_loading.dart';
 import 'package:linux_do/widgets/expandable.dart';
-import 'package:linux_do/widgets/html_widget.dart';
+import 'package:linux_do/widgets/html/html_widget.dart';
 
 class ReplayList extends StatelessWidget {
   final TopicDetailController controller;

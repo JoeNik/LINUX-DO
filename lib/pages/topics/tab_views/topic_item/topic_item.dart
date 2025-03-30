@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:get/get.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/models/topic_model.dart';
+import 'package:linux_do/pages/settings/font_size_controller.dart';
 import 'package:linux_do/pages/topics/tab_views/topic_item/topic_content.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:linux_do/widgets/avatar_widget.dart';
@@ -20,6 +22,7 @@ class TopicItem extends StatelessWidget with Concatenated {
   final List<String>? avatarUrls;
   final AvatarActions avatarActions;
   final bool? toPersonalPage;
+  final bool? openSideslip;
   const TopicItem({
     Key? key,
     required this.topic,
@@ -32,11 +35,25 @@ class TopicItem extends StatelessWidget with Concatenated {
     this.avatarUrls,
     this.avatarActions = AvatarActions.noAction,
     this.toPersonalPage,
+    this.openSideslip = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+
+
+    return Obx((){
+
+    final fontSizeController = Get.find<FontSizeController>();
+    final density = fontSizeController.listDensity.value;
+            
+    final padding = density == ListDensity.compact
+        ? const EdgeInsets.all(8)
+        : density == ListDensity.normal
+            ? const EdgeInsets.all(12)
+            : const EdgeInsets.all(15);
+
+      return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4).w,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(4).w,
@@ -49,7 +66,7 @@ class TopicItem extends StatelessWidget with Concatenated {
         ],
       ),
       child: Slidable(
-        endActionPane: _buildSingleActionPane(),
+        endActionPane: openSideslip ?? true ? _buildSingleActionPane() : null,
         child: Stack(
           children: [
             Container(
@@ -59,9 +76,9 @@ class TopicItem extends StatelessWidget with Concatenated {
               ),
               child: InkWell(
                 onTap: onTap,
-                  borderRadius: BorderRadius.circular(4).w,
+                borderRadius: BorderRadius.circular(4).w,
                 child: Padding(
-                  padding: const EdgeInsets.all(14).w,
+                  padding: padding.w,
                   child: TopicContent(
                     topic: topic,
                     avatarUrl: avatarUrl,
@@ -76,20 +93,20 @@ class TopicItem extends StatelessWidget with Concatenated {
             ),
 
             if (topic.bookmarked ?? false)
-
               Positioned(
                 top: 4.w,
                 right: 4.w,
                 child: Icon(
-                    CupertinoIcons.bookmark,
-                    size: 14.w,
-                    color: Theme.of(context).primaryColor,
-                  ),
+                  CupertinoIcons.bookmark,
+                  size: 14.w,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
           ],
         ),
       ),
     );
+    });
   }
 
   ActionPane _buildSingleActionPane() {

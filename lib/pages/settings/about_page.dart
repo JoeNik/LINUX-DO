@@ -12,7 +12,7 @@ import 'package:linux_do/utils/device_util.dart';
 import 'package:linux_do/widgets/avatar_widget.dart';
 import 'package:linux_do/widgets/dis_loading.dart';
 import 'package:linux_do/widgets/dis_refresh.dart';
-import 'package:linux_do/widgets/html_widget.dart';
+import 'package:linux_do/widgets/html/html_widget.dart';
 import 'about_controller.dart';
 
 class AboutPage extends GetView<AboutController> {
@@ -893,7 +893,6 @@ class AboutPage extends GetView<AboutController> {
         _buildLable(context, CupertinoIcons.info_circle_fill, AppConst.settings.versionInfo),
         16.vGap,
         
-        // 版本号
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -917,7 +916,6 @@ class AboutPage extends GetView<AboutController> {
         ),
         12.vGap,
         
-        // 许可证
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -935,7 +933,7 @@ class AboutPage extends GetView<AboutController> {
                 borderRadius: BorderRadius.circular(4.w),
               ),
               child: Text(
-                '${DeviceUtil.version}-beta-19',
+                '${DeviceUtil.version} + ${DeviceUtil.buildNumber}',
                 style: TextStyle(
                   fontSize: 10.w,
                   fontWeight: FontWeight.w600,

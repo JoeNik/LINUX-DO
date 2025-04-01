@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dio/dio.dart';
+import 'dart:io';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:linux_do/controller/base_controller.dart';
+import 'package:linux_do/models/app_version.dart';
+import 'package:linux_do/net/api_service.dart';
+import 'package:linux_do/net/http_config.dart';
+import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/controller/global_controller.dart';
+import 'package:linux_do/widgets/dis_app_update.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:in_app_update/in_app_update.dart';
 
 import '../../const/app_images.dart';
-import '../../controller/base_controller.dart';
-import '../../net/api_service.dart';
-import '../../routes/app_pages.dart';
-import '../topics/topics_controller.dart';
 import '../../const/app_const.dart';
 import '../../const/app_colors.dart';
+import '../../routes/app_pages.dart';
+import '../topics/topics_controller.dart';
 
-class HomeController extends BaseController{
+class HomeController extends BaseController {
   // ignore: unused_field
   late final ApiService _apiService;
 
@@ -45,10 +53,10 @@ class HomeController extends BaseController{
     topicsController = Get.find<TopicsController>();
 
     // 模拟请求的数据
-     // badgeCount = {0: '12'};
+    // badgeCount = {0: '12'};
+
+    checkAppVersion();
   }
-
-
 
   @override
   void onClose() {
@@ -58,12 +66,11 @@ class HomeController extends BaseController{
 
   // 切换tab
   void switchTab(int index) {
-
     final globalController = Get.find<GlobalController>();
 
     if (globalController.isAnonymousMode) {
       if (index == 1 || index == 2 || index == 3) {
-        showWarning('当前为游客模式,无法查看改内容');
+        showWarning('当前为游客模式,无法查看该内容');
         return;
       }
     }
@@ -184,5 +191,42 @@ class HomeController extends BaseController{
       ),
       barrierColor: Colors.black.withValues(alpha: 0.5),
     );
+  }
+
+  void checkAppVersion() async {
+    try {
+      final dio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+      ));
+
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      String currentVersion = packageInfo.version;
+      int currentVersionCode = int.parse(packageInfo.buildNumber);
+
+      final response = await dio.get(
+        '${HttpConfig.otherUrl}/api/version/check/${Platform.isAndroid ? 'Android' : 'iOS'}',
+        queryParameters: {
+          'current_version': currentVersion,
+          'current_version_code': currentVersionCode,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        if (response.data['has_update'] == false) return;
+
+        final appVersion = AppVersion.fromJson(response.data);
+
+        if (appVersion.hasUpdate == true) {
+          if (Platform.isAndroid) {
+            DisAppUpdate.showUpdateDialog(appVersion);
+          } else if (Platform.isIOS) {
+            DisAppUpdate.showUpdateDialog(appVersion);
+          }
+        }
+      }
+    } catch (e, s) {
+      l.e('检查更新失败: $e\n$s');
+    }
   }
 }

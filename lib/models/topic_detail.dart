@@ -569,22 +569,28 @@ class Bookmarks {
 
 @JsonSerializable()
 class PollsVotes {
-  final List<String>? poll;
+  final Map<String, List<String>> votes;
 
-  PollsVotes({this.poll});
+  PollsVotes({required this.votes});
 
-  factory PollsVotes.fromJson(Map<String, dynamic> json){
-    return PollsVotes(
-      poll: json['poll'] != null
-          ? (json['poll'] as List<dynamic>).cast<String>()
-          : null,
-    );
+  factory PollsVotes.fromJson(Map<String, dynamic> json) {
+    final Map<String, List<String>> votesMap = {};
+    
+    json.forEach((key, value) {
+      if (value is List) {
+        votesMap[key] = (value as List).cast<String>();
+      }
+    });
+    
+    return PollsVotes(votes: votesMap);
   }
+  
   Map<String, dynamic> toJson() {
-    return {
-      'poll': poll,
-    };
+    return votes;
   }
+  
+  // 兼容旧代码的getter
+  List<String>? get poll => votes['poll'];
 }
 
 @JsonSerializable()

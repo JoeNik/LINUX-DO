@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -1084,44 +1085,59 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
         if (extensionContext.classes.contains('poll') &&
             polls != null &&
             polls!.isNotEmpty) {
-          final poll = polls!.first;
-          final pollController =
-              Get.find<PollController>(tag: 'poll_${poll.id}');
-          return _buildPollWidget(pollController);
+          final String pollSetId = polls!.map((p) => p.id).join('_');
+
+          if (controller.processedPollIds.contains(pollSetId)) {
+            return Container();
+          }
+
+          controller.processedPollIds.add(pollSetId);
+          return ListView.builder(
+            shrinkWrap: true,
+            padding: EdgeInsets.zero,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              return _buildPollWidget(
+                  Get.find<PollController>(tag: 'poll_${polls![index].id}'));
+            },
+            itemCount: polls!.length,
+          );
         }
 
-        if (extensionContext.classes.contains('d-image-grid')){
-            List<dom.Element> images = [];
-            extensionContext.element!.querySelectorAll('.lightbox-wrapper').forEach((wrapper) {
-              dom.Element? img = wrapper.querySelector('img');
-              if (img != null) {
-                images.add(img);
-              }
-            });
-            
-            if (images.isEmpty) {
-              return const SizedBox.shrink();
+        if (extensionContext.classes.contains('d-image-grid')) {
+          List<dom.Element> images = [];
+          extensionContext.element!
+              .querySelectorAll('.lightbox-wrapper')
+              .forEach((wrapper) {
+            dom.Element? img = wrapper.querySelector('img');
+            if (img != null) {
+              images.add(img);
             }
+          });
 
-            // 根据图片数量确定网格布局样式
-            return Container(
-              margin: const EdgeInsets.symmetric(vertical: 2),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  if (images.length == 1) {
-                    return _buildSingleImage(context, images[0]);
-                  } else if (images.length == 2) {
-                    return _buildTwoImagesRow(context, images);
-                  } else if (images.length == 3) {
-                    return _buildThreeImagesLayout(context, images);
-                  } else if (images.length == 4) {
-                    return _buildFourImagesGrid(context, images);
-                  } else {
-                    return _buildImageGrid(context, images);
-                  }
-                },
-              ),
-            );
+          if (images.isEmpty) {
+            return const SizedBox.shrink();
+          }
+
+          // 根据图片数量确定网格布局样式
+          return Container(
+            margin: const EdgeInsets.symmetric(vertical: 2),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                if (images.length == 1) {
+                  return _buildSingleImage(context, images[0]);
+                } else if (images.length == 2) {
+                  return _buildTwoImagesRow(context, images);
+                } else if (images.length == 3) {
+                  return _buildThreeImagesLayout(context, images);
+                } else if (images.length == 4) {
+                  return _buildFourImagesGrid(context, images);
+                } else {
+                  return _buildImageGrid(context, images);
+                }
+              },
+            ),
+          );
         }
         return const SizedBox.shrink();
       },
@@ -1826,6 +1842,23 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.checkmark_seal_fill,
+                            size: 14.w,
+                            color: theme.primaryColor.withValues(alpha: .5),
+                          ),
+                          Text(
+                            controller.title.value,
+                            style: TextStyle(
+                                fontSize: 11.w,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: AppFontFamily.dinPro),
+                          ),
+                        ],
+                      ),
+                      18.vGap,
                       ...controller.options.map((option) => Obx(() =>
                           _buildPollOptionItem(context, controller, option))),
 
@@ -2136,9 +2169,9 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
     final alt = imgElement.attributes['alt'] ?? '';
     final width = double.tryParse(imgElement.attributes['width'] ?? '0') ?? 0;
     final height = double.tryParse(imgElement.attributes['height'] ?? '0') ?? 0;
-    
+
     if (src == null) return const SizedBox.shrink();
-    
+
     // 使用固定的宽高比，若原始尺寸可用则使用，否则使用默认比例
     final double aspectRatio;
     if (width > 0 && height > 0) {
@@ -2147,7 +2180,7 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
       // 默认使用4:3比例作为通用显示比例
       aspectRatio = 4 / 3;
     }
-    
+
     return GestureDetector(
       onTap: () => showImagePreview(context, src),
       child: AspectRatio(
@@ -2179,31 +2212,34 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
       ),
     );
   }
-  
+
   // 辅助方法：构建两图布局
   Widget _buildTwoImagesRow(BuildContext context, List<dom.Element> images) {
     const gap = 6.0;
     const fixedHeight = 160.0; // 两图布局使用较大的高度
-    
+
     return Row(
       children: [
         Expanded(
-          child: _buildGridItemImage(context, images[0], fixedHeight: fixedHeight),
+          child:
+              _buildGridItemImage(context, images[0], fixedHeight: fixedHeight),
         ),
         gap.hGap,
         Expanded(
-          child: _buildGridItemImage(context, images[1], fixedHeight: fixedHeight),
+          child:
+              _buildGridItemImage(context, images[1], fixedHeight: fixedHeight),
         ),
       ],
     );
   }
-  
+
   // 辅助方法：构建三图布局
-  Widget _buildThreeImagesLayout(BuildContext context, List<dom.Element> images) {
+  Widget _buildThreeImagesLayout(
+      BuildContext context, List<dom.Element> images) {
     const gap = 6.0;
     const mainImageHeight = 180.0; // 主图较大
     const smallImageHeight = 120.0; // 小图较小
-    
+
     return Column(
       children: [
         _buildGridItemImage(context, images[0], fixedHeight: mainImageHeight),
@@ -2211,33 +2247,37 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
         Row(
           children: [
             Expanded(
-              child: _buildGridItemImage(context, images[1], fixedHeight: smallImageHeight),
+              child: _buildGridItemImage(context, images[1],
+                  fixedHeight: smallImageHeight),
             ),
             gap.hGap,
             Expanded(
-              child: _buildGridItemImage(context, images[2], fixedHeight: smallImageHeight),
+              child: _buildGridItemImage(context, images[2],
+                  fixedHeight: smallImageHeight),
             ),
           ],
         ),
       ],
     );
   }
-  
+
   // 辅助方法：构建四图网格
   Widget _buildFourImagesGrid(BuildContext context, List<dom.Element> images) {
     const gap = 6.0;
     const fixedHeight = 140.0; // 四图布局中每张图片的高度
-    
+
     return Column(
       children: [
         Row(
           children: [
             Expanded(
-              child: _buildGridItemImage(context, images[0], fixedHeight: fixedHeight),
+              child: _buildGridItemImage(context, images[0],
+                  fixedHeight: fixedHeight),
             ),
             gap.hGap,
             Expanded(
-              child: _buildGridItemImage(context, images[1], fixedHeight: fixedHeight),
+              child: _buildGridItemImage(context, images[1],
+                  fixedHeight: fixedHeight),
             ),
           ],
         ),
@@ -2245,35 +2285,37 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
         Row(
           children: [
             Expanded(
-              child: _buildGridItemImage(context, images[2], fixedHeight: fixedHeight),
+              child: _buildGridItemImage(context, images[2],
+                  fixedHeight: fixedHeight),
             ),
             gap.hGap,
             Expanded(
-              child: _buildGridItemImage(context, images[3], fixedHeight: fixedHeight),
+              child: _buildGridItemImage(context, images[3],
+                  fixedHeight: fixedHeight),
             ),
           ],
         ),
       ],
     );
   }
-  
+
   // 辅助方法：构建多图网格
   Widget _buildImageGrid(BuildContext context, List<dom.Element> images) {
     // 统一使用更大的间距
     const gap = 6.0;
     const columns = 3; // 固定3列
     const gridItemHeight = 120.0; // 每行固定高度
-    
+
     // 计算行数
     final rows = (images.length / columns).ceil();
-    
+
     return Column(
       children: List.generate(rows, (rowIndex) {
         final startIndex = rowIndex * columns;
-        final endIndex = (startIndex + columns > images.length) 
-            ? images.length 
+        final endIndex = (startIndex + columns > images.length)
+            ? images.length
             : startIndex + columns;
-        
+
         return Padding(
           padding: EdgeInsets.only(bottom: rowIndex < rows - 1 ? gap : 0),
           child: Row(
@@ -2285,7 +2327,8 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
                   padding: EdgeInsets.only(
                     right: colIndex < endIndex - startIndex - 1 ? gap : 0,
                   ),
-                  child: _buildGridItemImage(context, images[index], fixedHeight: gridItemHeight),
+                  child: _buildGridItemImage(context, images[index],
+                      fixedHeight: gridItemHeight),
                 ),
               );
             }),
@@ -2296,10 +2339,11 @@ class HtmlWidget extends GetView<HtmlController> with ToastMixin {
   }
 
   // 辅助方法：构建固定高度的单张图片
-  Widget _buildGridItemImage(BuildContext context, dom.Element imgElement, {double fixedHeight = 120}) {
+  Widget _buildGridItemImage(BuildContext context, dom.Element imgElement,
+      {double fixedHeight = 120}) {
     final src = imgElement.attributes['src'];
     if (src == null) return const SizedBox.shrink();
-    
+
     return GestureDetector(
       onTap: () => showImagePreview(context, src),
       child: Container(
@@ -2345,6 +2389,7 @@ class HtmlController extends BaseController {
   final postId = 0.obs;
   final _apiService = Get.find<ApiService>();
   RxMap<String, PreviewData> datas = RxMap<String, PreviewData>();
+  final Set<String> processedPollIds = {};
 
   // 存储引用内容的Map，key为"topicId:postId"格式
   final RxMap<String, String> quotedContents = RxMap<String, String>();
@@ -2431,6 +2476,7 @@ class PollController extends BaseController {
   RxInt get voteCount => RxInt(poll.value.voters ?? 0);
   RxString get pollStatus => RxString(poll.value.status ?? '');
   RxList<PollOption> get options => RxList(poll.value.options ?? []);
+  RxString get title => RxString(poll.value.title ?? '');
 
   @override
   void onInit() {
@@ -2463,14 +2509,14 @@ class PollController extends BaseController {
 
   void updateSelectedOptions() {
     selectedOptionIds.clear();
-
+    hasVoted.value = false;
+    
     // 如果有vote数据，将其添加到selectedOptionIds
     if (poll.value.vote != null && poll.value.vote!.isNotEmpty) {
+      // 处理投票数据
       selectedOptionIds.addAll(poll.value.vote!);
       hasVoted.value = true;
-    } else {
-      hasVoted.value = false;
-    }
+    } 
   }
 
   String getVoterType(String optionId) {
@@ -2516,30 +2562,31 @@ class PollController extends BaseController {
     try {
       isLoadingMoreVoters.value = true;
 
+      for (final optionId in selectedOptionIds) {
       final response = await _apiService.getPollVoters(
         pollName: poll.value.name ?? '',
-        page: votersPage[selectedOptionIds.first] ?? 1,
+        page: votersPage[optionId] ?? 1,
         limit: votersPerPage,
-        optionId: selectedOptionIds.first,
+        optionId: optionId,
         postId: poll.value.postId,
       );
-
-      if (response.voters != null) {
-        for (final optionId in selectedOptionIds) {
-          if (response.voters!.containsKey(optionId) && response.voters![optionId] != null) {
-            final newVoters = response.voters![optionId]!;
-            if (newVoters.isNotEmpty) {
-              // 更新页码
-              votersPage[optionId] = (votersPage[optionId] ?? 1) + 1;
-              if (!voters.containsKey(optionId)) {
-                voters[optionId] = RxList<PollVoter>([]);
-              }
-              
-              voters[optionId]!.addAll(newVoters);
-            }
-          }
-        }
+      
+      if (response.voters != null && 
+          response.voters!.containsKey(optionId) &&
+          response.voters![optionId] != null) {
         
+        final newVoters = response.voters![optionId]!;
+        if (newVoters.isNotEmpty) {
+          // 更新页码
+          votersPage[optionId] = (votersPage[optionId] ?? 1) + 1;
+          if (!voters.containsKey(optionId)) {
+            voters[optionId] = RxList<PollVoter>([]);
+          }
+          
+          voters[optionId]!.addAll(newVoters);
+        }
+      }
+
         voters.refresh();
       }
     } catch (e, s) {

@@ -1,6 +1,7 @@
 class HttpConfig {
   /// 默认配置
   static const String baseUrl = 'https://linux.do/';
+  static const String otherUrl = 'https://ld.rrrc.me';
   static const String domain = 'linux.do';
   static const int connectTimeout = 20000;
   static const int receiveTimeout = 25000;
@@ -26,4 +27,5 @@ class HttpConfig {
   static const String networkErrorMessage = "网络连接错误";
   static const String timeoutMessage = "请求超时";
 
+  static const String iosAppId = '123456789';
 }

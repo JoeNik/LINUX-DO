@@ -355,12 +355,15 @@ Map<String, dynamic> _$BookmarksToJson(Bookmarks instance) => <String, dynamic>{
     };
 
 PollsVotes _$PollsVotesFromJson(Map<String, dynamic> json) => PollsVotes(
-      poll: (json['poll'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      votes: (json['votes'] as Map<String, dynamic>).map(
+        (k, e) =>
+            MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
+      ),
     );
 
 Map<String, dynamic> _$PollsVotesToJson(PollsVotes instance) =>
     <String, dynamic>{
-      'poll': instance.poll,
+      'votes': instance.votes,
     };
 
 Polls _$PollsFromJson(Map<String, dynamic> json) => Polls(

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/models/topic_detail.dart';
+import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/widgets/html/html_widget.dart';
 
 import '../topic_detail_controller.dart';
@@ -146,10 +149,14 @@ class _PostBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (post.polls != null && post.polls!.isNotEmpty) {
-      final poll = post.polls?.first;
-      poll?.vote = post.polls_votes?.poll ?? [];
-      poll?.postId = post.id;
-      Get.put(PollController(poll!), tag: 'poll_${post.polls!.first.id}');
+      for (var poll in post.polls!) {
+        if (Get.isRegistered<PollController>(tag: 'poll_${poll.id}')) {
+          continue;
+        }
+        poll.postId = post.id;
+        poll.vote = post.polls_votes?.votes[poll.name ?? 'poll'];
+        Get.put(PollController(poll), tag: 'poll_${poll.id}');
+      }
     }
     return HtmlWidget(
       html: post.cooked ?? '',

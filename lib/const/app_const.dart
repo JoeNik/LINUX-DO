@@ -263,6 +263,8 @@ class _Settings {
   String get save => '保存';
   String get change => '更换';
   String get none => '无';
+  String get updateNow => '立即更新';
+  String get cancelUpdate => '暂不更新';
 
   // 编辑资料
   String get basicInfo => '基本信息';

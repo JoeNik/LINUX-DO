@@ -196,77 +196,77 @@ class NetClient {
     ));
 
     // 添加日志拦截器
-    // _dio.interceptors.add(
-    //   InterceptorsWrapper(
-    //     onRequest: (options, handler) {
-    //       final sb = StringBuffer();
-    //       sb.writeln(
-    //           '┌─────────────────────────── Request ───────────────────────────');
-    //       sb.writeln('│ ${options.method} ${options.uri}');
-    //       sb.writeln('│ Headers:');
-    //       options.headers.forEach((key, value) {
-    //         sb.writeln('│   $key: $value');
-    //       });
-    //       if (options.data != null) {
-    //         sb.writeln('│ Body: ${options.data}');
-    //       }
-    //       if (options.queryParameters.isNotEmpty) {
-    //         sb.writeln('│ Query: ${options.queryParameters}');
-    //       }
-    //       sb.writeln(
-    //           '└─────────────────────────────────────────────────────────────────────');
-    //       l.d(sb.toString());
-    //       return handler.next(options);
-    //     },
-    //     onResponse: (response, handler) {
-    //       final sb = StringBuffer();
-    //       sb.writeln(
-    //           '┌─────────────────────────── Response ───────────────────────────');
-    //       sb.writeln('│ Status: ${response.statusCode}');
-    //       sb.writeln('│ Headers:');
-    //       response.headers.forEach((name, values) {
-    //         sb.writeln('│   $name: ${values.join(", ")}');
-    //       });
-    //       sb.writeln('│ Body: ${response.data}');
-    //       sb.writeln(
-    //           '└─────────────────────────────────────────────────────────────────────');
-    //       l.d(sb.toString());
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          final sb = StringBuffer();
+          sb.writeln(
+              '┌─────────────────────────── Request ───────────────────────────');
+          sb.writeln('│ ${options.method} ${options.uri}');
+          sb.writeln('│ Headers:');
+          options.headers.forEach((key, value) {
+            sb.writeln('│   $key: $value');
+          });
+          if (options.data != null) {
+            sb.writeln('│ Body: ${options.data}');
+          }
+          if (options.queryParameters.isNotEmpty) {
+            sb.writeln('│ Query: ${options.queryParameters}');
+          }
+          sb.writeln(
+              '└─────────────────────────────────────────────────────────────────────');
+          l.d(sb.toString());
+          return handler.next(options);
+        },
+        onResponse: (response, handler) {
+          final sb = StringBuffer();
+          sb.writeln(
+              '┌─────────────────────────── Response ───────────────────────────');
+          sb.writeln('│ Status: ${response.statusCode}');
+          sb.writeln('│ Headers:');
+          response.headers.forEach((name, values) {
+            sb.writeln('│   $name: ${values.join(", ")}');
+          });
+          sb.writeln('│ Body: ${response.data}');
+          sb.writeln(
+              '└─────────────────────────────────────────────────────────────────────');
+          l.d(sb.toString());
 
-    //       return handler.next(response);
-    //     },
-    //     onError: (error, handler) {
-    //       final sb = StringBuffer();
-    //       sb.writeln(
-    //           '┌─────────────────────────── Request Error ───────────────────────────');
-    //       sb.writeln(
-    //           '│ 请求类型: ${error.requestOptions.method} URL: ${error.requestOptions.uri}');
-    //       sb.writeln('│ Headers:');
-    //       error.requestOptions.headers.forEach((key, value) {
-    //         sb.writeln('│   $key: $value');
-    //       });
-    //       if (error.requestOptions.data != null) {
-    //         sb.writeln('│ 请求 Data: ${error.requestOptions.data}');
-    //       }
-    //       sb.writeln('│ 响应 Code: ${error.response?.statusCode}');
-    //       if (error.response?.headers != null) {
-    //         sb.writeln('│ 响应 Headers:');
-    //         error.response!.headers.forEach((name, values) {
-    //           sb.writeln('│   $name: ${values.join(", ")}');
-    //         });
-    //       }
-    //       if (error.response?.data != null) {
-    //         sb.writeln('│ 响应 Data: ${error.response?.data}');
-    //       }
-    //       if (error.message != null) {
-    //         sb.writeln('│ Error: ${error.message}');
-    //       }
-    //       sb.writeln(
-    //           '└─────────────────────────────────────────────────────────────────────');
-    //       l.e(sb.toString());
-    //       return handler.next(error);
-    //     },
-    //   ),
-    // );
+          return handler.next(response);
+        },
+        onError: (error, handler) {
+          final sb = StringBuffer();
+          sb.writeln(
+              '┌─────────────────────────── Request Error ───────────────────────────');
+          sb.writeln(
+              '│ 请求类型: ${error.requestOptions.method} URL: ${error.requestOptions.uri}');
+          sb.writeln('│ Headers:');
+          error.requestOptions.headers.forEach((key, value) {
+            sb.writeln('│   $key: $value');
+          });
+          if (error.requestOptions.data != null) {
+            sb.writeln('│ 请求 Data: ${error.requestOptions.data}');
+          }
+          sb.writeln('│ 响应 Code: ${error.response?.statusCode}');
+          if (error.response?.headers != null) {
+            sb.writeln('│ 响应 Headers:');
+            error.response!.headers.forEach((name, values) {
+              sb.writeln('│   $name: ${values.join(", ")}');
+            });
+          }
+          if (error.response?.data != null) {
+            sb.writeln('│ 响应 Data: ${error.response?.data}');
+          }
+          if (error.message != null) {
+            sb.writeln('│ Error: ${error.message}');
+          }
+          sb.writeln(
+              '└─────────────────────────────────────────────────────────────────────');
+          l.e(sb.toString());
+          return handler.next(error);
+        },
+      ),
+    );
   }
 
   Future<void> _handleCookies(Response response) async {
@@ -294,7 +294,7 @@ class NetClient {
           // 解析 forum session
           final sessionCookie = _parseSessionCookie(cookieString);
           if (sessionCookie != null) {
-            l.d('保存 session cookie: ${sessionCookie.value}');
+            //l.d('保存 session cookie: ${sessionCookie.value}');
             await cookieJar.saveFromResponse(uri, [sessionCookie]);
           }
         }

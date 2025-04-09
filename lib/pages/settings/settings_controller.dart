@@ -102,6 +102,7 @@ class SettingsController extends BaseController {
     await StorageManager.remove(AppConst.identifier.name);
     Get.find<GlobalController>().setIsLogin(false);
     Get.find<GlobalController>().setIsAnonymousMode(false);
+    StorageManager.setData(AppConst.identifier.isAnonymousMode, false);
     Get.offAllNamed(Routes.LOGIN);
   }
 

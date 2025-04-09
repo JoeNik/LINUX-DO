@@ -48,7 +48,20 @@ class Birthday {
       _$BirthdayFromJson(json);
   Map<String, dynamic> toJson() => _$BirthdayToJson(this);
 
-  String getAvatar(int size) {
-    return '${HttpConfig.baseUrl}${avatarTemplate.replaceAll('{size}', '$size')}';
+    String get avatarUrl {
+    if (animatedAvatar != null && animatedAvatar!.isNotEmpty) {
+      if (animatedAvatar!.startsWith('http://') || animatedAvatar!.startsWith('https://')) {
+        return animatedAvatar!;
+      }
+      return '${HttpConfig.baseUrl}${animatedAvatar!.replaceAll('{size}', '80')}';
+    }
+
+    if (avatarTemplate == null || avatarTemplate!.isEmpty) {
+      return '';
+    }
+    if (avatarTemplate!.startsWith('http://') || avatarTemplate!.startsWith('https://')) {
+      return avatarTemplate!;
+    }
+    return '${HttpConfig.baseUrl}${avatarTemplate!.replaceAll('{size}', '80')}';
   }
 } 

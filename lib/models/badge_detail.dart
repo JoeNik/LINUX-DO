@@ -131,11 +131,12 @@ class BadgeDetail {
   });
 
   String getImageUrl() {
-    if (imageUrl != null) {
-      return '${HttpConfig.baseUrl}$imageUrl';
+    if (imageUrl!.startsWith('http://') || imageUrl!.startsWith('https://')) {
+      return imageUrl!;
     }
-    return '';
+    return '${HttpConfig.baseUrl}${imageUrl!.replaceAll('{size}', '80')}';
   }
+
 
   // 添加一些随机的颜色字符串
   final List<String> randomColors = [

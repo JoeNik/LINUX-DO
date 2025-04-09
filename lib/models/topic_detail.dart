@@ -294,8 +294,20 @@ class Post {
   });
 
 
-  String getAvatarUrl() {
-    return '${HttpConfig.baseUrl}${avatarTemplate!.replaceAll("{size}", "62")}';
+  String get avatarUrl {
+    if (animatedAvatar != null && animatedAvatar!.isNotEmpty) {
+      if (animatedAvatar!.startsWith('http://') || animatedAvatar!.startsWith('https://')) {
+        return animatedAvatar!;
+      }
+      return '${HttpConfig.baseUrl}${animatedAvatar!.replaceAll('{size}', '62')}';
+    }
+    if (avatarTemplate == null || avatarTemplate!.isEmpty) {
+      return '';
+    }
+    if (avatarTemplate!.startsWith('http://') || avatarTemplate!.startsWith('https://')) {
+      return avatarTemplate!;
+    }
+    return '${HttpConfig.baseUrl}${avatarTemplate!.replaceAll('{size}', '62')}';
   }
 
   bool isWebMaster() {
@@ -730,7 +742,19 @@ class PollVoter {
   }
 
   String getAvatarUrl() {
-    return '${HttpConfig.baseUrl}${avatar_template!.replaceAll("{size}", "40")}';
+    if (animated_avatar != null && animated_avatar!.isNotEmpty) {
+      if (animated_avatar!.startsWith('http://') || animated_avatar!.startsWith('https://')) {
+        return animated_avatar!;
+      }
+      return '${HttpConfig.baseUrl}${animated_avatar!.replaceAll('{size}', '40')}';
+    }
+    if (avatar_template == null || avatar_template!.isEmpty) {
+      return '';
+    }
+    if (avatar_template!.startsWith('http://') || avatar_template!.startsWith('https://')) {
+      return avatar_template!;
+    }
+    return '${HttpConfig.baseUrl}${avatar_template!.replaceAll('{size}', '40')}';
   }
 
   Map<String, dynamic> toJson() {

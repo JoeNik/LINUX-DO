@@ -108,12 +108,36 @@ class UserAction {
     required this.hidePresence,
   });
 
-  String getAvatar(int size) {
-    return '${HttpConfig.baseUrl}${avatarTemplate?.replaceAll('{size}', '$size')}';
+  String get avatarUrl {
+    if (avatarTemplate == null || avatarTemplate!.isEmpty) {
+      return '';
+    }
+    if (avatarTemplate!.startsWith('http://') || avatarTemplate!.startsWith('https://')) {
+      return avatarTemplate!;
+    }
+    if (actingAvatarTemplate == null || actingAvatarTemplate!.isEmpty) {
+      return '';
+    }
+    if (actingAvatarTemplate!.startsWith('http://') || actingAvatarTemplate!.startsWith('https://')) {
+      return actingAvatarTemplate!;
+    }
+    return '${HttpConfig.baseUrl}${actingAvatarTemplate!.replaceAll('{size}', '100')}';
   }
 
   String getAvatarUrl() {
-    return '${HttpConfig.baseUrl}${actingAvatarTemplate?.replaceAll("{size}", "62")}';
+    if (avatarTemplate == null || avatarTemplate!.isEmpty) {
+      return '';
+    }
+    if (avatarTemplate!.startsWith('http://') || avatarTemplate!.startsWith('https://')) {
+      return avatarTemplate!;
+    }
+    if (actingAvatarTemplate == null || actingAvatarTemplate!.isEmpty) {
+      return '';
+    }
+    if (actingAvatarTemplate!.startsWith('http://') || actingAvatarTemplate!.startsWith('https://')) {
+      return actingAvatarTemplate!;
+    }
+    return '${HttpConfig.baseUrl}${actingAvatarTemplate!.replaceAll('{size}', '62')}';
   }
 
   bool isWebMaster() {

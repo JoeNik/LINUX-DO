@@ -1,4 +1,5 @@
 import 'package:linux_do/net/http_config.dart';
+import 'package:linux_do/utils/log.dart';
 import '../models/topic_model.dart';
 
 class UserCache {
@@ -23,7 +24,14 @@ class UserCache {
     if (users == null) return;
     for (final user in users) {
       _users[user.id] = user;
-      _avatarUrls[user.id] = '${HttpConfig.baseUrl}${user.avatarTemplate!.replaceAll("{size}", "62")}';
+      if (user.avatarTemplate!.startsWith('http://') || user.avatarTemplate!.startsWith('https://')) {
+        final url = user.avatarTemplate!;
+        final protocol = url.startsWith('https://') ? 'https://' : 'http://';
+        final path = url.substring(protocol.length);
+        _avatarUrls[user.id] = protocol + path.replaceAll(RegExp(r'/+'), '/');
+      } else {
+        _avatarUrls[user.id] = '${HttpConfig.baseUrl}${user.avatarTemplate!.replaceAll("{size}", "62")}';
+      }
     }
   }
 

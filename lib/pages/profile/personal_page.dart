@@ -191,7 +191,7 @@ class PersonalPage extends GetView<PersonalController> {
                                           color: AppColors.white, width: 1.w),
                                       borderRadius: BorderRadius.circular(80.w)),
                                   child: CachedImage(
-                                    imageUrl: user.getAvatar(60),
+                                    imageUrl: user.avatarUrl,
                                     circle: !user.isWebMaster(),
                                     width: 30.w,
                                     height: 30.w,
@@ -325,7 +325,7 @@ class PersonalPage extends GetView<PersonalController> {
           final topic = topics[index];
           return TopicItem(
             topic: topic,
-            avatarUrl: user?.getAvatar(120),
+            avatarUrl: user?.avatarUrl,
             nickName: user?.name,
             username: user?.username,
             avatarUrls: controller.getAvatarUrls(topic),
@@ -367,7 +367,7 @@ class PersonalPage extends GetView<PersonalController> {
                       color: Theme.of(context).primaryColor, width: 2.w),
                   borderRadius: BorderRadius.circular(45.w)),
               child: CachedImage(
-                imageUrl: user.getAvatar(120),
+                imageUrl: user.avatarUrl,
                 circle: true,
                 width: 50.w,
                 height: 50.w,

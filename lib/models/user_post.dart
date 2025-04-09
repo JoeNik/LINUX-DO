@@ -66,11 +66,20 @@ class UserPost {
     required this.topic,
   });
 
-  String getAvatarUrl() {
+  String get avatarUrl {
     if (user.animatedAvatar != null) {
+      if (user.animatedAvatar!.startsWith('http://') || user.animatedAvatar!.startsWith('https://')) {
+        return user.animatedAvatar!;
+      }
       return '${HttpConfig.baseUrl}${user.animatedAvatar?.replaceFirst('{size}', '100') ?? ''}';
     }
-    return '${HttpConfig.baseUrl}${user.avatarTemplate?.replaceFirst('{size}', '100') ?? ''}';
+    if (user.avatarTemplate == null || user.avatarTemplate!.isEmpty) {
+      return '';
+    }
+    if (user.avatarTemplate!.startsWith('http://') || user.avatarTemplate!.startsWith('https://')) {
+      return user.avatarTemplate!;
+    }
+    return '${HttpConfig.baseUrl}${user.avatarTemplate!.replaceFirst('{size}', '100') ?? ''}';
   }
 
   bool isWebMaster() {

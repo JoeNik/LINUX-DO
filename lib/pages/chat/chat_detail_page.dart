@@ -4,6 +4,7 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_colors.dart';
+import 'package:linux_do/const/app_images.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/widgets/cached_image.dart';
 import 'package:linux_do/widgets/dis_loading.dart';
@@ -26,7 +27,10 @@ class ChatDetailPage extends GetView<ChatDetailController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(controller.channel.title ?? ''),
+        title: Text(
+          controller.channel.title ?? '',
+          style: TextStyle(fontSize: 14.w, fontWeight: FontWeight.w500),
+        ),
         centerTitle: true,
         actions: [
           // IconButton(
@@ -43,41 +47,106 @@ class ChatDetailPage extends GetView<ChatDetailController> {
           return const Center(child: DisSquareLoading());
         }
 
-        return Chat(
-          messageWidthRatio: 0.68,
-          messages: controller.chatMessages,
-          onSendPressed: controller.sendMessage,
-          onAttachmentPressed: controller.handleFileSelection,
-          user: controller.currentUser,
-          theme:
-              isDark ? _getDarkChatTheme(context) : _getLightChatTheme(context),
-          showUserAvatars: true,
-          showUserNames: true,
-          dateLocale: 'zh_CN',
-          onEndReached: controller.loadMorePastMessages,
-          onEndReachedThreshold: 0.3,
-          inputOptions: const InputOptions(
-            sendButtonVisibilityMode: SendButtonVisibilityMode.always,
-          ),
-          emptyState: Center(
-            child: Text(
-              '暂无消息，发送一条消息开始聊天吧',
-              style: TextStyle(color: Theme.of(context).hintColor),
-            ),
-          ),
-          avatarBuilder: (author) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 4).w,
-              child: CachedImage(
-                imageUrl: author.imageUrl,
-                width: 32,
-                height: 32,
-                circle: int.parse(author.id) == 1,
-                borderRadius: BorderRadius.circular(16.w),
-                showBorder: true,
+        return Stack(
+          children: [
+            Chat(
+              messageWidthRatio: 0.68,
+              messages: controller.chatMessages,
+              onSendPressed: controller.sendMessage,
+              onAttachmentPressed: controller.isRobotChat.value
+                  ? null
+                  : controller.handleFileSelection,
+              user: controller.currentUser,
+              theme: isDark
+                  ? _getDarkChatTheme(context)
+                  : _getLightChatTheme(context),
+              showUserAvatars: true,
+              showUserNames: true,
+              dateLocale: 'zh_CN',
+              onEndReached: controller.isRobotChat.value
+                  ? null
+                  : controller.loadMorePastMessages,
+              onEndReachedThreshold: 0.3,
+              inputOptions: const InputOptions(
+                sendButtonVisibilityMode: SendButtonVisibilityMode.always,
               ),
-            );
-          },
+              emptyState: Center(
+                child: Text(
+                  '暂无消息，发送一条消息开始聊天吧',
+                  style: TextStyle(color: Theme.of(context).hintColor),
+                ),
+              ),
+              avatarBuilder: (author) {
+                final isRobot = author.id == 'robot';
+                return Padding(
+                  padding: const EdgeInsets.only(right: 4).w,
+                  child: isRobot
+                      ? Container(
+                          width: 32.w,
+                          height: 32.w,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(19.w),
+                            child: Image.asset(
+                              AppImages.robot,
+                              width: 24.w,
+                              height: 24.w,
+                            ),
+                          ),
+                        )
+                      : CachedImage(
+                          imageUrl: author.imageUrl,
+                          width: 32,
+                          height: 32,
+                          circle: int.parse(author.id) == 1,
+                          borderRadius: BorderRadius.circular(16.w),
+                          showBorder: true,
+                        ),
+                );
+              },
+            ),
+            if (controller.robotThinking.value)
+              Positioned(
+                bottom: 100.w,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.w),
+                    decoration: BoxDecoration(
+                      color:
+                          Theme.of(context).primaryColor.withValues(alpha: .8),
+                      borderRadius: BorderRadius.circular(20.w),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 16.w,
+                          height: 16.w,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Text(
+                          'LUNIX DO Bot 正在思考...',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13.w,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
         );
       }),
     );

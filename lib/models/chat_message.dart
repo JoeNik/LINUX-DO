@@ -56,9 +56,24 @@ class ChatMessage {
 
   String getAvatarUrl() {
     if (chatable.users?.isNotEmpty == true) {
-      return  '${HttpConfig.baseUrl}${chatable.users?.first.avatarTemplate?.replaceAll('{size}', '100') ?? ''}';
+      final user = chatable.users!.first;
+      final avatarTemplate = user.avatarTemplate;
+      if (avatarTemplate != null) {
+        if (avatarTemplate.startsWith('http://') || avatarTemplate.startsWith('https://')) {
+          return avatarTemplate;
+        }
+        return '${HttpConfig.baseUrl}${avatarTemplate.replaceAll('{size}', '100')}';
+      }
     }
-    return  '${HttpConfig.baseUrl}${chatable.uploadedLogo?.url ?? ''}';
+    final logo = chatable.uploadedLogo;
+    if (logo?.url != null) {
+      final url = logo!.url;
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+      return '${HttpConfig.baseUrl}$url';
+    }
+    return '';
   }
 
 

@@ -186,6 +186,10 @@ class _WebPageState extends State<WebPage> {
           if (result != null &&
               result.toString() != '{}' &&
               result.toString().isNotEmpty) {
+
+            // 更新请求头
+            NetClient.getDio.options.headers['x-csrf-token'] = result.toString();
+
             await StorageManager.setData(
                 AppConst.identifier.csrfToken, result.toString());
             break;

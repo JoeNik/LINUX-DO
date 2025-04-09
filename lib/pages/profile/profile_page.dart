@@ -8,6 +8,7 @@ import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/pages/profile/widget/profile_menu.dart';
 import 'package:linux_do/routes/app_pages.dart';
+import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/widgets/cached_image.dart';
 import 'package:linux_do/widgets/glowing_text_wweep.dart';
 import 'dart:ui';
@@ -49,6 +50,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
         final expandedHeight =
             userInfo?.user?.backgroundUrl != null ? 380.w : 280.w;
         final user = userInfo?.user;
+
         return NestedScrollView(
           physics: const BouncingScrollPhysics(),
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
@@ -166,7 +168,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                                       color: AppColors.white, width: 1.w),
                                   borderRadius: BorderRadius.circular(80.w)),
                               child: CachedImage(
-                                imageUrl: user?.getAvatar(120) ?? '',
+                                imageUrl: user?.avatarUrl ?? '',
                                 circle: true,
                                 width: 30.w,
                                 height: 30.w,
@@ -283,7 +285,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                           color: Theme.of(context).primaryColor, width: 2.w),
                       borderRadius: BorderRadius.circular(45.w)),
                   child: CachedImage(
-                    imageUrl: user?.getAvatar(240) ?? '',
+                    imageUrl: user?.avatarUrl ?? '',
                     circle: true,
                     width: 70.w,
                     height: 70.w,

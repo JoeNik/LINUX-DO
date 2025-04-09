@@ -4,6 +4,7 @@ import 'package:get/get.dart' hide Response;
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:linux_do/net/retry_interceptor.dart';
 import 'package:linux_do/utils/cloudflare_auth_service.dart';
 import 'package:linux_do/utils/device_util.dart';
 import 'package:path_provider/path_provider.dart';
@@ -125,6 +126,8 @@ class NetClient {
     // 清除所有现有的拦截器
     _dio.interceptors.clear();
 
+    _dio.interceptors.add(RetryInterceptor(dio: dio));
+
     // 添加 Cookie 管理拦截器
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
@@ -245,21 +248,13 @@ class NetClient {
             sb.writeln('│   $key: $value');
           });
           if (error.requestOptions.data != null) {
-            sb.writeln('│ 请求 Data: ${error.requestOptions.data}');
+            sb.writeln('│ Body: ${error.requestOptions.data}');
           }
-          sb.writeln('│ 响应 Code: ${error.response?.statusCode}');
-          if (error.response?.headers != null) {
-            sb.writeln('│ 响应 Headers:');
-            error.response!.headers.forEach((name, values) {
-              sb.writeln('│   $name: ${values.join(", ")}');
-            });
+          if (error.response != null) {
+            sb.writeln('│ Response Status: ${error.response?.statusCode}');
+            sb.writeln('│ Response Body: ${error.response?.data}');
           }
-          if (error.response?.data != null) {
-            sb.writeln('│ 响应 Data: ${error.response?.data}');
-          }
-          if (error.message != null) {
-            sb.writeln('│ Error: ${error.message}');
-          }
+          sb.writeln('│ Error: ${error.message}');
           sb.writeln(
               '└─────────────────────────────────────────────────────────────────────');
           l.e(sb.toString());
@@ -267,6 +262,9 @@ class NetClient {
         },
       ),
     );
+
+    // 最后添加重试拦截器，确保它能捕获到其他拦截器的错误
+    _dio.interceptors.add(RetryInterceptor(dio: _dio));
   }
 
   Future<void> _handleCookies(Response response) async {

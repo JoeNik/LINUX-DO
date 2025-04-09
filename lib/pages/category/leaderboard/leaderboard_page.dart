@@ -263,7 +263,7 @@ class LeaderboardPage extends GetView<LeaderboardController> {
                       ],
                     ),
                     child: CachedImage(
-                      imageUrl: top1.getAvatarUrl(),
+                      imageUrl: top1.avatarUrl,
                       width: bidSize,
                       height: bidSize,
                       circle: true,
@@ -319,7 +319,7 @@ class LeaderboardPage extends GetView<LeaderboardController> {
                       ],
                     ),
                     child: CachedImage(
-                      imageUrl: top3.getAvatarUrl(),
+                      imageUrl: top3.avatarUrl,
                       width: smallSize,
                       height: smallSize,
                       circle: true,
@@ -376,7 +376,7 @@ class LeaderboardPage extends GetView<LeaderboardController> {
                       ],
                     ),
                     child: CachedImage(
-                      imageUrl: top2.getAvatarUrl(),
+                      imageUrl: top2.avatarUrl,
                       width: smallSize,
                       height: smallSize,
                       circle: true,
@@ -510,7 +510,7 @@ class LeaderboardPage extends GetView<LeaderboardController> {
             width: 42.w,
             height: 42.w,
             child: CachedImage(
-              imageUrl: me?.user.getAvatarUrl() ?? '',
+              imageUrl: me?.user.avatarUrl ?? '',
               width: 42.w,
               height: 42.w,
               circle: true,
@@ -665,7 +665,7 @@ class LeaderboardPage extends GetView<LeaderboardController> {
             width: 42.w,
             height: 42.w,
             child: CachedImage(
-              imageUrl: item.getAvatarUrl(),
+              imageUrl: item.avatarUrl,
               width: 42.w,
               height: 42.w,
               circle: true,

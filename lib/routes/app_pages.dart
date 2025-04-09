@@ -79,7 +79,7 @@ class AppPages {
         Get.lazyPut(() => ChatListController());
         Get.lazyPut(() => ProfileController());
         Get.lazyPut(() => BookmarkService());
-        Get.lazyPut(() => FontSizeController());
+        Get.put(FontSizeController(), permanent: true);
       }),
     ),
 

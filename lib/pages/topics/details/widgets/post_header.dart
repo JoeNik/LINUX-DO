@@ -45,7 +45,7 @@ class _UserAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AvatarWidget(
-      avatarUrl: post.getAvatarUrl(),
+      avatarUrl: post.avatarUrl,
       size: 32.w,
       circle: !post.isWebMaster(),
       borderRadius: 4.w,

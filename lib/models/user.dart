@@ -3,6 +3,7 @@ import 'package:linux_do/models/user_action.dart';
 import 'package:linux_do/models/user_auth_token.dart';
 import 'package:linux_do/models/user_status.dart';
 import 'package:linux_do/net/http_config.dart';
+import 'package:linux_do/utils/log.dart';
 
 import 'badge_detail.dart';
 part 'user.g.dart';
@@ -384,15 +385,23 @@ class CurrentUser {
     return 'CurrentUser(id: $id, username: $username, customFields: $customFields)';
   }
 
-  String getAvatar(int size) {
-    return '${HttpConfig.baseUrl}${avatarTemplate?.replaceAll('{size}', '$size')}';
+  String get avatarUrl {
+    if (avatarTemplate == null || avatarTemplate!.isEmpty) {
+      return '';
+    }
+    if (avatarTemplate!.startsWith('http://') || avatarTemplate!.startsWith('https://')) {
+      return avatarTemplate!;
+    }
+    return '${HttpConfig.baseUrl}${avatarTemplate!.replaceAll('{size}', '100')}';
   }
 
   String? get backgroundUrl {
-    if (cardBackgroundUploadUrl != null) {
-      return '${HttpConfig.baseUrl}$cardBackgroundUploadUrl';
+    // 如果不包含https:// 则添加
+    if (cardBackgroundUploadUrl != null && !cardBackgroundUploadUrl!.startsWith('https://')) {
+      final tmpUrl = cardBackgroundUploadUrl!.replaceAll(RegExp(r'/+'), '/');
+      return '${HttpConfig.baseUrl}$tmpUrl';
     }
-    return null;
+    return cardBackgroundUploadUrl;
   }
 
     bool isWebMaster() {

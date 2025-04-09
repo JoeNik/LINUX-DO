@@ -148,10 +148,10 @@ class LikePage extends GetView<LikeController> {
     required User item,
     required bool isUser,
   }) {
-    final avatarUrl = item.getAvatarUrl();
+    final avatarUrl = item.avatarUrl;
     final username = item.username ?? '用户';
     final count = item.count?.toString() ?? '0';
-    final imageUrl = item.getFlairUrl();
+    final imageUrl = item.flairUrl;
     final displayName = item.name;
 
     return Container(

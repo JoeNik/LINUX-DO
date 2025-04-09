@@ -4,6 +4,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../controller/base_controller.dart';
 import '../../models/chat_message.dart';
 import '../../net/api_service.dart';
+import '../../net/http_config.dart';
 import '../../routes/app_pages.dart';
 import '../../utils/log.dart';
 
@@ -31,7 +32,51 @@ class ChatListController extends BaseController {
 
   final refreshController = RefreshController();
 
+  // 机器人ID
+  static const int robotId = -1;
+
   List<ChatMessage> get messages => _messages;
+
+  // 创建机器人聊天项
+  ChatMessage _createRobotChatItem() {
+    // 创建机器人用户
+    final robotUser = ChatUser(
+      id: robotId,
+      username: 'linux_assistant',
+      name: 'LUNIX DO Bot',
+      avatarTemplate: null,
+    );
+    
+    final chatableData = ChatableData(
+      group: false,
+      users: [robotUser],
+      uploadedLogo: null,
+    );
+    
+    final meta = Meta(
+      messageBusLastIds: MessageBusLastIds(
+        channelMessageBusLastId: 0,
+        newMessages: 0,
+        newMentions: 0,
+      ),
+      canJoinChatChannel: true,
+      canFlag: false,
+      userSilenced: false,
+      canModerate: false,
+      canDeleteSelf: false,
+      canDeleteOthers: false,
+    );
+    
+    return ChatMessage(
+      id: robotId,
+      allowChannelWideMentions: false,
+      chatable: chatableData,
+      chatableId: robotId,
+      chatableType: 'direct',
+      title: 'LUNIX DO Bot',
+      meta: meta,
+    );
+  }
 
   @override
   void onInit() {
@@ -87,14 +132,21 @@ class ChatListController extends BaseController {
 
       final response = await apiService.getChannels();
       
-      // 合并公共频道和私信
       _messages.clear();
+      
+      _messages.add(_createRobotChatItem());
+      
       _messages.addAll(response.publicChannels ?? []);
       _messages.addAll(response.directMessageChannels ?? []);
       
     } catch (e, s) {
       l.e('加载聊天列表失败 $e $s');
       showError(e.toString());
+      
+      if (_messages.isEmpty || !_messages.any((m) => m.id == robotId)) {
+        _messages.clear();
+        _messages.add(_createRobotChatItem());
+      }
     } finally {
       isLoading.value = false;
       refreshController.refreshCompleted();
@@ -103,6 +155,11 @@ class ChatListController extends BaseController {
 
   // 搜索变化
   void onSearchChanged(String value) {
+  }
+
+  // 判断是否是机器人聊天
+  bool isRobotChat(ChatMessage message) {
+    return message.id == robotId;
   }
 
   // 点击消息

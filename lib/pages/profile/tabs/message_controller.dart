@@ -33,7 +33,11 @@ class MessageController extends BaseController with Concatenated {
           if (message.posters?.isNotEmpty == true) {
             final lastPostUser = users.firstWhereOrNull((user) => user.id == message.posters?[0].userId);
             if (lastPostUser != null) {
-              message.avatarUrl = '${HttpConfig.baseUrl}${lastPostUser.avatarTemplate.replaceFirst('{size}', '70')}';
+              if (lastPostUser.avatarTemplate!.startsWith('http://') || lastPostUser.avatarTemplate!.startsWith('https://')) {
+                message.avatarUrl = lastPostUser.avatarTemplate;
+              } else {
+                message.avatarUrl = '${HttpConfig.baseUrl}${lastPostUser.avatarTemplate!.replaceFirst('{size}', '70')}';
+              }
               l.d('lastPostUserId: ${message.posters?[0].userId}, found user: ${lastPostUser.username}');
             }
           }

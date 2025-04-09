@@ -73,9 +73,18 @@ class User {
     this.animatedAvatar,
   });
 
-  String getAvatarUrl() {
+  String get avatarUrl {
     if (animatedAvatar != null) {
+      if (animatedAvatar!.startsWith('http://') || animatedAvatar!.startsWith('https://')) {
+        return animatedAvatar!;
+      }
       return '${HttpConfig.baseUrl}${animatedAvatar?.replaceFirst('{size}', '100')}';
+    }
+    if (avatarTemplate == null || avatarTemplate!.isEmpty) {
+      return '';
+    }
+    if (avatarTemplate!.startsWith('http://') || avatarTemplate!.startsWith('https://')) {
+      return avatarTemplate!;
     }
     return '${HttpConfig.baseUrl}${avatarTemplate?.replaceFirst('{size}', '100')}';
   }
@@ -83,6 +92,9 @@ class User {
   String? getFlairUrl() {
     if(flairUrl == null) {
       return null;
+    }
+    if (flairUrl!.startsWith('http://') || flairUrl!.startsWith('https://')) {
+      return flairUrl!;
     }
     return '${HttpConfig.baseUrl}${flairUrl?.replaceFirst('{size}', '100')}';
   }

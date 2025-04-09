@@ -67,7 +67,12 @@ class CategoryLogo {
     required this.height,
   });
 
-  String get imageUrl => url.startsWith('http') ? url : '${HttpConfig.baseUrl}$url';
+  String get imageUrl {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    return '${HttpConfig.baseUrl}$url';
+  }
 
   factory CategoryLogo.fromJson(Map<String, dynamic> json) => _$CategoryLogoFromJson(json);
   Map<String, dynamic> toJson() => _$CategoryLogoToJson(this);

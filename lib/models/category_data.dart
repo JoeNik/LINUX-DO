@@ -118,7 +118,10 @@ class Category {
 
   String getLogoUrl() {
     if (uploadedLogo == null) return '';
-    return '${HttpConfig.baseUrl}${uploadedLogo!.url}';
+    if (uploadedLogo!.url!.startsWith('http://') || uploadedLogo!.url!.startsWith('https://')) {
+      return uploadedLogo!.url!;
+    }
+    return '${HttpConfig.baseUrl}${uploadedLogo!.url!}';
   }
 
   factory Category.fromJson(Map<String, dynamic> json) =>

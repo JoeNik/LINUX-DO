@@ -43,8 +43,8 @@ Future<String> _determineInitialRoute() async {
 
   // 检查登录状态
   final hasLogin = await Get.find<GlobalController>().checkLoginStatus();
-
-  return hasLogin ? Routes.HOME : Routes.LOGIN;
+  final isAnonymousMode = StorageManager.getBool(AppConst.identifier.isAnonymousMode) ?? false;
+  return isAnonymousMode || hasLogin ? Routes.HOME : Routes.LOGIN;
 }
 
 

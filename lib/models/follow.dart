@@ -46,13 +46,21 @@ class Follow {
     this.animatedAvatar,
   });
 
-  // 获取指定尺寸的头像URL
-  String getAvatarUrl({int size = 100}) {
+  String get avatarUrl {
     if (animatedAvatar != null && animatedAvatar!.isNotEmpty) {
-      return '${HttpConfig.baseUrl}${animatedAvatar!.replaceAll('{size}', size.toString())}';
+      if (animatedAvatar!.startsWith('http://') || animatedAvatar!.startsWith('https://')) {
+        return animatedAvatar!;
+      }
+      return '${HttpConfig.baseUrl}${animatedAvatar!.replaceAll('{size}', '80')}';
     }
-    if (avatarTemplate == null) return '';
-    return '${HttpConfig.baseUrl}${avatarTemplate!.replaceAll('{size}', size.toString())}';
+
+    if (avatarTemplate == null || avatarTemplate!.isEmpty) {
+      return '';
+    }
+    if (avatarTemplate!.startsWith('http://') || avatarTemplate!.startsWith('https://')) {
+      return avatarTemplate!;
+    }
+    return '${HttpConfig.baseUrl}${avatarTemplate!.replaceAll('{size}', '80')}';
   }
 
   bool get isWebMaster => id == 1;

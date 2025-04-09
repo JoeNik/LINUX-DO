@@ -132,7 +132,7 @@ class FollowPage extends GetView<FollowController> {
   // 构建用户帖子卡片
   Widget _buildUserPostCard(BuildContext context, UserPost post) {
     final user = post.user;
-    final avatarUrl = user.getAvatarUrl();
+    final avatarUrl = user.avatarUrl;
     final username = user.username ?? '';
     final displayName = user.name ?? '无名大佬';
     final createdDate = DateTime.parse(post.createdAt);
@@ -444,7 +444,7 @@ class FollowPage extends GetView<FollowController> {
 
   // 构建关注/关注者用户卡片
   Widget _buildFollowUserCard(BuildContext context, Follow user, {required bool isFollowing}) {
-    final avatarUrl = user.getAvatarUrl();
+    final avatarUrl = user.avatarUrl;
     final username = user.username ?? '用户';
     final displayName = user.name == null || user.name!.isEmpty ? 'Anonymous Big Shot' : user.name;
     

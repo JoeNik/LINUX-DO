@@ -94,7 +94,7 @@ class _BrithdayTabViewState extends State<BrithdayTabView> with AutomaticKeepAli
           child: Row(
             children: [
               CachedImage(
-                imageUrl: birthday.getAvatar(120),
+                imageUrl: birthday.avatarUrl,
                 width: 70.w,
                 height: 70.w,
                 borderRadius: BorderRadius.only(

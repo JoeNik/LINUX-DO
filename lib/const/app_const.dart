@@ -158,6 +158,7 @@ class _StateConst {
 
 /// 标识常量
 class _Identifier {
+
   const _Identifier();
 
   String get token => 'token';
@@ -179,6 +180,8 @@ class _Identifier {
   String get listDensity => 'list_density';
 
   String get browserTips => 'browserTips';
+
+  String get isAnonymousMode => 'isAnonymousMode';
 }
 
 /// 登录页面文本

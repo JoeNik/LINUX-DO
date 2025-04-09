@@ -79,10 +79,14 @@ class NotificationItem {
   }
 
   String getAvatarUrl() {
-    if (actingUserAvatarTemplate.contains(HttpConfig.baseUrl)) {
-      return actingUserAvatarTemplate.replaceAll("{size}", "80");
+
+    if (actingUserAvatarTemplate == null || actingUserAvatarTemplate!.isEmpty) {
+      return '';
     }
-    return '${HttpConfig.baseUrl}${actingUserAvatarTemplate.replaceAll("{size}", "40")}';
+    if (actingUserAvatarTemplate!.startsWith('http://') || actingUserAvatarTemplate!.startsWith('https://')) {
+      return actingUserAvatarTemplate!;
+    }
+    return '${HttpConfig.baseUrl}${actingUserAvatarTemplate!.replaceAll('{size}', '80')}';
   }
 
     bool isWebMaster() {

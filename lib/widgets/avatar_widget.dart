@@ -249,7 +249,7 @@ class UserInfoCard extends GetView<UserInfoCardController> {
                   }
                 },
                 child: CachedImage(
-                  imageUrl: user?.getAvatar(80) ?? '',
+                  imageUrl: user?.avatarUrl ?? '',
                   width: 60,
                   height: 60,
                   circle: user?.id != 1,
@@ -594,15 +594,14 @@ class UserInfoCard extends GetView<UserInfoCardController> {
               html: user?.bioExcerpt ?? 'TA什么都没有留下~',
               fontSize: 11.w,
               customWidgetBuilder: (element) {
-                if (element.localName == 'img') {
-                  String? src = element.attributes['src'];
-                  if (src != null && src.startsWith('/')) {
-                    return Image.network(
-                      '${HttpConfig.baseUrl}$src',
-                      width: 20.w,
-                      height: 20.w,
-                    );
-                  }
+                final srcTmp = element.attributes['src'];
+                final src = srcTmp?.startsWith('http://') == true || srcTmp?.startsWith('https://') == true ? srcTmp : null;
+                if (element.localName == 'img' && src != null) {
+                  return Image.network(
+                    src,
+                    width: 20.w,
+                    height: 20.w,
+                  );
                 }
                 return const SizedBox();
               },
@@ -879,7 +878,7 @@ class UserInfoCard extends GetView<UserInfoCardController> {
               Row(
                 children: [
                   AvatarWidget(
-                    avatarUrl: user?.getAvatar(80) ?? '',
+                    avatarUrl: user?.avatarUrl ?? '',
                     size: 40.w,
                     username: username,
                     circle: user?.id != 1,

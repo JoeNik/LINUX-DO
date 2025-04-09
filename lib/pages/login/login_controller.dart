@@ -191,5 +191,6 @@ class LoginController extends BaseController {
     }
     Get.find<GlobalController>().setIsAnonymousMode(true);
     Get.offAllNamed(Routes.HOME);
+    StorageManager.setData(AppConst.identifier.isAnonymousMode, true);
   }
 }

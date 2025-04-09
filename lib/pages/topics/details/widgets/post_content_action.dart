@@ -32,7 +32,7 @@ class PostContentAction extends StatelessWidget {
         _buildIcon(context),
         10.hGap,
         AvatarWidget(
-          avatarUrl: post.getAvatarUrl(),
+          avatarUrl: post.avatarUrl,
           size: 22.w,
           circle: !post.isWebMaster(),
           borderRadius: 4.w,

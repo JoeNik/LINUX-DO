@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/models/topic_model.dart';
 import 'package:linux_do/pages/settings/font_size_controller.dart';
-import 'package:linux_do/pages/topics/tab_views/topic_item/topic_excerpt.dart';
 import 'package:linux_do/pages/topics/tab_views/topic_item/topic_footer.dart';
 import 'package:linux_do/pages/topics/tab_views/topic_item/topic_header.dart';
 import 'package:linux_do/pages/topics/tab_views/topic_item/topic_poster_avatar.dart';

@@ -86,7 +86,7 @@ class EditProfileController extends BaseController with ToastMixin {
   void _loadUserInfo() {
     final userInfo = _globalController.userInfo?.user;
     if (userInfo != null) {
-      avatarUrl.value = userInfo.getAvatar(200);
+      avatarUrl.value = userInfo.avatarUrl;
 
       // 获取已关联的账户
       final associatedAccounts = userInfo.associatedAccounts ?? [];

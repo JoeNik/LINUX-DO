@@ -22,6 +22,7 @@ class AppImages {
   static const String lOther = 'assets/images/l-other.png';
   static const String lMe = 'assets/images/l-me.png';
   static const String batteryQuarter = 'battery-quarter';
+  static const String robot = 'assets/images/robot.png';
 
 
   // 状态Icon

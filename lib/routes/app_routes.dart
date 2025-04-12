@@ -31,6 +31,9 @@ abstract class Routes {
   // 聊天详情页
   static const CHAT_DETAIL = '/chat/detail';
 
+  // 机器人聊天页面
+  static const ROBOT_CHAT = '/robot/chat';
+
   // 编辑资料页
   static const EDIT_PROFILE = '/profile/edit';
 

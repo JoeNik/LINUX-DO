@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.3+6
+version: 1.0.5+7
 license: MIT
 repository: https://github.com/R-lz/LINUX-DO
 
@@ -32,7 +32,6 @@ dependencies:
   keframe: ^3.0.0
   lazy_load_indexed_stack: ^1.2.1
   cupertino_icons: ^1.0.2
-  cached_network_image: ^3.3.1
   retrofit: ^4.0.3
   dio: ^5.4.0
   dio_cookie_manager: ^3.1.1
@@ -61,12 +60,7 @@ dependencies:
   photo_view: ^0.15.0
   image_picker: ^1.0.7
   crypto: ^3.0.3
-  # emoji_picker_flutter: ^4.3.0
   calendar_date_picker2: ^1.1.8
-  image_gallery_saver:
-    git:
-      url: https://github.com/R-lz/image_gallery_saver.git
-      ref: 467f4dcbce79c0779290a53b00d44efee027805c
   file_picker: ^8.3.3
   url_launcher: ^6.3.1
   flutter_markdown: ^0.6.18+2
@@ -83,7 +77,20 @@ dependencies:
   flutter_svg: ^2.0.17
   get_storage: ^2.1.1
   share_plus: ^10.1.4
-  in_app_update: ^4.2.3
+  flutter_keyboard_visibility: ^6.0.0
+  emoji_picker_flutter:
+    git:
+      url: https://github.com/R-lz/emoji_picker_flutter.git
+      ref: eef3d77b37701d45628f66702557a037d433eab0
+  image_gallery_saver:
+    git:
+      url: https://github.com/R-lz/image_gallery_saver.git
+      ref: 467f4dcbce79c0779290a53b00d44efee027805c
+  cached_network_image: 
+    git:
+      url: https://github.com/R-lz/flutter_cached_network_image.git
+      path: cached_network_image
+      ref: c2e1db8df0899cafc9e692617d4bb01c64a9863e
 
 dev_dependencies:
   flutter_test:
@@ -105,6 +112,7 @@ flutter:
     - assets/json/
     - assets/html/
     - assets/icons/
+    - assets/emojis/
   fonts:
     - family: DINPro
       fonts:

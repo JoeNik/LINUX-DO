@@ -192,6 +192,7 @@ class _WebPageState extends State<WebPage> {
 
             await StorageManager.setData(
                 AppConst.identifier.csrfToken, result.toString());
+            Get.find<GlobalController>().initService();
             break;
           } else {
             if (i < maxRetries - 1) {
@@ -209,7 +210,6 @@ class _WebPageState extends State<WebPage> {
 
         if (mounted) {
           Future.delayed(const Duration(milliseconds: 200), () {
-            Get.find<GlobalController>().fetchUserInfo();
             Get.back(result: true);
           });
         }

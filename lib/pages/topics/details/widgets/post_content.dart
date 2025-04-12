@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/models/topic_detail.dart';
-import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/widgets/html/html_widget.dart';
 
 import '../topic_detail_controller.dart';

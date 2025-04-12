@@ -1,5 +1,4 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:linux_do/utils/log.dart';
 
 import '../net/http_config.dart';
 

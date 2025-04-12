@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:dio/dio.dart';
 import '../utils/log.dart';
 
@@ -17,22 +18,25 @@ class RetryInterceptor extends Interceptor {
   final int maxRetries;
   final Duration initialDelay;
   final Duration maxDelay;
+  final Random _random = Random();
 
   RetryInterceptor({
     required this.dio,
-    this.maxRetries = 4,
+    this.maxRetries = 3, // 减少最大重试次数
     this.initialDelay = const Duration(seconds: 1),
-    this.maxDelay = const Duration(seconds: 10),
+    this.maxDelay = const Duration(seconds: 5),
   });
 
   bool _isValidResponse(Response? response) {
     if (response == null) return false;
     
     if (response.statusCode == 429) {
+      final retryAfter = int.tryParse(response.headers.value('Retry-After') ?? '60') ?? 60;
+      l.e('速率限制: $retryAfter 秒');
       return false;
     }
-    final contentType = response.headers.value('content-type') ?? '';
     
+    final contentType = response.headers.value('content-type') ?? '';
     if (contentType.toLowerCase().contains('text/html')) {
       return false;
     }
@@ -40,14 +44,22 @@ class RetryInterceptor extends Interceptor {
     return true;
   }
 
+  Duration _calculateDelay(int retryCount) {
+    // 使用指数退避算法，并添加随机抖动
+    final exponentialDelay = initialDelay * (1 << retryCount);
+    final jitter = Duration(milliseconds: _random.nextInt(1000));
+    final delay = exponentialDelay + jitter;
+    return delay > maxDelay ? maxDelay : delay;
+  }
+
   @override
   Future<void> onResponse(Response response, ResponseInterceptorHandler handler) async {
     if (!_isValidResponse(response)) {
-      
       final retryCount = response.requestOptions.extra['retryCount'] as int? ?? 0;
       
       if (retryCount < maxRetries) {
         final delay = _calculateDelay(retryCount);
+        l.d('重试请求 (${retryCount + 1}/$maxRetries)，等待 ${delay.inSeconds} 秒');
         
         await Future.delayed(delay);
         final options = Options(
@@ -68,15 +80,12 @@ class RetryInterceptor extends Interceptor {
             options: options,
           );
           
-          // 验证响应是否有效
           if (_isValidResponse(newResponse)) {
             return handler.next(newResponse);
           } else {
-            // 递归调用自身，继续重试
             return onResponse(newResponse, handler);
           }
         } catch (e) {
-          // 转为错误处理
           if (e is DioException) {
             return handler.reject(e);
           }
@@ -88,7 +97,7 @@ class RetryInterceptor extends Interceptor {
           );
         }
       } else {
-        l.e('达到最大重试次数');
+        l.e('达到最大重试次数 ($maxRetries)');
         final retryAfter = int.tryParse(
           response.headers.value('Retry-After') ?? '60'
         ) ?? 60;
@@ -101,22 +110,19 @@ class RetryInterceptor extends Interceptor {
       }
     }
     
-    // 如果响应有效，直接传递给下一个拦截器
     return handler.next(response);
   }
 
   @override
   Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
-    // 保留 onError 处理，以防有错误无法通过 onResponse 捕获
-    
-    // 检查是否是429或收到了HTML响应
     if (err.response?.statusCode == 429 || !_isValidResponse(err.response)) {
       final retryCount = err.requestOptions.extra['retryCount'] as int? ?? 0;
       
       if (retryCount < maxRetries) {
         final delay = _calculateDelay(retryCount);
+        l.d('重试请求 (${retryCount + 1}/$maxRetries)，等待 ${delay.inSeconds} 秒');
         
-        await Future.delayed(delay);
+        await Future.delayed(delay + const Duration(seconds: 2));
         final options = Options(
           method: err.requestOptions.method,
           headers: err.requestOptions.headers,
@@ -135,11 +141,9 @@ class RetryInterceptor extends Interceptor {
             options: options,
           );
           
-          // 验证响应是否有效
           if (_isValidResponse(response)) {
             return handler.resolve(response);
           } else {
-            // 如果响应无效，继续重试
             return onError(
               DioException(
                 requestOptions: err.requestOptions,
@@ -168,10 +172,5 @@ class RetryInterceptor extends Interceptor {
       }
     }
     return handler.next(err);
-  }
-
-  Duration _calculateDelay(int retryCount) {
-    final delay = initialDelay * (1 << retryCount);
-    return delay > maxDelay ? maxDelay : delay;
   }
 } 

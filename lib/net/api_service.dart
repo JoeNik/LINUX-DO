@@ -70,6 +70,20 @@ abstract class ApiService {
     @Query("forceLoad") bool forceLoad = true,
   });
 
+
+  /// 获取机器人私信回复详情
+  @GET("t/{topic_id}.json")
+  Future<TopicDetail> getRobotTopicDetail(
+    @Path("topic_id") String topicId, {
+    @Query("track_visit") bool trackVisit = true,
+    @Query("forceLoad") bool forceLoad = true,
+  });
+
+
+  /// 获取单个帖子内容
+  @GET("posts/{post_id}")
+  Future<Post> getPostContent(@Path("post_id") String postId);
+
   /// 获取帖子详情 - 加载指定帖子
   @GET("t/{id}/posts.json")
   @DioResponseType(ResponseType.json)
@@ -190,8 +204,7 @@ abstract class ApiService {
 
   /// 消息/私信
   @GET('topics/private-messages/{username}.json')
-  Future<MessageResponse> getMessages(@Path("username") String username,
-      @Query('ascending') bool ascending, @Query('order') String order);
+  Future<MessageResponse> getMessages(@Path("username") String username);
 
   /// 用户徽章
   @GET('user-badges/{current}.json')
@@ -292,7 +305,7 @@ abstract class ApiService {
   @POST('posts')
   @FormUrlEncoded()
   Future<CreatePostResponse> createPost({
-    @Field('title') required String title,
+    @Field('title') String? title,
     @Field('raw') required String content,
     @Field('category') int? categoryId,
     @Field('unlist_topic') bool? unlistTopic = false,
@@ -304,9 +317,11 @@ abstract class ApiService {
     @Field('tags[]') List<String>? tags,
     @Field('image_sizes') Map<String, ImageSize>? imageSizes,
     @Field('target_recipients') String? targetRecipients,
+    @Field('meta_data[ai_persona_id]') int? aiPersonaId,
+    @Field('topic_id') int? topicId,
   });
 
-  /// 修改主题
+  /// 修改主题meta_data[ai_persona_id]: 8
   @PUT('posts/{id}')
   @FormUrlEncoded()
   Future<CreatePostResponse> updateTopic(

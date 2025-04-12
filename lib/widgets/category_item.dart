@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_spacing.dart';
+import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/utils/expand/string_expand.dart';
-import '../const/app_colors.dart';
 import '../models/category_data.dart';
-import 'cached_image.dart';
 
 class CategoryItem extends StatelessWidget {
   final Category category;
@@ -106,28 +105,29 @@ class CategoryItem extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(0),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(4.w),
-                  ),
-                  child: CachedImage(
-                    imageUrl: icon,
-                    width: 24.w,
-                    height: 24.w,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                8.hGap,
+                // Container(
+                //   padding: const EdgeInsets.all(0),
+                //   decoration: BoxDecoration(
+                //     color: AppColors.white,
+                //     borderRadius: BorderRadius.circular(4.w),
+                //   ),
+                //   child: CachedImage(
+                //     imageUrl: icon,
+                //     width: 24.w,
+                //     height: 24.w,
+                //     fit: BoxFit.cover,
+                //   ),
+                // ),
+                // 8.hGap,
                 // Icon(Icons.lock_outline, size: 14.w, color: textColor),
                 // 4.hGap,
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 14.w,
+                    fontSize: 13.w,
                     color: Theme.of(context).textTheme.titleLarge?.color,
                     fontWeight: FontWeight.w500,
+                    fontFamily: AppFontFamily.dinPro,
                   ),
                 ),
                 4.hGap,
@@ -156,8 +156,11 @@ class CategoryItem extends StatelessWidget {
                   description,
                   style: TextStyle(
                     color: Colors.grey[600],
-                    fontSize: 12.w,
+                    fontSize: 11.w,
+                    overflow: TextOverflow.ellipsis,
+                    fontFamily: AppFontFamily.dinPro,
                   ),
+                     maxLines: 1,
                 ),
               ),
           ],

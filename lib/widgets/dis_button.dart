@@ -37,6 +37,7 @@ class DisButton extends StatefulWidget {
   final bool? disabled; // 是否禁用按钮
   final double? spacing; // Add spacing property
   final double? fontSize; // 字体大小
+  final double? borderRadius; // 圆角大小
 
   const DisButton({
     super.key,
@@ -54,6 +55,7 @@ class DisButton extends StatefulWidget {
     this.disabled,
     this.spacing,
     this.fontSize,
+    this.borderRadius,
   });
 
   @override
@@ -84,7 +86,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
   void _reset() {
     _width = widget.width ?? double.infinity;
     _height = _getHeight();
-    _borderRadius = 4.w;
+    _borderRadius = widget.borderRadius ?? 4.w;
   }
 
   @override
@@ -108,7 +110,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
-          borderRadius: BorderRadius.circular(4.w),
+          borderRadius: BorderRadius.circular(widget.borderRadius ?? 4.w),
         ),
         child: ElevatedButton(
           onPressed: onPressed,
@@ -120,7 +122,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
       if (widget.useWidthAnimation) {
         child = PhysicalModel(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(_borderRadius),
+          borderRadius: BorderRadius.circular(widget.borderRadius ?? 4.w),
           child: SizedBox(
             key: _globalKey,
             height: _height,
@@ -135,7 +137,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
-                borderRadius: BorderRadius.circular(_borderRadius),
+                borderRadius: BorderRadius.circular(widget.borderRadius ?? 4.w),
               ),
               child: ElevatedButton(
                 onPressed: loading ? null : _handlePress,
@@ -156,7 +158,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
             ),
-            borderRadius: BorderRadius.circular(_borderRadius),
+            borderRadius: BorderRadius.circular(widget.borderRadius ?? 4.w),
           ),
           child: ElevatedButton(
             onPressed: onPressed,
@@ -181,6 +183,9 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
       width: widget.block ? double.infinity : widget.width,
       height: _height,
       margin: widget.margin,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(widget.borderRadius ?? 4.w),
+      ),
       child: child,
     );
   }
@@ -326,7 +331,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
           padding: _getPadding(),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.w),
+            borderRadius: BorderRadius.circular(widget.borderRadius ?? 4.w),
           ),
         ),
       ButtonType.secondary => ElevatedButton.styleFrom(
@@ -336,7 +341,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
           padding: _getPadding(),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.w),
+            borderRadius: BorderRadius.circular(widget.borderRadius ?? 4.w),
           ),
         ),
       ButtonType.text => TextButton.styleFrom(
@@ -344,7 +349,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
           padding: _getPadding(),
           textStyle: TextStyle(fontSize: widget.fontSize),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.w),
+            borderRadius: BorderRadius.circular(widget.borderRadius ?? 4.w),
           ),
         ).copyWith(
           backgroundColor: WidgetStateProperty.resolveWith<Color?>(
@@ -362,7 +367,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
           textStyle: TextStyle(fontSize: widget.fontSize),
           side: BorderSide(color: theme.primaryColor),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.w),
+            borderRadius: BorderRadius.circular(widget.borderRadius ?? 4.w),
           ),
         ).copyWith(
           backgroundColor: WidgetStateProperty.resolveWith<Color?>(
@@ -381,7 +386,7 @@ class _DisButtonState extends State<DisButton> with TickerProviderStateMixin {
           padding: _getPadding(),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(_borderRadius),
+            borderRadius: BorderRadius.circular(widget.borderRadius ?? 4.w),
           ),
         ),
     };

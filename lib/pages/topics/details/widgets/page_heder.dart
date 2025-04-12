@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_theme.dart';
+import 'package:linux_do/widgets/emoji_text.dart';
 
 import '../../../../utils/tag.dart';
 import '../topic_detail_controller.dart';
@@ -22,7 +23,7 @@ class PageHeader extends StatelessWidget {
       children: [
         controller.topic.value?.title == null
             ? const SizedBox()
-            : Text(
+            : EmojiText(
                 controller.topic.value?.title ?? '',
                 style: TextStyle(
                   fontSize: 12.w,

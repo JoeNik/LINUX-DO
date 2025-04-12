@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -26,14 +28,17 @@ class CreatePostController extends BaseController {
   final titleController = TextEditingController();
   // 内容
   final contentController = TextEditingController();
+
+  // 搜索
+  final searchController = TextEditingController();
   // 选中的分类
   final selectedCategory = Rx<Category?>(null);
-  final selectedCategoryName = Rxn<String>();
+  final selectedCategoryName = Rxn<String?>();
   // 是否正在提交
   final isSubmitting = false.obs;
   // 标签列表
   final tags = <String>[].obs;
-  // 标签输入控制器 
+  // 标签输入控制器
   final tagController = TextEditingController();
   // 是否在预览模式
   final isPreview = false.obs;
@@ -47,18 +52,52 @@ class CreatePostController extends BaseController {
   final uploadedImages = <UploadImageResponse>[].obs;
   final isUploading = false.obs;
 
+  // 表情选择器相关
+  final RxBool isShowEmojiPicker = false.obs;
+  final RxBool isHideKeyboard = false.obs;
+  final titleFocusNode = FocusNode();
+  final contentFocusNode = FocusNode();
+
+  // 跟踪焦点 currentFocus 似乎没有任何效果, 不知道原因
+  final RxString focusedInput = 'content'.obs;
+
+  final isShowKeyboard = false.obs;
+
   @override
   void onInit() {
     super.onInit();
     // 初始化时加载所有分类的统计数据
     loadAllCategoryStats();
+
+    KeyboardVisibilityController().onChange.listen((bool visible) {
+      if (visible) {
+        isShowEmojiPicker.value = false;
+        isHideKeyboard.value = false;
+      }
+
+      isShowKeyboard.value = visible;
+    });
+
+    titleFocusNode.addListener(() {
+      if (titleFocusNode.hasFocus) {
+        focusedInput.value = 'title';
+      }
+    });
+    contentFocusNode.addListener(() {
+      if (contentFocusNode.hasFocus) {
+        focusedInput.value = 'content';
+      }
+    });
   }
 
   @override
   void onClose() {
     titleController.dispose();
     contentController.dispose();
+    searchController.dispose();
     tagController.dispose();
+    titleFocusNode.dispose();
+    contentFocusNode.dispose();
     super.onClose();
   }
 
@@ -66,24 +105,28 @@ class CreatePostController extends BaseController {
   Future<void> loadAllCategoryStats() async {
     try {
       isLoading.value = true;
-      
+
       // 获取所有分类
       final categoriesResponse = await _apiService.getCategories();
       categories.value = categoriesResponse.categoryList.categories;
-      
+
       // 更新统计数据
       for (var category in categories) {
         // 根据权限等级计算可见的主题数量
         final totalTopics = category.topicCount;
         categoryStats[category.id] = {
           1: totalTopics ?? 0, // Lv1 可以看到所有主题
-          2: category.permission == 2 ? totalTopics ?? 0 : 0, // Lv2 只能看到权限等级=2的主题
-          3: category.permission == 3 ? totalTopics ?? 0 : 0, // Lv3 只能看到权限等级=3的主题
+          2: category.permission == 2
+              ? totalTopics ?? 0
+              : 0, // Lv2 只能看到权限等级=2的主题
+          3: category.permission == 3
+              ? totalTopics ?? 0
+              : 0, // Lv3 只能看到权限等级=3的主题
         };
       }
       /// 默认选中第一个分类
       selectedCategory.value = categories.first;
-      selectedCategoryName.value = categories.first.name;
+      await searchTags('');
     } catch (e) {
       debugPrint('Error loading categories: $e');
       showToast('加载分类数据失败');
@@ -98,15 +141,15 @@ class CreatePostController extends BaseController {
   }
 
   // 更新选中的分类
-  void updateSelectedCategory(Category category, [int? level]) {
+  Future<void> updateSelectedCategory(Category category, [int? level]) async {
     selectedCategory.value = category;
-    String displayName = level == null
-        ? category.name ?? ''
-        : '${category.name} (Lv $level)';
+    String displayName =
+        level == null ? category.name ?? '' : '${category.name} (Lv $level)';
     selectedCategoryName.value = displayName;
     // 清空标签搜索结果
     tagResults.clear();
     tags.clear();
+    await searchTags('');
   }
 
   // 搜索标签
@@ -114,13 +157,13 @@ class CreatePostController extends BaseController {
     if (selectedCategory.value == null) {
       return [];
     }
-    
+
     try {
       // 如果搜索关键词为空，且已有结果，直接返回
       if (query.isEmpty && tagResults.isNotEmpty) {
         return tagResults;
       }
-      
+
       final response = await _apiService.getTags(
         query,
         8,
@@ -135,35 +178,34 @@ class CreatePostController extends BaseController {
     }
   }
 
-  // 添加标签
   void addTag(String tag) {
-    /// 异步添加标签
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (tag.isNotEmpty && !tags.contains(tag)) {
-        tags.add(tag);
-        tagController.clear();
-      }
-    });
+    final normalizedTag = tag.trim(); 
+    if (normalizedTag.isNotEmpty && !tags.contains(normalizedTag)) {
+      tags.add(normalizedTag); 
+      searchController.clear();
+    }
   }
 
-  // 删除标签
   void removeTag(String tag) {
-    tags.remove(tag);
+    final normalizedTag = tag.trim();
+    if (tags.contains(normalizedTag)) {
+      tags.remove(normalizedTag); 
+    } 
   }
 
   // 格式化内容为HTML
   String _formatContentToHtml() {
     if (contentController.text.isEmpty) return '';
-    
+
     // 按行分割内容
     final lines = contentController.text.split('\n');
     final formattedLines = <String>[];
-    
+
     for (var line in lines) {
       if (line.isEmpty) {
         continue;
       }
-      
+
       // 处理图片标记 ![name|widthxheight](url)
       if (line.contains('![') && line.contains('](')) {
         final imagePattern = RegExp(r'!\[(.*?)\|(\d+)x(\d+)\]\((.*?)\)');
@@ -173,38 +215,38 @@ class CreatePostController extends BaseController {
           final width = match.group(2) ?? '';
           final height = match.group(3) ?? '';
           var url = match.group(4) ?? '';
-          
+
           // 打印匹配到的URL
           l.d('Original image URL: $url');
-          
+
           // 处理 upload:// 短链接
           if (url.startsWith('upload://')) {
             // 查找对应的上传图片记录
-            final uploadedImage = uploadedImages.firstWhereOrNull(
-              (img) => img.shortUrl == url || img.url.contains(url.substring(9))
-            );
-            
+            final uploadedImage = uploadedImages.firstWhereOrNull((img) =>
+                img.shortUrl == url || img.url.contains(url.substring(9)));
+
             if (uploadedImage != null) {
               url = uploadedImage.url;
             } else {
               // 如果找不到记录，使用基础URL
               final baseUrl = HttpConfig.baseUrl.endsWith('/')
-                  ? HttpConfig.baseUrl.substring(0, HttpConfig.baseUrl.length - 1)
+                  ? HttpConfig.baseUrl
+                      .substring(0, HttpConfig.baseUrl.length - 1)
                   : HttpConfig.baseUrl;
               url = '$baseUrl/uploads/default/${url.substring(9)}';
             }
             l.d('Converted image URL: $url');
           }
-          
+
           // 构建img标签
           line = '<img src="$url" alt="$name" width="$width" height="$height">';
         }
       }
-      
+
       // 将处理后的行包装在p标签中
       formattedLines.add('<p>$line</p>');
     }
-    
+
     // 连接所有行
     return formattedLines.join('\n');
   }
@@ -212,7 +254,7 @@ class CreatePostController extends BaseController {
   // 切换预览模式
   void togglePreview() {
     if (!validateInputs()) return;
-    
+
     // 预览不重要, 碰到问题了,先不做
     Get.to(() => const PreviewPostPage(), binding: BindingsBuilder(() {
       Get.put(PreviewPostController(
@@ -232,7 +274,8 @@ class CreatePostController extends BaseController {
   // 生成短文件名
   String _generateShortFileName(String originalFileName) {
     final extension = originalFileName.split('.').last;
-    final timestamp = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    final timestamp =
+        DateTime.now().millisecondsSinceEpoch.toString().substring(8);
     final random = (1000 + Random().nextInt(9000)).toString();
     return 'img_${timestamp}_$random.$extension';
   }
@@ -241,7 +284,7 @@ class CreatePostController extends BaseController {
   Future<void> pickAndUploadImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    
+
     if (pickedFile != null) {
       isUploading.value = true;
       try {
@@ -250,7 +293,7 @@ class CreatePostController extends BaseController {
         final originalFileName = pickedFile.path.split('/').last;
         final shortFileName = _generateShortFileName(originalFileName);
         final sha1Checksum = _calculateSha1(bytes);
-        
+
         // 创建 FormData
         final formData = dio.FormData.fromMap({
           'upload_type': 'composer',
@@ -263,22 +306,23 @@ class CreatePostController extends BaseController {
             filename: shortFileName,
           ),
         });
-        
+
         final response = await _apiService.uploadImage(
           GlobalController.clientId,
           formData,
         );
-        
+
         // 打印上传响应信息
         l.d('Image upload response - shortUrl: ${response.shortUrl}, url: ${response.url}');
-        
+
         uploadedImages.add(response);
-        
+
         // 将图片插入到内容中，使用 shortUrl 作为标记但在预览时使用完整 url
-        final imageMarkdown = '\n![${response.originalFilename}|${response.width}x${response.height}](${response.shortUrl})\n';
+        final imageMarkdown =
+            '\n![${response.originalFilename}|${response.width}x${response.height}](${response.shortUrl})\n';
         final currentContent = contentController.text;
         final cursorPosition = contentController.selection.baseOffset;
-        
+
         if (cursorPosition >= 0) {
           final newContent = currentContent.substring(0, cursorPosition) +
               imageMarkdown +
@@ -290,7 +334,7 @@ class CreatePostController extends BaseController {
         } else {
           contentController.text += imageMarkdown;
         }
-      } catch (e,s) {
+      } catch (e, s) {
         showToast(AppConst.createPost.uploadFailed);
         l.e('Error uploading image: $e -- $s');
       } finally {
@@ -303,7 +347,8 @@ class CreatePostController extends BaseController {
   void removeImage(UploadImageResponse image) {
     uploadedImages.remove(image);
     // 从内容中移除图片引用
-    final imagePattern = '\\!\\[${image.originalFilename}\\|${image.width}x${image.height}\\]\\(${image.shortUrl}\\)';
+    final imagePattern =
+        '\\!\\[${image.originalFilename}\\|${image.width}x${image.height}\\]\\(${image.shortUrl}\\)';
     final regex = RegExp(imagePattern);
     contentController.text = contentController.text.replaceAll(regex, '');
   }
@@ -311,7 +356,7 @@ class CreatePostController extends BaseController {
   // 发布帖子
   Future<void> publishPost() async {
     if (!validateInputs()) return;
-    
+
     try {
       isSubmitting.value = true;
       // 构建图片尺寸映射
@@ -347,11 +392,11 @@ class CreatePostController extends BaseController {
   // 保存草稿
   Future<void> saveDraft() async {
     if (!validateInputs()) return;
-    
+
     try {
       isSubmitting.value = true;
 
-      await Future.delayed(const Duration(seconds: 1)); 
+      await Future.delayed(const Duration(seconds: 1));
       Get.back();
       showToast(AppConst.createPost.draftSuccess);
     } catch (e) {
@@ -363,18 +408,32 @@ class CreatePostController extends BaseController {
 
   // 验证输入
   bool validateInputs() {
-    if (titleController.text.isEmpty) {
-      showToast(AppConst.createPost.titleRequired);
-      return false;
-    }
-    if (contentController.text.isEmpty) {
-      showToast(AppConst.createPost.contentRequired);
-      return false;
-    }
-    if (selectedCategory.value == null) {
-      showToast(AppConst.createPost.categoryRequired);
+    if (titleController.text.isEmpty || contentController.text.isEmpty) {
+      showToast(AppConst.createPost.previewPost);
       return false;
     }
     return true;
   }
-} 
+
+  void toggleEmojiPicker() {
+    if (isShowEmojiPicker.value) {
+      isShowEmojiPicker.value = false;
+      isHideKeyboard.value = false;
+
+      // 检查当前焦点是否在 titleFocusNode 或 contentFocusNode 上
+      FocusNode targetFocusNode = focusedInput.value == 'title' ? titleFocusNode : contentFocusNode;
+
+      Future.delayed(const Duration(milliseconds: 100), () {
+        FocusScope.of(Get.context!).requestFocus(targetFocusNode);
+        SystemChannels.textInput.invokeMethod('TextInput.show');
+      });
+    } else {
+      FocusManager.instance.primaryFocus?.unfocus();
+      Future.delayed(const Duration(milliseconds: 300), () {
+        isShowEmojiPicker.value = true;
+        isHideKeyboard.value = true;
+      });
+    }
+  }
+}
+

@@ -148,7 +148,7 @@ class BadgePage extends GetView<BadgeController> {
 class BadgeCard extends GetView<BadgeController> {
   final BadgeDetail badge;
 
-  const BadgeCard({required this.badge});
+  const BadgeCard({super.key, required this.badge});
 
   @override
   Widget build(BuildContext context) {

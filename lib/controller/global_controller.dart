@@ -118,4 +118,8 @@ class GlobalController extends BaseController with Concatenated {
       l.e('获取用户信息失败: $e\n$stack');
     }
   }
+
+  Future<void> initService() async {
+    await _apiService.getTopics('latest');
+  }
 }

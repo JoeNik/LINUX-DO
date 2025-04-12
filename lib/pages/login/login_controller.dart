@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/net/api_service.dart';
+import 'package:linux_do/net/http_client.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import '../../const/app_const.dart';
 import '../../utils/mixins/toast_mixin.dart';
@@ -42,7 +43,8 @@ class LoginController extends BaseController {
         // 保存登录状态
         Get.find<GlobalController>().setIsLogin(true);
         // 跳转到首页
-        Get.offAllNamed('/home');
+        Get.offAllNamed(Routes.HOME);
+         
       } catch (e) {
         showSnackbar(
           title: AppConst.login.loginFailedTitle,
@@ -165,11 +167,12 @@ class LoginController extends BaseController {
         await StorageManager.setData(
             AppConst.identifier.cfClearance, data['cf']);
 
+        NetClient.getDio.options.headers['x-csrf-token'] = data['c'];
+
+        Get.find<GlobalController>().initService();
+
         // 执行到这里，说明扫码登录成功
         showSuccess('扫码登录成功');
-
-        // 获取用户信息并返回
-        await Get.find<GlobalController>().fetchUserInfo();
 
         Get.offAllNamed(Routes.HOME);
       } catch (e) {

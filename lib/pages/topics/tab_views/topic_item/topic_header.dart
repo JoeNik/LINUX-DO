@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/pages/settings/font_size_controller.dart';
+import 'package:linux_do/widgets/emoji_text.dart';
 
 /// 话题标题组件
 class TopicHeader extends StatelessWidget {
@@ -49,7 +50,7 @@ class TopicHeader extends StatelessWidget {
         
         // 标题
         Expanded(
-          child: Text(
+          child: EmojiText(
             title,
             style: TextStyle(
               fontSize: fontSize.w,

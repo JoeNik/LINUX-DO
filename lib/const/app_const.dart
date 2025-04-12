@@ -180,6 +180,7 @@ class _Identifier {
   String get listDensity => 'list_density';
 
   String get browserTips => 'browserTips';
+  String get chatHintDontShow => 'chatHintDontShow';
 
   String get isAnonymousMode => 'isAnonymousMode';
 }
@@ -519,6 +520,7 @@ class _CreatePost {
   String get addTags => '添加标签';
   String get inputTips => '请输入内容';
   String get uploadFailed => '图片上传失败';
+  String get previewPost => '请完善内容后预览';
 }
 
 class _Chat {

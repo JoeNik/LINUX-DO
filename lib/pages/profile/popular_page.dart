@@ -11,7 +11,6 @@ import 'package:linux_do/models/summary.dart';
 import 'package:linux_do/pages/profile/popular_controller.dart';
 import 'package:linux_do/utils/badge.dart';
 import 'package:linux_do/utils/expand/datetime_expand.dart';
-import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/utils/tag.dart';
 import 'package:linux_do/widgets/badge_widget.dart';
 import 'package:linux_do/widgets/cached_image.dart';

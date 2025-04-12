@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/models/message.dart';
@@ -22,7 +24,7 @@ class MessageController extends BaseController with Concatenated {
     isLoading.value = true;
 
     try {
-      final data = await _apiService.getMessages(userName, false, 'posts');
+      final data = await _apiService.getMessages(userName);
       final users = data.users;
       final topics = data.topicList?.topics ?? [];
       
@@ -36,7 +38,7 @@ class MessageController extends BaseController with Concatenated {
               if (lastPostUser.avatarTemplate!.startsWith('http://') || lastPostUser.avatarTemplate!.startsWith('https://')) {
                 message.avatarUrl = lastPostUser.avatarTemplate;
               } else {
-                message.avatarUrl = '${HttpConfig.baseUrl}${lastPostUser.avatarTemplate!.replaceFirst('{size}', '70')}';
+                message.avatarUrl = '${HttpConfig.baseUrl}${lastPostUser.avatarTemplate.replaceFirst('{size}', '70')}';
               }
               l.d('lastPostUserId: ${message.posters?[0].userId}, found user: ${lastPostUser.username}');
             }

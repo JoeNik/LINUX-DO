@@ -131,6 +131,9 @@ class BadgeDetail {
   });
 
   String getImageUrl() {
+    if (imageUrl == null || imageUrl!.isEmpty) {
+      return '';
+    }
     if (imageUrl!.startsWith('http://') || imageUrl!.startsWith('https://')) {
       return imageUrl!;
     }

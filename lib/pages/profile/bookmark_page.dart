@@ -70,6 +70,7 @@ class BookmarkPage extends GetView<BookmarkController> {
                 ),
                 child: TabBar(
                   isScrollable: true,
+                  tabAlignment: TabAlignment.start,
                   controller: controller.tabController,
                   indicatorSize: TabBarIndicatorSize.label,
                   labelColor: Colors.white,

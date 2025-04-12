@@ -4,7 +4,6 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../controller/base_controller.dart';
 import '../../models/chat_message.dart';
 import '../../net/api_service.dart';
-import '../../net/http_config.dart';
 import '../../routes/app_pages.dart';
 import '../../utils/log.dart';
 
@@ -164,6 +163,12 @@ class ChatListController extends BaseController {
 
   // 点击消息
   void onMessageTap(ChatMessage message) async {
+
+    if (message.id == robotId) {
+      await Get.toNamed(Routes.ROBOT_CHAT);
+      return;
+    }
+
     // 使用 await 等待导航返回结果
     await Get.toNamed(Routes.CHAT_DETAIL, arguments: message);
     

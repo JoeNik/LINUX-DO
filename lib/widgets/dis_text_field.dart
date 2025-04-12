@@ -21,6 +21,7 @@ class DisTextField extends StatelessWidget {
   final InputBorder? enabledBorder;
   final InputBorder? focusedBorder;
   final InputBorder? disabledBorder;
+  final TextEditingController? controller;
 
   const DisTextField({
     super.key,
@@ -43,6 +44,7 @@ class DisTextField extends StatelessWidget {
     this.enabledBorder,
     this.focusedBorder,
     this.disabledBorder,
+    this.controller,
   });
 
   @override
@@ -55,10 +57,11 @@ class DisTextField extends StatelessWidget {
     );
 
     return TextField(
-      controller: TextEditingController(text: value)
-        ..selection = TextSelection.fromPosition(
-          TextPosition(offset: value?.length ?? 0),
-        ),
+      controller: controller ??
+          TextEditingController(text: value)
+            ..selection = TextSelection.fromPosition(
+              TextPosition(offset: value?.length ?? 0),
+            ),
       onChanged: onChanged,
       maxLines: maxLines,
       enabled: enabled,

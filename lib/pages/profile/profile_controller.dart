@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/models/follow.dart';
 import 'package:linux_do/models/summary.dart';
@@ -42,10 +44,17 @@ class ProfileController extends BaseController with Concatenated {
   final RxList<Follow> followers = <Follow>[].obs;
   final summaryData = Rxn<SummaryResponse>();
 
+  final RxString emojiStatus = ''.obs;
+
   // 功能按钮当前页面索引
   final RxInt featurePageIndex = 0.obs;
 
   late final PageController featurePageController;
+
+    // 表情选择器相关
+  final RxBool isShowEmojiPicker = false.obs;
+  final RxBool isHideKeyboard = false.obs;
+  final FocusNode focusNode = FocusNode();
 
   @override
   void onInit() {
@@ -62,6 +71,15 @@ class ProfileController extends BaseController with Concatenated {
         }
       }
     });
+
+    // 监听键盘可见性
+    KeyboardVisibilityController().onChange.listen((bool visible) {
+      if (visible) {
+        isShowEmojiPicker.value = false;
+        isHideKeyboard.value = false;
+      }
+    });
+    
     // 初始化子控制器
     Get.lazyPut(() => SummaryController());
     Get.lazyPut(() => ActivityController());
@@ -157,12 +175,15 @@ class ProfileController extends BaseController with Concatenated {
       if (statusController.text.trim().isNotEmpty) {
         response = await _apiService.updateUserStatus(
           statusController.text.trim(),
+          emoji: emojiStatus.value.replaceAll(':', ''),
         );
       } else {
         response = await _apiService.deleteUserStatus();
       }
       if (response.isSuccess) {
         showSuccess(AppConst.configSuccess);
+        emojiStatus.value = '';
+        statusController.clear();
         Get.find<GlobalController>().fetchUserInfo();
       } else {
         showError(AppConst.configFailed);
@@ -211,6 +232,25 @@ class ProfileController extends BaseController with Concatenated {
       Get.toNamed(Routes.POPULAR_PAGE, arguments: summaryData.value);
     } else {
       showError('获取数据失败');
+    }
+  }
+
+    // 切换表情选择器
+  void toggleEmojiPicker() {
+    if (isShowEmojiPicker.value) {
+      isShowEmojiPicker.value = false;
+      isHideKeyboard.value = false;
+
+      Future.delayed(const Duration(milliseconds: 100), () {
+        FocusScope.of(Get.context!).requestFocus(focusNode);
+        SystemChannels.textInput.invokeMethod('TextInput.show');
+      });
+    } else {
+      FocusManager.instance.primaryFocus?.unfocus();
+      Future.delayed(const Duration(milliseconds: 300), () {
+        isShowEmojiPicker.value = true;
+        isHideKeyboard.value = true;
+      });
     }
   }
 }

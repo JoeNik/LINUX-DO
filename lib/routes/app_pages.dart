@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:linux_do/controller/share_controller.dart';
 import 'package:linux_do/pages/category/category_list_controller.dart';
+import 'package:linux_do/pages/chat/chat_robot_controller.dart';
+import 'package:linux_do/pages/chat/chat_robot_page.dart';
 import 'package:linux_do/pages/profile/edit_profile_controller.dart';
 import 'package:linux_do/pages/profile/edit_profile_page.dart';
 import 'package:linux_do/pages/profile/follow_controller.dart';
@@ -270,6 +272,15 @@ class AppPages {
       page: () => const BookmarkPage(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => BookmarkController());
+      }),
+    ),
+
+    /// 机器人聊天页
+    GetPage(
+      name: Routes.ROBOT_CHAT,
+      page: () => const ChatRobotPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => ChatRobotController());
       }),
     ),
   ];

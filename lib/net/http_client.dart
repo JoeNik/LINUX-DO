@@ -274,14 +274,14 @@ class NetClient {
       for (var cookieString in cookies) {
         if (cookieString.contains(cfClearance)) {
           // 解析 CF cookie
-          final cfCookie = _parseCfCookie(cookieString);
+          final cfCookie = parseCfCookie(cookieString);
           if (cfCookie != null) {
             l.d('保存 CF cookie: ${cfCookie.value}');
             await cookieJar.saveFromResponse(uri, [cfCookie]);
           }
         } else if (cookieString.contains(tokenKey)) {
           // 解析登录 token
-          final tokenCookie = _parseTokenCookie(cookieString);
+          final tokenCookie = parseTokenCookie(cookieString);
           if (tokenCookie != null) {
             l.d('保存 token cookie: ${tokenCookie.value}');
             await cookieJar.saveFromResponse(uri, [tokenCookie]);
@@ -290,7 +290,7 @@ class NetClient {
           }
         } else if (cookieString.contains(forumSession)) {
           // 解析 forum session
-          final sessionCookie = _parseSessionCookie(cookieString);
+          final sessionCookie = parseSessionCookie(cookieString);
           if (sessionCookie != null) {
             //l.d('保存 session cookie: ${sessionCookie.value}');
             await cookieJar.saveFromResponse(uri, [sessionCookie]);
@@ -300,7 +300,7 @@ class NetClient {
     }
   }
 
-  Cookie? _parseCfCookie(String cookieString) {
+  Cookie? parseCfCookie(String cookieString) {
     try {
       // 解析 cookie 字符串
       final parts = cookieString.split(';');
@@ -319,7 +319,7 @@ class NetClient {
     return null;
   }
 
-  Cookie? _parseTokenCookie(String cookieString) {
+  Cookie? parseTokenCookie(String cookieString) {
     try {
       final parts = cookieString.split(';');
       final mainPart = parts[0].trim();
@@ -337,7 +337,7 @@ class NetClient {
     return null;
   }
 
-  Cookie? _parseSessionCookie(String cookieString) {
+  Cookie? parseSessionCookie(String cookieString) {
     try {
       final parts = cookieString.split(';');
       final mainPart = parts[0].trim();
@@ -353,6 +353,12 @@ class NetClient {
       l.e('解析 session cookie 失败: $e');
     }
     return null;
+  }
+
+  Future<void> updateCookies( String cookieName, String cookieValue) async {
+    final uri = Uri.parse(HttpConfig.baseUrl);
+    final cookie = Cookie(cookieName, cookieValue);
+    await cookieJar.saveFromResponse(uri, [cookie]);
   }
 
   /// 处理错误

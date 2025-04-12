@@ -1,111 +1,122 @@
-// import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter/cupertino.dart';
-// import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:get/get.dart';
-// import '../const/app_colors.dart';
-// import '../controller/base_controller.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:linux_do/utils/emoji_manager.dart';
+import '../const/app_colors.dart';
 
-// class DisEmojiController extends BaseController {
+class DisEmojiPicker extends StatelessWidget {
+  final double? height;
+  final double? emojiSize;
+  final bool showBackspace;
+  final Color? backgroundColor;
+  final TextEditingController? textEditingController;
+  final Function(String)? onEmojiSelected;
 
-//   @override
-//   void onInit() {
-//     super.onInit();
-//   }
-// }
+  const DisEmojiPicker({
+    super.key,
+    this.height,
+    this.emojiSize,
+    this.showBackspace = false,
+    this.backgroundColor,
+    this.textEditingController,
+    this.onEmojiSelected,
+  });
 
-// class DisEmojiPicker extends StatelessWidget {
-//   final Function(String) onEmojiSelected;
-//   final double? height;
-//   final double? emojiSize;
-//   final bool showBackspace;
-//   final Color? backgroundColor;
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height ?? 356.w,
+      child: EmojiPicker(
+        onEmojiSelected: (category, emoji) {
+          _onEmojiSelected(emoji);
+        },
+        config: Config(
+          height: height ?? 356.w,
+          emojiSet: (locale) => EmojiManager().getCategoryEmojis(),
+          emojiViewConfig: EmojiViewConfig(
+            columns: 7,
+            emojiSizeMax: emojiSize ?? 30.w,
+            backgroundColor: backgroundColor ?? Theme.of(context).cardColor,
+          ),
+          categoryViewConfig: CategoryViewConfig(
+            // 默认的是真的丑  必须自定义
+            customCategoryView: (config, state, tabController, pageController) {
+              return _buildCustomCategory(
+                  context, tabController, pageController, state, config);
+            },
+          ),
+          bottomActionBarConfig: BottomActionBarConfig(
+            enabled: showBackspace,
+            showBackspaceButton: showBackspace,
+            backgroundColor:
+                backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
+          ),
+        ),
+      ),
+    );
+  }
 
-//   DisEmojiPicker({
-//     super.key,
-//     required this.onEmojiSelected,
-//     this.height,
-//     this.emojiSize,
-//     this.showBackspace = false,
-//     this.backgroundColor,
-//   }) {
-//     Get.put(DisEmojiController());
-//   }
+  Widget _buildCustomCategory(BuildContext context, TabController tabController,
+      PageController pageController, EmojiViewState state, Config config) {
+    final ValueNotifier<int> tabIndexNotifier =
+        ValueNotifier<int>(tabController.index);
+    tabController.addListener(() {
+      tabIndexNotifier.value = tabController.index;
+    });
 
-//   @override
-//   Widget build(BuildContext context) {
-//     final controller = Get.find<DisEmojiController>();
-    
-//     return Obx(() {
-//       if (controller.isLoading.value) {
-//         return SizedBox(
-//           height: height ?? 256.w,
-//           child: const Center(child: CircularProgressIndicator()),
-//         );
-//       }
+    return ValueListenableBuilder<int>(
+        valueListenable: tabIndexNotifier,
+        builder: (context, currentIndex, child) {
+          return Container(
+            height: 44.w,
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+            ),
+            padding: EdgeInsets.zero,
+            child: TabBar(
+              tabAlignment: TabAlignment.start,
+              controller: tabController,
+              isScrollable: true,
+              padding: EdgeInsets.zero,
+              onTap: (index) {
+                pageController.jumpToPage(index);
+              },
+              dividerHeight: 0,
+              indicatorPadding: EdgeInsets.zero,
+              indicator: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: .9),
+                shape: BoxShape.circle,
+              ),
+              labelPadding: EdgeInsets.zero,
+              tabs: state.categoryEmoji.map((category) {
+                final icon = getIconForCategory(
+                    config.categoryViewConfig.categoryIcons, category.category);
+                final isSelected = tabController.index ==
+                    state.categoryEmoji.indexOf(category);
+                return Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.w),
+                  child: Icon(
+                    icon,
+                    size: 20.w,
+                    color: isSelected
+                        ? AppColors.white
+                        : Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                );
+              }).toList(),
+            ),
+          );
+        });
+  }
 
-//       return SizedBox(
-//         height: height ?? 256.w,
-//         child: EmojiPicker(
-//           onEmojiSelected: (category, emoji) {
-//             onEmojiSelected(emoji.emoji);
-//           },
-//           config: Config(
-//             height: height ?? 256.w,
-//             emojiViewConfig: EmojiViewConfig(
-//               columns: 7,
-//               emojiSizeMax: emojiSize ?? 24.w,
-//               backgroundColor: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
-//             ),
-//             categoryViewConfig: const CategoryViewConfig(
-//               indicatorColor: AppColors.primary,
-//               iconColorSelected: AppColors.primary,
-//               iconColor: Colors.grey,
-//               tabIndicatorAnimDuration: kTabScrollDuration,
-//               categoryIcons: CategoryIcons(
-//                 recentIcon: CupertinoIcons.clock,
-//                 smileyIcon: CupertinoIcons.smiley,
-//                 animalIcon: CupertinoIcons.paw,
-//                 foodIcon: CupertinoIcons.cart,
-//                 activityIcon: CupertinoIcons.person_2,
-//                 travelIcon: CupertinoIcons.airplane,
-//                 objectIcon: CupertinoIcons.lightbulb,
-//                 symbolIcon: CupertinoIcons.number,
-//                 flagIcon: CupertinoIcons.flag,
-//               ),
-//             ),
-//             bottomActionBarConfig: BottomActionBarConfig(
-//               enabled: showBackspace,
-//               showBackspaceButton: showBackspace,
-//               backgroundColor: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
-//             ),
-//           ),
-//         ),
-//       );
-//     });
-//   }
-// }
-
-// class DisEmojiButton extends StatelessWidget {
-//   final TextEditingController controller;
-//   final VoidCallback? onPressed;
-//   final bool showEmoji;
-
-//   const DisEmojiButton({
-//     super.key,
-//     required this.controller,
-//     required this.showEmoji,
-//     this.onPressed,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return IconButton(
-//       onPressed: onPressed,
-//       icon: Icon(
-//         showEmoji ? Icons.keyboard_alt_outlined : Icons.emoji_emotions_outlined,
-//         size: 24.w,
-//       ),
-//     );
-//   }
-// }
+  void _onEmojiSelected(Emoji emoji) {
+    if (emoji.imageUrl != null) {
+      textEditingController?.text += ':${emoji.name}:';
+      onEmojiSelected?.call(':${emoji.name}:');
+    } else {
+      textEditingController?.text += emoji.emoji;
+      onEmojiSelected?.call(emoji.emoji);
+    }
+  }
+}

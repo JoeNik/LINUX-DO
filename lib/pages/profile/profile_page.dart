@@ -8,8 +8,9 @@ import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/pages/profile/widget/profile_menu.dart';
 import 'package:linux_do/routes/app_pages.dart';
-import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/widgets/cached_image.dart';
+import 'package:linux_do/widgets/dis_emoji_picker.dart';
+import 'package:linux_do/widgets/emoji_text.dart';
 import 'package:linux_do/widgets/glowing_text_wweep.dart';
 import 'dart:ui';
 import '../../const/app_const.dart';
@@ -162,20 +163,42 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                     child: showAvatar
                         ? Padding(
                             padding: EdgeInsets.all(8.w),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: AppColors.white, width: 1.w),
-                                  borderRadius: BorderRadius.circular(80.w)),
-                              child: CachedImage(
-                                imageUrl: user?.avatarUrl ?? '',
-                                circle: true,
-                                width: 30.w,
-                                height: 30.w,
-                                borderRadius: BorderRadius.circular(80.w),
-                                showBorder: true,
-                                borderColor: AppColors.white,
-                              ),
+                            child: Stack(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: AppColors.white, width: 1.w),
+                                      borderRadius:
+                                          BorderRadius.circular(80.w)),
+                                  child: Stack(
+                                    children: [
+                                      CachedImage(
+                                        imageUrl: user?.avatarUrl ?? '',
+                                        circle: true,
+                                        width: 30.w,
+                                        height: 30.w,
+                                        borderRadius:
+                                            BorderRadius.circular(80.w),
+                                        showBorder: true,
+                                        borderColor: AppColors.white,
+                                      ),
+                                      Positioned(
+                                        right: 0,
+                                        bottom: 0,
+                                        child: user?.status?.emoji != null
+                                            ? EmojiText(
+                                                ':${user?.status?.emoji}:',
+                                                style: TextStyle(
+                                                  fontSize: 10.w,
+                                                ),
+                                              )
+                                            : const SizedBox.shrink(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           )
                         : const SizedBox.shrink(),
@@ -248,21 +271,21 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
               ),
             ),
           ],
-          body: Obx(() => 
-              globalController.isAnonymousMode
-                  ? GestureDetector(
-                      onLongPress: () {
-                        showSuccess('没有惊喜 😜');
-                      },
-                      child: Center(
-                        child: Text(
-                          '尊贵的游客,长按此处3秒没有惊喜哦',
-                          style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color),
-                        ),
-                      ),
-                  )
-                  : Get.find<GlobalController>().userInfo == null
-                      ? const Center(child: DisSquareLoading())
+          body: Obx(() => globalController.isAnonymousMode
+              ? GestureDetector(
+                  onLongPress: () {
+                    showSuccess('没有惊喜 😜');
+                  },
+                  child: Center(
+                    child: Text(
+                      '尊贵的游客,长按此处3秒没有惊喜哦',
+                      style: TextStyle(
+                          color: Theme.of(context).textTheme.bodySmall?.color),
+                    ),
+                  ),
+                )
+              : Get.find<GlobalController>().userInfo == null
+                  ? const Center(child: DisSquareLoading())
                   : controller.createCurrent()),
         );
       }),
@@ -319,9 +342,7 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                       children: [
                         GlowingTextSweep(
                           text: user?.name ??
-                              (globalController.isAnonymousMode
-                                  ? '旅途雅士'
-                                  : ''),
+                              (globalController.isAnonymousMode ? '旅途雅士' : ''),
                           style: TextStyle(
                             color: AppColors.white,
                             fontSize: 18.w,
@@ -343,11 +364,11 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                                 onPressed: () {
                                   Get.toNamed(Routes.EDIT_PROFILE);
                                 },
-                            icon: Icon(
-                              CupertinoIcons.pencil,
-                              color: AppColors.white.withValues(alpha: .9),
-                              size: 20.w,
-                            ))
+                                icon: Icon(
+                                  CupertinoIcons.pencil,
+                                  color: AppColors.white.withValues(alpha: .9),
+                                  size: 20.w,
+                                ))
                       ],
                     ),
                     globalController.isAnonymousMode
@@ -356,10 +377,10 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                             user?.email ?? '',
                             style: TextStyle(
                               color: AppColors.white.withValues(alpha: .9),
-                        fontFamily: AppFontFamily.dinPro,
-                        fontSize: 12.sp,
-                      ),
-                    ),
+                              fontFamily: AppFontFamily.dinPro,
+                              fontSize: 12.sp,
+                            ),
+                          ),
                   ],
                 ),
               )
@@ -373,59 +394,68 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                 children: [
                   Container(
                     height: 28.w,
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
-              decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(14.w)),
-              child: InkWell(
-                onTap: () => showCustomStatusDialog(context),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      user?.status?.description == null
-                          ? CupertinoIcons.plus_circle
-                          : CupertinoIcons.checkmark_alt_circle_fill,
-                      size: 14.w,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    4.hGap,
-                    Text(
-                      user?.status?.description ?? '自定义状态',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontSize: 12.sp,
+                    constraints: BoxConstraints(maxWidth: 150.w),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
+                    decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(14.w)),
+                    child: InkWell(
+                      onTap: () => showCustomStatusDialog(context),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          user?.status?.emoji != null
+                              ? const SizedBox.shrink()
+                              : Icon(
+                                  CupertinoIcons.plus_circle,
+                                  size: 16.w,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                          user?.status?.emoji != null
+                              ? EmojiText(
+                                  ':${user?.status?.emoji}:',
+                                )
+                              : const SizedBox.shrink(),
+                          4.hGap,
+                          Text(
+                            user?.status?.description ?? '自定义状态',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontSize: 12.sp,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            12.hGap,
-            globalController.isAnonymousMode
-                ? const SizedBox.shrink()
-                : SizedBox(
-                    height: 28.w,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                children: [
-                  DisSwitch(
-                    value: (user?.userAction?.hidePresence ?? false),
-                    textOn: '在线',
-                    textOff: '离线',
-                    colorOn: Theme.of(context).primaryColor,
-                    iconOn: CupertinoIcons.checkmark_alt_circle_fill,
-                    iconOff: Icons.power_settings_new,
-                    animationDuration: const Duration(milliseconds: 300),
-                    onChanged: (bool state) {
-                      controller.updatePresence(state);
-                    },
                   ),
+                  12.hGap,
+                  globalController.isAnonymousMode
+                      ? const SizedBox.shrink()
+                      : SizedBox(
+                          height: 28.w,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              DisSwitch(
+                                value:
+                                    (user?.userAction?.hidePresence ?? false),
+                                textOn: '在线',
+                                textOff: '离线',
+                                colorOn: Theme.of(context).primaryColor,
+                                iconOn:
+                                    CupertinoIcons.checkmark_alt_circle_fill,
+                                iconOff: Icons.power_settings_new,
+                                animationDuration:
+                                    const Duration(milliseconds: 300),
+                                onChanged: (bool state) {
+                                  controller.updatePresence(state);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
                 ],
-              ),
-            ),
-          ],
-        )
+              )
       ],
     );
   }
@@ -445,6 +475,21 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
             children: [
               Row(
                 children: [
+                  Obx(
+                    () => controller.emojiStatus.value.isNotEmpty
+                        ? Container(
+                            padding: EdgeInsets.all(4.w),
+                            decoration: BoxDecoration(
+                              color: Theme.of(Get.context!)
+                                  .primaryColor
+                                  .withValues(alpha: .2),
+                              borderRadius: BorderRadius.circular(4.w),
+                            ),
+                            child: EmojiText(controller.emojiStatus.value),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                  6.hGap,
                   Expanded(
                     child: TextField(
                       controller: controller.statusController,
@@ -458,6 +503,17 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                       ),
                     ),
                   ),
+                  16.hGap,
+                  IconButton(
+                    icon: Icon(
+                      CupertinoIcons.smiley_fill,
+                      color: Theme.of(context).primaryColor,
+                      size: 18.w,
+                    ),
+                    onPressed: () {
+                      controller.toggleEmojiPicker();
+                    },
+                  )
                 ],
               ),
               16.hGap,
@@ -489,6 +545,20 @@ class ProfilePage extends GetView<ProfileController> with ToastMixin {
                       ))
                 ],
               ),
+              Obx(
+                () => Offstage(
+                  offstage: !controller.isShowEmojiPicker.value,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    child: DisEmojiPicker(
+                      height: 320.w,
+                      onEmojiSelected: (emoji) {
+                        controller.emojiStatus.value = emoji;
+                      },
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
         ),

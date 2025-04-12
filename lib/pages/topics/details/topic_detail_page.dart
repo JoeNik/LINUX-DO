@@ -11,6 +11,8 @@ import 'package:linux_do/pages/topics/details/widgets/replay_list.dart';
 import 'package:linux_do/utils/expand/num_expand.dart';
 import 'package:linux_do/utils/mixins/toast_mixin.dart';
 import 'package:linux_do/widgets/dis_button.dart';
+import 'package:linux_do/widgets/dis_emoji_picker.dart';
+import 'package:linux_do/widgets/emoji_text.dart';
 import 'package:linux_do/widgets/owner_banner.dart';
 import 'package:linux_do/widgets/state_view.dart';
 import '../../../const/app_const.dart';
@@ -126,8 +128,6 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
       ],
     );
   }
-
-  
 
   Widget _buildHeader(BuildContext context) {
     return PageHeader(controller: controller);
@@ -279,7 +279,9 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                           ),
                         )
                       : const SizedBox(),
-                  node.post.isForumMaster(controller.topic.value?.userId ?? 0) && node.post.postType == 1
+                  node.post.isForumMaster(
+                              controller.topic.value?.userId ?? 0) &&
+                          node.post.postType == 1
                       ? Positioned(
                           bottom: 14.w,
                           right: 14.w,
@@ -326,7 +328,7 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
       ),
       child: Column(
         children: [
-          Text(
+          EmojiText(
             topic.title ?? '',
             style: theme.textTheme.titleMedium
                 ?.copyWith(fontSize: 10.sp, fontFamily: AppFontFamily.dinPro),
@@ -515,8 +517,8 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
       decoration: BoxDecoration(
         color: theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(12).w,
-          topRight: const Radius.circular(12).w,
+          topLeft: const Radius.circular(8).w,
+          topRight: const Radius.circular(8).w,
         ),
         boxShadow: [
           BoxShadow(
@@ -529,7 +531,6 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 顶部拖动条
           Row(
             children: [
               const Spacer(),
@@ -553,10 +554,10 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
             }
             return Container(
               margin: const EdgeInsets.symmetric(horizontal: 12).w,
-              padding: const EdgeInsets.all(12).w,
+              padding: const EdgeInsets.all(6).w,
               decoration: BoxDecoration(
                 color: theme.cardColor,
-                borderRadius: const BorderRadius.all(Radius.circular(12)).w,
+                borderRadius: const BorderRadius.all(Radius.circular(4)).w,
                 border: Border.all(
                   color: theme.dividerColor.withValues(alpha: 0.1),
                 ),
@@ -593,53 +594,53 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                           ],
                         ),
                       ),
+                      if (controller.replyPostUser.value != null) ...[
+                        4.hGap,
+                        Text(
+                          '(${controller.replyPostUser.value ?? ''})',
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            color: theme.hintColor,
+                            fontFamily: AppFontFamily.dinPro,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                        ),
+                      ],
                     ],
                   ),
                   4.vGap,
                   Text(
                     controller.replyPostTitle.value ?? '',
                     style: TextStyle(
-                      fontSize: 12.sp,
+                      fontSize: 10.sp,
                       color: theme.textTheme.bodyMedium?.color,
                       fontFamily: AppFontFamily.dinPro,
                       fontWeight: FontWeight.w600,
-                      height: 1.4,
+                      height: 1.2,
                     ),
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     softWrap: true,
                   ),
-                  if (controller.replyPostUser.value != null) ...[
-                    4.vGap,
-                    Text(
-                      controller.replyPostUser.value ?? '',
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        color: theme.hintColor,
-                        fontFamily: AppFontFamily.dinPro,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: true,
-                    ),
-                  ],
                 ],
               ),
             );
           }),
           // 输入区域
           Padding(
-            padding: const EdgeInsets.all(12).w,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6).w,
             child: Column(
               children: [
                 Container(
                   constraints: BoxConstraints(
-                    minHeight: 120.w,
+                    minHeight: 80.w,
                     maxHeight: 200.w,
                   ),
                   decoration: BoxDecoration(
                     color: theme.cardColor,
-                    borderRadius: const BorderRadius.all(Radius.circular(12)).w,
+                    borderRadius: const BorderRadius.all(Radius.circular(4)).w,
                     border: Border.all(
                       color: theme.dividerColor.withValues(alpha: 0.1),
                     ),
@@ -654,7 +655,7 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                     keyboardType: TextInputType.multiline,
                     textInputAction: TextInputAction.newline,
                     style: TextStyle(
-                      fontSize: 15.w,
+                      fontSize: 11.w,
                       height: 1.4,
                     ),
                     decoration: InputDecoration(
@@ -669,130 +670,60 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                         fillColor: AppColors.transparent),
                   ),
                 ),
-                16.vGap,
 
                 // 图片上传区域
-                Row(
-                  children: [
-                    // 添加图片按钮
-                    Obx(() => Container(
-                          width: 60.w,
-                          height: 60.w,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: Theme.of(context).dividerColor),
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(8)).w,
-                          ),
-                          child: controller.isUploading.value
-                              ? Center(
-                                  child: DisRefreshLoading(
-                                    fontSize: 8.w,
+                _buildMenus(context),
+                Obx(() {
+                  if (controller.uploadedImages.isEmpty) {
+                    return Container();
+                  }
+                  return SizedBox(
+                    height: 50.w,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: controller.uploadedImages.length,
+                      separatorBuilder: (context, index) => 8.hGap,
+                      itemBuilder: (context, index) {
+                        final image = controller.uploadedImages[index];
+                        return Stack(
+                          children: [
+                            Container(
+                              width: 50.w,
+                              height: 50.w,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4.w),
+                                image: DecorationImage(
+                                  image: NetworkImage(image.url),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              right: 4.w,
+                              top: 4.w,
+                              child: InkWell(
+                                onTap: () => controller.removeImage(image),
+                                child: Container(
+                                  padding: const EdgeInsets.all(3).w,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.5),
+                                    shape: BoxShape.circle,
                                   ),
-                                )
-                              : Material(
-                                  color: AppColors.transparent,
-                                  child: InkWell(
-                                    onTap: controller.pickAndUploadImage,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          CupertinoIcons.photo,
-                                          size: 16.w,
-                                          color: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium
-                                              ?.color,
-                                        ),
-                                        5.vGap,
-                                        Text(
-                                          AppConst.createPost.addImage,
-                                          style: TextStyle(
-                                            fontSize: 10.w,
-                                            color: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.color,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                  child: Icon(
+                                    CupertinoIcons.xmark,
+                                    size: 7.w,
+                                    color: Colors.white,
                                   ),
                                 ),
-                        )),
-                    16.hGap,
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // 已上传图片列表
-                              Obx(() {
-                                if (controller.uploadedImages.isEmpty) {
-                                  return Container();
-                                }
-                                return SizedBox(
-                                  height: 60.w,
-                                  child: ListView.separated(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: controller.uploadedImages.length,
-                                    separatorBuilder: (context, index) =>
-                                        8.hGap,
-                                    itemBuilder: (context, index) {
-                                      final image =
-                                          controller.uploadedImages[index];
-                                      return Stack(
-                                        children: [
-                                          Container(
-                                            width: 60.w,
-                                            height: 60.w,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(8.w),
-                                              image: DecorationImage(
-                                                image: NetworkImage(image.url),
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                          Positioned(
-                                            right: 4.w,
-                                            top: 4.w,
-                                            child: InkWell(
-                                              onTap: () =>
-                                                  controller.removeImage(image),
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.all(4).w,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black
-                                                      .withValues(alpha: 0.5),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Icon(
-                                                  CupertinoIcons.xmark,
-                                                  size: 8.w,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                );
-                              }),
-                            ],
-                          ),
-                        ],
-                      ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                  ],
-                ),
+                  );
+                }),
+
                 16.vGap,
                 // 发送按钮
                 Obx(() => AnimatedScale(
@@ -803,7 +734,7 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                         duration: const Duration(milliseconds: 200),
                         child: SizedBox(
                           width: double.infinity,
-                          height: 44.w,
+                          height: 40.w,
                           child: DisButton(
                               text: AppConst.posts.send,
                               onPressed: controller.sendReply,
@@ -816,10 +747,60 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
               ],
             ),
           ),
+
+          Offstage(
+            offstage: !controller.isShowEmojiPicker.value,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              child: DisEmojiPicker(
+                height: 320.w,
+                textEditingController: controller.contentController,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
+
+  Widget _buildMenus(BuildContext context) => Row(
+        children: [
+          controller.isUploading.value
+              ? Center(
+                  child: SizedBox(
+                    width: 18.w,
+                    height: 18.w,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).primaryColor,
+                      ),
+                    ),
+                  ),
+                )
+              : IconButton(
+                  onPressed: controller.pickAndUploadImage,
+                  icon: Icon(
+                    CupertinoIcons.camera_fill,
+                    color: Theme.of(context).primaryColor,
+                    size: 18.w,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(minWidth: 40.w, minHeight: 40.w),
+                ),
+          // 表情切换
+          IconButton(
+            icon: Icon(
+              CupertinoIcons.smiley_fill,
+              color: Theme.of(context).primaryColor,
+              size: 18.w,
+            ),
+            onPressed: () {
+              controller.toggleEmojiPicker();
+            },
+          )
+        ],
+      );
 
   // 计算链接列表的高度，基于条目数量
   double calculateLinkListHeight(int linkCount) {
@@ -844,7 +825,10 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
      */
     switch (post.postType) {
       case 3:
-        return PostContentAction(post: post, controller: controller, title: controller.topic.value?.title);
+        return PostContentAction(
+            post: post,
+            controller: controller,
+            title: controller.topic.value?.title);
       default:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,

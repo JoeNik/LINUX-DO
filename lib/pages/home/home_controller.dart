@@ -3,16 +3,18 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/models/app_version.dart';
 import 'package:linux_do/net/api_service.dart';
 import 'package:linux_do/net/http_config.dart';
+import 'package:linux_do/utils/emoji_manager.dart';
 import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/controller/global_controller.dart';
 import 'package:linux_do/widgets/dis_app_update.dart';
+import 'package:linux_do/widgets/dis_button.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:in_app_update/in_app_update.dart';
 
 import '../../const/app_images.dart';
 import '../../const/app_const.dart';
@@ -55,6 +57,7 @@ class HomeController extends BaseController {
     // 模拟请求的数据
     // badgeCount = {0: '12'};
 
+    initEmoji();
     checkAppVersion();
   }
 
@@ -125,12 +128,14 @@ class HomeController extends BaseController {
               8.vGap,
               // 内容
               Text(
-                AppConst.createPost.dialogContent,
+                //AppConst.createPost.dialogContent,
+                '更新了发布功能，优化了发布的流程, 现在可以更方便的发布帖子了',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 14.w,
+                  fontSize: 12.w,
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                   height: 1.5,
+                  fontFamily: AppFontFamily.dinPro,
                 ),
               ),
               24.vGap,
@@ -144,7 +149,7 @@ class HomeController extends BaseController {
                     decoration: BoxDecoration(
                       color:
                           Theme.of(context).shadowColor.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(12.w),
+                      borderRadius: BorderRadius.circular(6.w),
                     ),
                     child: IconButton(
                       onPressed: () => Get.back(),
@@ -158,28 +163,15 @@ class HomeController extends BaseController {
                   12.hGap,
                   // 确认按钮
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                        Get.toNamed(Routes.CREATE_TOPIC);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor:
-                            Theme.of(context).textTheme.titleLarge?.color,
-                        elevation: 0,
-                        padding: EdgeInsets.symmetric(vertical: 16.w),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.w),
-                        ),
-                      ),
-                      child: Text(
-                        AppConst.createPost.dialogConfirm,
-                        style: TextStyle(
-                          fontSize: 14.w,
-                          color: AppColors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    child: SizedBox(
+                      height: 48.w,
+                      child: DisButton(
+                        onPressed: () {
+                          Get.back();
+                          Get.toNamed(Routes.CREATE_TOPIC);
+                        },
+                        text: '去创建',
+                        borderRadius: 6.w,
                       ),
                     ),
                   ),
@@ -228,5 +220,10 @@ class HomeController extends BaseController {
     } catch (e, s) {
       l.e('检查更新失败: $e\n$s');
     }
+  }
+
+  void initEmoji() async {
+    await EmojiManager().init('assets/json/emoji.json');
+    EmojiManager().precacheImages(Get.context!);
   }
 }

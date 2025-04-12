@@ -189,6 +189,79 @@ class _ApiService implements ApiService {
   }
 
   @override
+  Future<TopicDetail> getRobotTopicDetail(
+    String topicId, {
+    bool trackVisit = true,
+    bool forceLoad = true,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'track_visit': trackVisit,
+      r'forceLoad': forceLoad,
+    };
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<TopicDetail>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          't/${topicId}.json',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late TopicDetail _value;
+    try {
+      _value = TopicDetail.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Post> getPostContent(String postId) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Post>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+        .compose(
+          _dio.options,
+          'posts/${postId}',
+          queryParameters: queryParameters,
+          data: _data,
+        )
+        .copyWith(
+            baseUrl: _combineBaseUrls(
+          _dio.options.baseUrl,
+          baseUrl,
+        )));
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late Post _value;
+    try {
+      _value = Post.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<TopicDetail> getTopicPosts(
     String id, {
     List<String> postIds = const [],
@@ -859,16 +932,9 @@ class _ApiService implements ApiService {
   }
 
   @override
-  Future<MessageResponse> getMessages(
-    String username,
-    bool ascending,
-    String order,
-  ) async {
+  Future<MessageResponse> getMessages(String username) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{
-      r'ascending': ascending,
-      r'order': order,
-    };
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<MessageResponse>(Options(
@@ -1397,7 +1463,7 @@ class _ApiService implements ApiService {
 
   @override
   Future<CreatePostResponse> createPost({
-    required String title,
+    String? title,
     required String content,
     int? categoryId,
     bool? unlistTopic = false,
@@ -1409,6 +1475,8 @@ class _ApiService implements ApiService {
     List<String>? tags,
     Map<String, ImageSize>? imageSizes,
     String? targetRecipients,
+    int? aiPersonaId,
+    int? topicId,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -1427,6 +1495,8 @@ class _ApiService implements ApiService {
       'tags[]': tags,
       'image_sizes': imageSizes,
       'target_recipients': targetRecipients,
+      'meta_data[ai_persona_id]': aiPersonaId,
+      'topic_id': topicId,
     };
     _data.removeWhere((k, v) => v == null);
     final _options = _setStreamType<CreatePostResponse>(Options(

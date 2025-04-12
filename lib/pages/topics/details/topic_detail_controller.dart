@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:linux_do/const/app_const.dart';
@@ -128,6 +129,12 @@ class TopicDetailController extends BaseController
   double fontSize = 14.0;
   double replyFontSize = 11.0;
 
+
+  // 表情选择器相关
+  final RxBool isShowEmojiPicker = false.obs;
+  final RxBool isHideKeyboard = false.obs;
+  final FocusNode focusNode = FocusNode();
+
   @override
   void onInit() {
     super.onInit();
@@ -142,6 +149,16 @@ class TopicDetailController extends BaseController
         StorageManager.getDouble(AppConst.identifier.postFontSize) ?? 14.0;
     replyFontSize =
         StorageManager.getDouble(AppConst.identifier.replyFontSize) ?? 11.0;
+
+
+    // 监听键盘可见性
+    KeyboardVisibilityController().onChange.listen((bool visible) {
+      if (visible) {
+        isShowEmojiPicker.value = false;
+        isHideKeyboard.value = false;
+      }
+    });
+
 
     itemPositionsListener.itemPositions.addListener(_onScroll);
 
@@ -1221,6 +1238,25 @@ class TopicDetailController extends BaseController
       showError('跳转失败，请重试');
     } finally {
       setLoading(false);
+    }
+  }
+
+  // 切换表情选择器
+  void toggleEmojiPicker() {
+    if (isShowEmojiPicker.value) {
+      isShowEmojiPicker.value = false;
+      isHideKeyboard.value = false;
+
+      Future.delayed(const Duration(milliseconds: 100), () {
+        FocusScope.of(Get.context!).requestFocus(focusNode);
+        SystemChannels.textInput.invokeMethod('TextInput.show');
+      });
+    } else {
+      FocusManager.instance.primaryFocus?.unfocus();
+      Future.delayed(const Duration(milliseconds: 300), () {
+        isShowEmojiPicker.value = true;
+        isHideKeyboard.value = true;
+      });
     }
   }
 }

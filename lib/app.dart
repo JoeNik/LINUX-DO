@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:linux_do/utils/emoji_manager.dart';
 import 'package:linux_do/utils/log.dart';
 
 import 'controller/global_controller.dart';

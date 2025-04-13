@@ -117,33 +117,33 @@ class SettingsController extends BaseController {
   }
 
   void changeTheme(Color color) {
-  try {
-    ThemeData lightTheme = ThemeData(
-      primaryColor: color,
-      brightness: Brightness.light,
-    );
+    try {
+      ThemeData lightTheme = ThemeData(
+        primaryColor: color,
+        brightness: Brightness.light,
+      );
 
-    ThemeData darkTheme = ThemeData(
-      primaryColor: color,
-      brightness: Brightness.dark,
-    );
+      ThemeData darkTheme = ThemeData(
+        primaryColor: color,
+        brightness: Brightness.dark,
+      );
 
-    // 根据当前主题模式切换
-    if (Get.isDarkMode) {
-      Get.changeTheme(darkTheme);
-    } else {
-      Get.changeTheme(lightTheme);
+      // 根据当前主题模式切换
+      if (Get.isDarkMode) {
+        Get.changeTheme(darkTheme);
+      } else {
+        Get.changeTheme(lightTheme);
+      }
+
+      // 返回上一页
+      Get.back();
+
+      final colorHex = color.value & 0xFFFFFF;
+      StorageManager.setData(AppConst.identifier.themeColor, colorHex);
+    } catch (e, s) {
+      l.e('changeTheme error: $e, $s');
     }
-
-    // 返回上一页
-    Get.back();
-
-    // 保存颜色
-    StorageManager.setData(AppConst.identifier.themeColor, color.toString());
-  } catch (e, s) {
-    l.e('changeTheme error: $e, $s');
   }
-}
 
 
   /// 关于页面

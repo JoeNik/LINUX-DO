@@ -31,4 +31,14 @@ extension StringExpand on String {
     }
     return Colors.blue;
   }
+
+  /// 转换为DateTime类型
+  DateTime? toDateTime() {
+    try {
+      final datetime = DateTime.parse(this);
+      return datetime;
+    } catch (e) {
+      return null;
+    }
+  }
 }

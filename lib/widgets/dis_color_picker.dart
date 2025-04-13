@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:linux_do/const/app_const.dart';
+import 'package:linux_do/utils/mixins/toast_mixin.dart';
+import 'package:linux_do/utils/storage_manager.dart';
+import 'package:linux_do/widgets/dis_button.dart';
 import '../const/app_colors.dart';
 import '../const/app_spacing.dart';
 
@@ -79,7 +82,7 @@ class _ColorPickerContent extends StatefulWidget {
   State<_ColorPickerContent> createState() => _ColorPickerContentState();
 }
 
-class _ColorPickerContentState extends State<_ColorPickerContent> {
+class _ColorPickerContentState extends State<_ColorPickerContent>  with ToastMixin{
   /// 主题色列表
   static final List<MaterialColor> _colors = [
     Colors.red,
@@ -231,6 +234,23 @@ class _ColorPickerContentState extends State<_ColorPickerContent> {
                         onTap: () => _onMaterialColorSelected(color),
                       ))
                   .toList(),
+            ),
+            16.vGap,
+
+            Align(
+              alignment: Alignment.centerRight,
+              child: SizedBox(
+                height: 30,
+                child: DisButton(
+                  text: '恢复默认',
+                  fontSize: 12,
+                  borderRadius: 15,
+                  onPressed: () {
+                   StorageManager.remove(AppConst.identifier.themeColor);
+                   showSuccess('恢复成功,下次启动生效');
+                  },
+                ),
+              ),
             ),
         ],
       ),

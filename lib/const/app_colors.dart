@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:linux_do/const/app_const.dart';
+import 'package:linux_do/utils/log.dart';
+import 'package:linux_do/utils/storage_manager.dart';
 
 class AppColors {
   /// L站 主色调
@@ -71,29 +74,27 @@ class AppColors {
   /// l-3
   static const Color l3 = Color(0xFFD76F3C);
 
-
   /// 创建 MaterialColor
   static MaterialColor createMaterialColor(Color color) {
     List<double> strengths = <double>[.05];
     Map<int, Color> swatch = {};
-    final int r = color.red, g = color.green, b = color.blue; 
-    
-  for (int i = 1; i < 10; i++) {
-    strengths.add(0.1 * i);
-  }
-  
-  for (var strength in strengths) {
-    final double ds = 0.5 - strength;
-    swatch[(strength * 1000).round()] = Color.fromRGBO(
-      r + ((ds < 0 ? r : (255 - r)) * ds).round(),
-      g + ((ds < 0 ? g : (255 - g)) * ds).round(),
-      b + ((ds < 0 ? b : (255 - b)) * ds).round(),
-      1,
-    );
+    final int r = color.red, g = color.green, b = color.blue;
+
+    for (int i = 1; i < 10; i++) {
+      strengths.add(0.1 * i);
+    }
+
+    for (var strength in strengths) {
+      final double ds = 0.5 - strength;
+      swatch[(strength * 1000).round()] = Color.fromRGBO(
+        r + ((ds < 0 ? r : (255 - r)) * ds).round(),
+        g + ((ds < 0 ? g : (255 - g)) * ds).round(),
+        b + ((ds < 0 ? b : (255 - b)) * ds).round(),
+        1,
+      );
     }
     return MaterialColor(color.value, swatch);
   }
-
 
   /// 亮色主题颜色
   static final light = _Colors(
@@ -124,6 +125,19 @@ class AppColors {
     shadow: Colors.white.withValues(alpha: .1),
     inputFillColor: textHint,
   );
+
+
+  static Color? getStoredColor() {
+    try {
+      final colorValue = StorageManager.getInt(AppConst.identifier.themeColor);
+      if (colorValue == null) return null;
+      
+      return Color(colorValue | 0xFF000000);
+    } catch (e, s) {
+      l.e('解析存储颜色失败: $e, $s');
+      return null;
+    }
+  }
 }
 
 class _Colors {
@@ -152,4 +166,5 @@ class _Colors {
     required this.shadow,
     required this.inputFillColor,
   });
+
 }

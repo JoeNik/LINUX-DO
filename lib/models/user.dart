@@ -310,6 +310,8 @@ class CurrentUser {
   final List<int>? sidebarCategoryIds;
   @JsonKey(name: 'sidebar_tags')
   final List<Tags>? sidebarTags;
+  @JsonKey(name: 'birthdate')
+  final String? birthdate;
 
   CurrentUser({
     required this.id,
@@ -374,6 +376,7 @@ class CurrentUser {
     this.userAuthTokens,
     this.sidebarCategoryIds,
     this.sidebarTags,
+    this.birthdate,
   });
 
   factory CurrentUser.fromJson(Map<String, dynamic> json) =>

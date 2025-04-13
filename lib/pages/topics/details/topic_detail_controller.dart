@@ -8,11 +8,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/controller/base_controller.dart';
 import 'package:linux_do/controller/share_controller.dart';
-import 'package:linux_do/net/http_client.dart';
 import 'package:linux_do/net/http_config.dart';
 import 'package:linux_do/utils/browser_util.dart';
-import 'package:linux_do/utils/cloudflare_auth_service.dart';
-import 'package:linux_do/utils/device_util.dart';
+import 'package:linux_do/widgets/cloudflare_timings_service.dart';
 import 'package:linux_do/utils/mixins/concatenated.dart';
 import 'package:linux_do/widgets/browser_tips_sheet.dart';
 import 'package:linux_do/widgets/html/html_widget.dart';
@@ -66,8 +64,8 @@ class TopicDetailController extends BaseController
   final isSending = false.obs;
 
   // 阅读时间追踪相关变量
-  final _lastTrackTime = DateTime.now().obs;
   final _visiblePostNumbers = <int>{}.obs;
+  final timings = <String, dynamic>{}.obs;
   Timer? _debounceTimer;
   static const _debounceDelay = Duration(milliseconds: 2000);
 
@@ -119,8 +117,6 @@ class TopicDetailController extends BaseController
   // 书签服务
   final BookmarkService _bookmarkService = Get.find<BookmarkService>();
 
-  final CloudflareAuthService _cloudflareAuthService = Get.find<CloudflareAuthService>();
-
   // csrfToken
   String? csrfToken = '';
   String? cfClearance = '';
@@ -129,11 +125,16 @@ class TopicDetailController extends BaseController
   double fontSize = 14.0;
   double replyFontSize = 11.0;
 
-
   // 表情选择器相关
   final RxBool isShowEmojiPicker = false.obs;
   final RxBool isHideKeyboard = false.obs;
   final FocusNode focusNode = FocusNode();
+
+  final Map<int, DateTime> _postVisibleStartTimes = {};
+  final Map<int, int> _readPosts = {};
+  final cloudflareController = Get.find<CloudflareController>();
+
+  final GlobalKey<CloudflareTimingsServiceState> cloudflareAuthKey = GlobalKey<CloudflareTimingsServiceState>();
 
   @override
   void onInit() {
@@ -150,7 +151,6 @@ class TopicDetailController extends BaseController
     replyFontSize =
         StorageManager.getDouble(AppConst.identifier.replyFontSize) ?? 11.0;
 
-
     // 监听键盘可见性
     KeyboardVisibilityController().onChange.listen((bool visible) {
       if (visible) {
@@ -158,7 +158,6 @@ class TopicDetailController extends BaseController
         isHideKeyboard.value = false;
       }
     });
-
 
     itemPositionsListener.itemPositions.addListener(_onScroll);
 
@@ -244,8 +243,13 @@ class TopicDetailController extends BaseController
 
   void _debouncedUpdateTiming() {
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(_debounceDelay, () {
-      _updateTopicTiming();
+    _debounceTimer = Timer(_debounceDelay, () async {
+      l.d('cloudflareController 对象: ${cloudflareController.webViewController}');
+      if (cloudflareController.webViewController != null) {
+        await updateTopicTiming();
+      } else {
+        l.e('CloudflareAuthServiceState 仍不可用，数据已缓存');
+      }
     });
   }
 
@@ -257,6 +261,7 @@ class TopicDetailController extends BaseController
       _isThrottling = false;
     });
 
+    final now = DateTime.now();
     final positions = itemPositionsListener.itemPositions.value.toList();
     if (positions.isEmpty) return;
 
@@ -266,23 +271,25 @@ class TopicDetailController extends BaseController
     if (!isManualScrolling.value) {
       for (var position in positions) {
         if (position.index >= 1 && position.index - 1 < replyTree.length) {
-          if (position.itemLeadingEdge < 0.5 &&
-              position.itemTrailingEdge > 0.5) {
+          if (position.itemLeadingEdge <= 1 && position.itemTrailingEdge >= 0) {
             final node = replyTree[position.index - 1];
             if (node.post.postNumber != null) {
-              // 使用实际的楼层号减1作为索引
-              currentPostIndex.value = node.post.postNumber! - 1;
               visiblePosts.add(node.post.postNumber!);
-              break;
+              if (position.itemLeadingEdge < 0.5 &&
+                  position.itemTrailingEdge > 0.5) {
+                currentPostIndex.value = node.post.postNumber! - 1;
+              }
             }
           }
         }
       }
     }
 
+    // 更新可见帖子列表
     _visiblePostNumbers.value = visiblePosts;
-    // 阅读时间 目前没办法更新
-    //_debouncedUpdateTiming();
+
+    // 处理帖子可见时间
+    _updatePostVisibility(visiblePosts, now);
 
     // 检查是否需要加载更多
     if (positions.isNotEmpty) {
@@ -307,89 +314,95 @@ class TopicDetailController extends BaseController
         loadMore();
       }
     }
-  }
 
-  // 更新阅读时间
-  // 暂时不更新阅读时间
-  Future<void> _updateTopicTiming() async {
-    final visiblePosts = _visiblePostNumbers.value;
-    if (visiblePosts.isEmpty) return;
-
-    final client = NetClient.getInstance();
-
-    await client.ensureValidClearance();
-
-    final now = DateTime.now();
-    final timeSpent = now.difference(_lastTrackTime.value).inSeconds * 1000;
-    if (timeSpent <= 0) return;
-
-    try {
-      final body =
-          'topic_id=${topicId.value}&topic_time=$timeSpent${visiblePosts.map((postNumber) => '&timings[$postNumber]=$timeSpent').join()}';
-
-      final dio = NetClient.getDio;
-
-      final userAgent = await DeviceUtil.getUserAgent();
-
-      final uri = Uri.parse('${HttpConfig.baseUrl}topics/timings');
-      final cookies =
-          await client.cookieJar.loadForRequest(uri);
-      final cookieHeader = cookies.isNotEmpty
-          ? cookies.map((c) => '${c.name}=${c.value}').join('; ')
-          : '';
-      l.d('CookieJar Cookies: $cookieHeader');
-
-      // 创建请求
-      final response = await dio.post('${HttpConfig.baseUrl}topics/timings',
-          data: body,
-          options: d.Options(
-            contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-            headers: {
-              'Accept': '*/*',
-              'X-CSRF-Token':
-                  StorageManager.getString(AppConst.identifier.csrfToken) ?? '',
-              'X-Requested-With': 'XMLHttpRequest',
-              'path': '/topics/timings',
-              'Referer': '${HttpConfig.baseUrl}t/topic/${topicId.value}',
-              'discourse-background': 'true',
-              'discourse-logged-in': 'true',
-              'discourse-present': 'true',
-              'x-silence-logger': 'true',
-              'User-Agent': userAgent,
-              'origin': HttpConfig.baseUrl,
-              'Accept-Encoding': 'gzip, deflate, br, zstd',
-            },
-          ));
-
-      if (response.statusCode == 200) {
-        l.d('阅读时间更新成功');
-      } else {
-        l.e('更新阅读时间失败: ${response.statusMessage}');
-      }
-
-      _lastTrackTime.value = now;
-    } catch (e, s) {
-      l.e('更新阅读时间失败: $e ${s.toString()}');
+    // 如果有已读帖子，触发更新
+    if (_readPosts.isNotEmpty) {
+      _debouncedUpdateTiming();
     }
   }
 
+  // 更新帖子可见时间
+  void _updatePostVisibility(Set<int> visiblePosts, DateTime now) {
+    for (var postNumber in visiblePosts) {
+      if (!_postVisibleStartTimes.containsKey(postNumber)) {
+        // 帖子首次可见，记录开始时间
+        _postVisibleStartTimes[postNumber] = now;
+        l.d('帖子 $postNumber 开始可见');
+      } else {
+        // 帖子已可见，检查是否超过 2 秒
+        final startTime = _postVisibleStartTimes[postNumber]!;
+        final duration = now.difference(startTime).inMilliseconds;
+        if (duration >= 2000 && !_readPosts.containsKey(postNumber)) {
+          // 可见超过 2 秒，标记为已读
+          _readPosts[postNumber] = duration;
+          l.d('帖子 $postNumber 已读，阅读时间: $duration ms');
+          // 从可见时间记录中移除，防止重复标记
+          _postVisibleStartTimes.remove(postNumber);
+        }
+      }
+    }
+
+    // 处理不再可见的帖子
+    _postVisibleStartTimes.keys.toList().forEach((postNumber) {
+      if (!visiblePosts.contains(postNumber)) {
+        // 帖子不再可见，检查是否已读
+        final startTime = _postVisibleStartTimes[postNumber]!;
+        final duration = now.difference(startTime).inMilliseconds;
+        if (duration >= 2000 && !_readPosts.containsKey(postNumber)) {
+          _readPosts[postNumber] = duration;
+          l.d('帖子 $postNumber 离开时已读，阅读时间: $duration ms');
+        }
+        _postVisibleStartTimes.remove(postNumber);
+      }
+    });
+  }
+  
+
+  // 更新阅读时间
+  // 暂时不更新阅读时间
+  Future<void> updateTopicTiming() async {
+    if (_readPosts.isEmpty) {
+      l.w('没有已读帖子需要更新');
+      return;
+    }
+
+    final Map<String, dynamic> timings = {
+      'topic_id': topicId.value,
+      'topic_time': _readPosts.values.fold<int>(0, (sum, time) => sum + time),
+      'timings': {}
+    };
+
+    _readPosts.forEach((postNumber, time) {
+      timings['timings'][postNumber.toString()] = time;
+    });
+
+    if (cloudflareController.webViewController != null) {
+      await cloudflareController.updateTopicTiming(timings);
+      _readPosts.clear();
+    } else {
+      // l.w('CloudflareAuthServiceState 未找到，缓存 timings 数据');
+      // await StorageManager.setData(
+      //   'pending_timings_${topicId.value}',
+      //   jsonEncode(timings),
+      // );
+
+    }
+  }
 
   /// 确保 cf_clearance 有效
-  Future<void> ensureValidClearance(NetClient client) async {
-    final cookies = await client.cookieJar.loadForRequest(
-        Uri.parse(HttpConfig.baseUrl));
-    final clearance = cookies.firstWhere(
-        (c) => c.name == 'cf_clearance', orElse: () => Cookie('cf_clearance', ''));
-    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-  if ((now - int.tryParse(clearance.value.split('-')[1])!) > 3600) {
-
-    l.d('cf_clearance 已过期或不存在');
-    await _cloudflareAuthService.authenticate();
-    
-  } else {
-    l.d('cf_clearance 有效: ${clearance.value}');
-  }
-}
+  // Future<void> ensureValidClearance(NetClient client) async {
+  //   final cookies =
+  //       await client.cookieJar.loadForRequest(Uri.parse(HttpConfig.baseUrl));
+  //   final clearance = cookies.firstWhere((c) => c.name == 'cf_clearance',
+  //       orElse: () => Cookie('cf_clearance', ''));
+  //   final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  //   if ((now - int.tryParse(clearance.value.split('-')[1])!) > 3600) {
+  //     l.d('cf_clearance 已过期或不存在');
+  //     await _cloudflareAuthService.authenticate();
+  //   } else {
+  //     l.d('cf_clearance 有效: ${clearance.value}');
+  //   }
+  // }
 
   /// 向上加载 获取更早的帖子
   /// 还有问题!!!
@@ -561,7 +574,7 @@ class TopicDetailController extends BaseController
 
       // 初始化点赞和书签数据
       _initPostScores();
-    } catch (e,s) {
+    } catch (e, s) {
       l.e('获取帖子详情失败: $e \n$s');
       setError('获取帖子详情失败');
     } finally {

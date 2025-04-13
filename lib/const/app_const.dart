@@ -10,6 +10,9 @@ class AppConst {
   /// 顶部信息
   static const String topInfo = '真诚、友善、团结、专业，共建你我引以为荣之社区。《常见问题解答》';
 
+  /// 顶部信息
+  static const String sloganEn = 'Sincere, friendly, united, and professional.';
+
   /// 通用提示
   static const String commonTip = '提示';
   static const updateSuccess = '更新成功';
@@ -159,10 +162,13 @@ class _StateConst {
 /// 标识常量
 class _Identifier {
 
+
+
   const _Identifier();
 
   String get token => 'token';
   String get cfClearance => 'cfClearance';
+  String get sessionCookie => '_forum_session';
   String get userInfo => 'userInfo';
   String get theme => 'theme';
   String get language => 'language';

@@ -5,7 +5,6 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:linux_do/net/retry_interceptor.dart';
-import 'package:linux_do/utils/cloudflare_auth_service.dart';
 import 'package:linux_do/utils/device_util.dart';
 import 'package:path_provider/path_provider.dart';
 import 'api_response.dart';
@@ -23,6 +22,7 @@ class NetClient {
   static const String cfClearance = 'cf_clearance';
   static const String forumSession = '_forum_session';
   static const String tokenKey = '_t';
+  static String userAgent  = '';
 
   /// 获取dio实例
   Dio get dio => _dio;
@@ -58,7 +58,7 @@ class NetClient {
 
   /// 初始化options
   Future<void> _initOptions() async {
-    final userAgent = await DeviceUtil.getUserAgent();
+    userAgent = await DeviceUtil.getUserAgent();
     _options = BaseOptions(
       baseUrl: HttpConfig.baseUrl,
       connectTimeout: const Duration(milliseconds: HttpConfig.connectTimeout),
@@ -580,21 +580,6 @@ class NetClient {
     } catch (e) {
       l.e('获取 cookie 失败: $e');
       return null;
-    }
-  }
-
-  Future<void> ensureValidClearance() async {
-    final cookies =
-        await cookieJar.loadForRequest(Uri.parse(HttpConfig.baseUrl));
-    final clearance = cookies.firstWhere((c) => c.name == 'cf_clearance',
-        orElse: () => Cookie('cf_clearance', ''));
-    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    if (clearance == null ||
-        (now - int.tryParse(clearance.value.split('-')[1])!) > 3600) {
-      l.d('cf_clearance 已过期或不存在，尝试更新');
-      await CloudflareAuthService().authenticate();
-    } else {
-      l.d('cf_clearance 有效: ${clearance.value}');
     }
   }
 }

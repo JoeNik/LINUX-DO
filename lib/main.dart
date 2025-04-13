@@ -5,11 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:linux_do/const/app_colors.dart';
 import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/controller/global_controller.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import 'package:linux_do/app.dart';
+import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/utils/storage_manager.dart';
 
 void main() async {
@@ -30,8 +32,7 @@ void main() async {
   Size size = Platform.isMacOS ? const Size(1024, 768) : const Size(375, 812);
 
   runApp(MyApp(designSize: size, initialRoute: initialRoute));
-} 
-
+}
 
 Future<String> _determineInitialRoute() async {
   // 检查是否首次启动
@@ -43,10 +44,10 @@ Future<String> _determineInitialRoute() async {
 
   // 检查登录状态
   final hasLogin = await Get.find<GlobalController>().checkLoginStatus();
-  final isAnonymousMode = StorageManager.getBool(AppConst.identifier.isAnonymousMode) ?? false;
+  final isAnonymousMode =
+      StorageManager.getBool(AppConst.identifier.isAnonymousMode) ?? false;
   return isAnonymousMode || hasLogin ? Routes.HOME : Routes.LOGIN;
 }
-
 
 class MyApp extends StatelessWidget {
   final Size designSize;
@@ -101,6 +102,19 @@ class MyApp extends StatelessWidget {
           builder: (context, child) {
             // 获取当前主题模式
             final isDark = Theme.of(context).brightness == Brightness.dark;
+            final themeColor = AppColors.getStoredColor();
+            
+            // 使用主题数据包装子组件
+            Widget? result = child;
+            if (themeColor != null) {
+              result = Theme(
+                data: ThemeData(
+                  primaryColor: themeColor,
+                  brightness: isDark ? Brightness.dark : Brightness.light,
+                ),
+                child: child!,
+              );
+            }
 
             // 根据主题设置系统UI样式
             if (Platform.isAndroid) {
@@ -119,25 +133,25 @@ class MyApp extends StatelessWidget {
             return GestureDetector(
               // 点击空白处收起键盘
               onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-              child: child!,
+              child: result!,
             );
           },
         );
       },
     );
   }
-}
 
 // 从存储中获取保存的主题模式
-ThemeMode _getSavedThemeMode() {
-  final savedTheme = StorageManager.getString(AppConst.identifier.theme);
-  switch (savedTheme) {
-    case 'light':
-      return ThemeMode.light;
-    case 'dark':
-      return ThemeMode.dark;
-    case 'system':
-    default:
-      return ThemeMode.system;
+  ThemeMode _getSavedThemeMode() {
+    final savedTheme = StorageManager.getString(AppConst.identifier.theme);
+    switch (savedTheme) {
+      case 'light':
+        return ThemeMode.light;
+      case 'dark':
+        return ThemeMode.dark;
+      case 'system':
+      default:
+        return ThemeMode.system;
+    }
   }
 }

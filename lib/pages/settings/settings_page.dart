@@ -131,15 +131,15 @@ class SettingsPage extends GetView<SettingsController> {
             [
               _buildThemeDropdown(context, const Color(0xFFFFB300),
                   CupertinoIcons.moon_stars_fill),
-              // _buildNavigationItem(
-              //   context,
-              //   AppConst.settings.themeCustom,
-              //   CupertinoIcons.paintbrush_fill,
-              //   iconColor: const Color(0xFFFFB300),
-              //   onTap: () {
-              //     controller.showColorPicker();
-              //   },
-              // ),
+              _buildNavigationItem(
+                context,
+                AppConst.settings.themeCustom,
+                CupertinoIcons.paintbrush_fill,
+                iconColor: const Color(0xFFFFB300),
+                onTap: () {
+                  controller.showColorPicker();
+                },
+              ),
               _buildNavigationItem(
                 context,
                 AppConst.settings.fontSize,

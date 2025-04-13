@@ -89,4 +89,22 @@ extension DateTimeExpand on DateTime {
       return format('HH:mm');
     }
   }
+
+  // 显示年份
+  String get friendlyDateTime3 {
+    final now = DateTime.now();
+    final difference = now.difference(this);
+
+    if (difference.inSeconds < 60) {
+      return '刚刚';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}分钟前';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}小时前';
+    }else if (difference.inDays > 1) {
+      return format('yyyy-MM-dd');
+    } else {
+      return format('yyyy-MM-dd');
+    }
+  }
 }

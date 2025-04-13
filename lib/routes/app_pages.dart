@@ -3,6 +3,8 @@ import 'package:linux_do/controller/share_controller.dart';
 import 'package:linux_do/pages/category/category_list_controller.dart';
 import 'package:linux_do/pages/chat/chat_robot_controller.dart';
 import 'package:linux_do/pages/chat/chat_robot_page.dart';
+import 'package:linux_do/pages/profile/connect_controller.dart';
+import 'package:linux_do/pages/profile/connect_page.dart';
 import 'package:linux_do/pages/profile/edit_profile_controller.dart';
 import 'package:linux_do/pages/profile/edit_profile_page.dart';
 import 'package:linux_do/pages/profile/follow_controller.dart';
@@ -22,7 +24,7 @@ import 'package:linux_do/pages/settings/profile_settings_page.dart';
 import 'package:linux_do/pages/settings/security_settings_controller.dart';
 import 'package:linux_do/pages/settings/security_settings_page.dart';
 import 'package:linux_do/utils/bookmark_service.dart';
-import 'package:linux_do/utils/cloudflare_auth_service.dart';
+import 'package:linux_do/widgets/cloudflare_timings_service.dart';
 import 'package:linux_do/widgets/html/html_widget.dart';
 import '../pages/chat/chat_detail_controller.dart';
 import '../pages/chat/chat_detail_page.dart';
@@ -111,7 +113,7 @@ class AppPages {
         Get.lazyPut(() => TopicDetailController());
         Get.lazyPut(() => HtmlController());
         Get.lazyPut(() => ShareController());
-        Get.lazyPut(() => CloudflareAuthService());
+        Get.lazyPut(() => CloudflareController());
       }),
     ),
 
@@ -281,6 +283,15 @@ class AppPages {
       page: () => const ChatRobotPage(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => ChatRobotController());
+      }),
+    ),
+
+    /// 连接页
+    GetPage(
+      name: Routes.CONNECT,
+      page: () => ConnectPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => ConnectController());
       }),
     ),
   ];

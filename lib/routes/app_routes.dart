@@ -81,4 +81,7 @@ abstract class Routes {
 
   // 书签页面
   static const BOOKMARKS = '/bookmarks';
+
+  // 连接页面
+  static const CONNECT = '/connect';
 }

@@ -7,6 +7,7 @@ import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/controller/global_controller.dart';
 import 'package:linux_do/pages/profile/profile_controller.dart';
+import 'package:linux_do/routes/app_pages.dart';
 import 'package:linux_do/utils/mixins/toast_mixin.dart';
 
 class ProfileMenu extends StatelessWidget with ToastMixin {
@@ -33,9 +34,9 @@ class ProfileMenu extends StatelessWidget with ToastMixin {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildStatItem('信任等级', user?.trustLevel.toString() ?? ''),
-                    _buildStatItem('徽章数', user?.badgeCount.toString() ?? ''),
-                    _buildStatItem('积分', '${user?.gamificationScore ?? 0}'),
+                    _buildStatItem('信任等级', user?.trustLevel.toString() ?? '', ()=> Get.toNamed(Routes.CONNECT)),
+                    _buildStatItem('徽章数', user?.badgeCount.toString() ?? '', () {}),
+                    _buildStatItem('积分', '${user?.gamificationScore ?? 0}', () {}),
                   ],
                 ),
               ),
@@ -155,25 +156,28 @@ class ProfileMenu extends StatelessWidget with ToastMixin {
     );
   }
 
-  Widget _buildStatItem(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 20.w,
-            fontFamily: AppFontFamily.dinPro,
-            fontWeight: FontWeight.bold,
+  Widget _buildStatItem(String label, String value, VoidCallback? onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20.w,
+              fontFamily: AppFontFamily.dinPro,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: Colors.grey,
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: Colors.grey,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

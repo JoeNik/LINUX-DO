@@ -111,7 +111,8 @@ class _WebPageState extends State<WebPage> {
               ..httpOnly = true
               ..secure = true
           ]);
-          await StorageManager.setData(AppConst.identifier.token, value);
+          await StorageManager.setData(
+              AppConst.identifier.token, value);
         } else if (name == NetClient.forumSession) {
           hasSessionCookie = true;
           await _cookieJar.saveFromResponse(uri, [
@@ -132,7 +133,8 @@ class _WebPageState extends State<WebPage> {
               ..httpOnly = true
               ..secure = true
           ]);
-          await StorageManager.setData(AppConst.identifier.cfClearance, value);
+          await StorageManager.setData(
+              AppConst.identifier.cfClearance, value);
         }
       }
 
@@ -190,13 +192,12 @@ class _WebPageState extends State<WebPage> {
           if (result != null &&
               result.toString() != '{}' &&
               result.toString().isNotEmpty) {
+
             // 更新请求头
-            NetClient.getDio.options.headers['x-csrf-token'] =
-                result.toString();
+            NetClient.getDio.options.headers['x-csrf-token'] = result.toString();
 
             await StorageManager.setData(
                 AppConst.identifier.csrfToken, result.toString());
-            Get.find<GlobalController>().initService();
             break;
           } else {
             if (i < maxRetries - 1) {

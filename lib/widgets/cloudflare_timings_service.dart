@@ -235,7 +235,9 @@ class CloudflareTimingsServiceState extends State<CloudflareTimingsService> {
         _scheduleRetry();
       },
       onConsoleMessage: (controller, consoleMessage) {
-         // l.e('JS Console: $consoleMessage');
+        if (consoleMessage.message.contains('阅读时间')) {
+          l.e('JS Console: $consoleMessage');
+        }
       },
       gestureRecognizers: const {},
     );

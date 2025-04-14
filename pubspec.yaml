@@ -79,6 +79,10 @@ dependencies:
   share_plus: ^10.1.4
   flutter_keyboard_visibility: ^6.0.0
   qr_flutter: ^4.1.0
+  salomon_bottom_bar:
+    git:
+      url: https://github.com/R-lz/salomon_bottom_bar.git
+      ref: 900f2ad66dc2785bd1518b20f9bc52a58d09ae88
   emoji_picker_flutter:
     git:
       url: https://github.com/R-lz/emoji_picker_flutter.git

@@ -6,7 +6,7 @@ part 'topic_detail.g.dart';
 
 @JsonSerializable()
 class TopicDetail {
-  final int id;
+  final int? id;
   final String? title;
   @JsonKey(name: 'fancy_title')
   final String? fancyTitle;
@@ -57,7 +57,7 @@ class TopicDetail {
 
 
   TopicDetail({
-    required this.id,
+    this.id,
     this.title,
     this.fancyTitle,
     this.postsCount,
@@ -648,7 +648,7 @@ class Polls {
           ?.map((e) => PollOption.fromJson(e as Map<String, dynamic>))
           .toList(),
       voters: json['voters'] as int?,
-        preloaded_voters: (json['preloaded_voters'] as Map<String, dynamic>).map(
+      preloaded_voters: (json['preloaded_voters'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(
           k,
           (e as List<dynamic>)

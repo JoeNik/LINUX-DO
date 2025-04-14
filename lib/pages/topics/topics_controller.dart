@@ -157,6 +157,9 @@ class TopicsController extends BaseController
     Get.put(controller, tag: path);
   }
 
+  // 获取当前的TopicTabController
+  TopicTabController get currentTabController => _tabControllers[paths[tabController.index]]!;
+
   @override
   void onClose() {
     removeSearchResults();

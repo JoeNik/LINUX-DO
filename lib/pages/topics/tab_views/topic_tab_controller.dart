@@ -89,7 +89,7 @@ class TopicTabController extends BaseController
       currentPage.value = 0;
       isRefreshing.value = true;
       clearError(); // 清除之前的错误
-
+      refreshController.requestRefresh();
       final response = await apiService.getTopics(path);
 
       // 更新用户缓存

@@ -11,7 +11,6 @@ import 'package:linux_do/const/app_theme.dart';
 import 'package:linux_do/controller/global_controller.dart';
 import 'package:linux_do/routes/app_pages.dart';
 import 'package:linux_do/app.dart';
-import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/utils/storage_manager.dart';
 
 void main() async {

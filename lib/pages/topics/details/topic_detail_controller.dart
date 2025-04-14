@@ -244,11 +244,10 @@ class TopicDetailController extends BaseController
   void _debouncedUpdateTiming() {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(_debounceDelay, () async {
-      l.d('cloudflareController 对象: ${cloudflareController.webViewController}');
       if (cloudflareController.webViewController != null) {
         await updateTopicTiming();
       } else {
-        l.e('CloudflareAuthServiceState 仍不可用，数据已缓存');
+        //l.e('CloudflareAuthServiceState 仍不可用，数据已缓存');
       }
     });
   }
@@ -1186,7 +1185,7 @@ class TopicDetailController extends BaseController
 
     // 创建BookmarkItem
     final bookmarkItem = BookmarkItem(
-      id: topicDetail.id,
+      id: topicDetail.id ?? 0,
       title: topicDetail.title ?? '未命名主题',
       avatarUrl: createUser?.getAvatarUrl() ?? '',
       tags: topicDetail.tags ?? [],

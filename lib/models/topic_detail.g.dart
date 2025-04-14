@@ -7,7 +7,7 @@ part of 'topic_detail.dart';
 // **************************************************************************
 
 TopicDetail _$TopicDetailFromJson(Map<String, dynamic> json) => TopicDetail(
-      id: (json['id'] as num).toInt(),
+      id: (json['id'] as num?)?.toInt(),
       title: json['title'] as String?,
       fancyTitle: json['fancy_title'] as String?,
       postsCount: (json['posts_count'] as num?)?.toInt(),

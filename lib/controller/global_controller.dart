@@ -54,8 +54,6 @@ class GlobalController extends BaseController with Concatenated {
 
   @override
   void onInit() {
-
-    fetchUserInfo();
     
     super.onInit();
 

@@ -18,13 +18,13 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../const/app_images.dart';
 import '../../const/app_const.dart';
-import '../../const/app_colors.dart';
 import '../../routes/app_pages.dart';
 import '../topics/topics_controller.dart';
 
 class HomeController extends BaseController {
   // ignore: unused_field
   late final ApiService _apiService;
+  final globalController = Get.find<GlobalController>();
 
   final pageController = PageController();
   late final TopicsController topicsController;
@@ -59,6 +59,7 @@ class HomeController extends BaseController {
 
     initEmoji();
     checkAppVersion();
+    Get.find<GlobalController>().fetchUserInfo();
   }
 
   @override
@@ -69,7 +70,6 @@ class HomeController extends BaseController {
 
   // 切换tab
   void switchTab(int index) {
-    final globalController = Get.find<GlobalController>();
 
     if (globalController.isAnonymousMode) {
       if (index == 1 || index == 2 || index == 3) {

@@ -1,8 +1,9 @@
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:lazy_load_indexed_stack/lazy_load_indexed_stack.dart';
 import '../chat/chat_list_page.dart';
 import '../topics/topics_page.dart';
@@ -34,7 +35,7 @@ class HomePage extends GetView<HomeController> {
   Widget build(BuildContext context) {
     // 计算底部导航栏总高度 = 基础高度 + 底部安全区域
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final navBarHeight = 50.h + bottomPadding;
+    final navBarHeight = 40.w + bottomPadding;
 
     return Scaffold(
       body: Obx(
@@ -52,78 +53,89 @@ class HomePage extends GetView<HomeController> {
       ),
       bottomNavigationBar: Obx(
         () => AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 800),
           height: controller.topicsController.isBottomBarVisible.value
               ? navBarHeight
               : 0,
+              decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: .1),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
           child: SingleChildScrollView(
             physics: const NeverScrollableScrollPhysics(),
-            child: SizedBox(
-              height: navBarHeight,
-              child: ConvexAppBar.badge(
-                controller.badgeCount,
-                style: TabStyle.fixed,
-                backgroundColor:
-                    Theme.of(context).cardColor,
-                color: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .unselectedItemColor,
-                activeColor: Theme.of(context)
-                    .bottomNavigationBarTheme
-                    .selectedItemColor,
-                height: 48.w,
-                curveSize: 78.w,
-                top: -18.w,
-                elevation: 9.0,
-                cornerRadius: 9.w,
-                badgeMargin: EdgeInsets.only(left: 20.w, bottom: 18.w),
-                items: [
-                  _buildTabItem(CupertinoIcons.square_list_fill, '帖子', context),
-                  _buildTabItem(CupertinoIcons.square_split_2x2_fill, '分类', context),
-                  TabItem(
-                    icon: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+            child: SalomonBottomBar(
+              selectedItemColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
+              unselectedItemColor: Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
+              backgroundColor: Colors.transparent,
+              currentIndex: controller.currentTab.value,
+              onTap: controller.switchTab,
+              itemPadding: EdgeInsets.symmetric(vertical: 6.w, horizontal: 11.w),
+              onDoubleTap: (index) {
+                if (index == 0) {
+                  controller.topicsController.currentTabController.onRefresh();
+                }
+              },
+              items: [
+                SalomonBottomBarItem(
+                  icon: const Icon(CupertinoIcons.square_list_fill),
+                  title: const Text('帖子',style: TextStyle(fontSize: 12),),
+                ),
+                SalomonBottomBarItem(
+                  icon: const Icon(CupertinoIcons.square_split_2x2_fill),
+                  title: const Text('分类',style: TextStyle(fontSize: 12),),
+                ),
+                // 中间按钮暂时使用普通样式
+                SalomonBottomBarItem(
+                  icon: const Icon(CupertinoIcons.add),
+                  title: const Text(''),
+                ),
+                SalomonBottomBarItem(
+                  icon: Stack(
+                    children: [
+                      const Icon(CupertinoIcons.app_badge_fill),
+                      if (controller.badgeCount[3] != null)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            padding: EdgeInsets.all(4.w),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(10.w),
+                            ),
+                            constraints: BoxConstraints(
+                              minWidth: 16.w,
+                              minHeight: 16.w,
+                            ),
+                            child: Text(
+                              '${controller.badgeCount[3]}',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10.w,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                        ],
-                      ),
-                      child: Icon(
-                        CupertinoIcons.add,
-                        size: 26.w,
-                        color: Colors.white,
-                      ),
-                    ),
-                    title: '',
-                    fontFamily: '',
-                    isIconBlend: false,
+                        ),
+                    ],
                   ),
-                  _buildTabItem(CupertinoIcons.app_badge_fill, '私信', context),
-                  _buildTabItem(CupertinoIcons.person_crop_square_fill, '我的', context),
-                ],
-                initialActiveIndex: controller.currentTab.value,
-                onTap: controller.switchTab,
-              ),
+                  title: const Text('私信',style: TextStyle(fontSize: 12),),
+                ),
+                SalomonBottomBarItem(
+                  icon: const Icon(CupertinoIcons.person_crop_square_fill),
+                  title: const Text('我的',style: TextStyle(fontSize: 12),),
+                ),
+              ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  // 提取通用的TabItem创建方法
-  TabItem _buildTabItem(IconData icon, String title, BuildContext context) {
-    return TabItem(
-      icon: icon,
-      title: title,
-      fontFamily: '',
-      isIconBlend: false,
-      activeIcon: Icon(icon, color: Theme.of(context).primaryColor),
     );
   }
 }

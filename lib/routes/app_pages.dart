@@ -23,6 +23,8 @@ import 'package:linux_do/pages/settings/profile_settings_controller.dart';
 import 'package:linux_do/pages/settings/profile_settings_page.dart';
 import 'package:linux_do/pages/settings/security_settings_controller.dart';
 import 'package:linux_do/pages/settings/security_settings_page.dart';
+import 'package:linux_do/pages/topics/details/web_post_read_controller.dart';
+import 'package:linux_do/pages/topics/details/web_post_read_page.dart';
 import 'package:linux_do/utils/bookmark_service.dart';
 import 'package:linux_do/widgets/cloudflare_timings_service.dart';
 import 'package:linux_do/widgets/html/html_widget.dart';
@@ -113,7 +115,6 @@ class AppPages {
         Get.lazyPut(() => TopicDetailController());
         Get.lazyPut(() => HtmlController());
         Get.lazyPut(() => ShareController());
-        Get.lazyPut(() => CloudflareController());
       }),
     ),
 
@@ -131,7 +132,7 @@ class AppPages {
       name: Routes.CREATE_TOPIC,
       page: () => const CreatePostPage(),
       binding: BindingsBuilder(() {
-         Get.lazyPut(() => CreatePostController());
+        Get.lazyPut(() => CreatePostController());
       }),
     ),
 
@@ -161,7 +162,6 @@ class AppPages {
         Get.lazyPut(() => SecuritySettingsController());
       }),
     ),
-
 
     /// 个性资料页
     GetPage(
@@ -218,10 +218,7 @@ class AppPages {
     ),
 
     /// 字体设置页
-    GetPage(
-      name: Routes.FONT_SIZE_SETTINGS,
-      page: () => const FontSizePage()
-    ),
+    GetPage(name: Routes.FONT_SIZE_SETTINGS, page: () => const FontSizePage()),
 
     /// 分类页
     GetPage(
@@ -289,9 +286,19 @@ class AppPages {
     /// 连接页
     GetPage(
       name: Routes.CONNECT,
-      page: () => ConnectPage(),
+      page: () => const ConnectPage(),
       binding: BindingsBuilder(() {
         Get.lazyPut(() => ConnectController());
+      }),
+    ),
+
+    /// 帖子web阅读页
+    GetPage(
+      name: Routes.WEB_POST_READ,
+      page: () => const WebPostReadPage(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut(() => WebPostReadController());
+        Get.lazyPut(() => CloudflareController());
       }),
     ),
   ];

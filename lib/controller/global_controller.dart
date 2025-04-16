@@ -48,6 +48,16 @@ class GlobalController extends BaseController with Concatenated {
   // 游客模式
   bool get isAnonymousMode => _isAnonymousMode.value;
 
+
+  // 展示隐藏内容
+  final _showHiddenContent = false.obs;
+
+  bool get showHiddenContent => _showHiddenContent.value;
+
+  void setShowHiddenContent(bool value) {
+    _showHiddenContent.value = value;
+  }
+
   void setIsAnonymousMode(bool value) {
     _isAnonymousMode.value = value;
   }

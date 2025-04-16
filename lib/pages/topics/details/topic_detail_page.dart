@@ -47,23 +47,6 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
       appBar: _buildAppBar(context),
       body: Stack(
         children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            child: SizedBox(
-              height: 50,  
-              child: Opacity(
-                opacity: 0,
-                child: CloudflareTimingsService(
-                  key: controller.cloudflareAuthKey,
-                  topicId: controller.topicId.value.toString(),
-                  onCookiesLoaded: () {
-                  },
-                ),
-              ),
-            ),
-          ),
           Obx(() {
             final topic = controller.topic.value;
             return StateView(
@@ -100,6 +83,8 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                   }),
             );
           }),
+
+          
         ],
       ),
     );
@@ -129,6 +114,23 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
       ),
       title: _buildHeader(context),
       actions: [
+        Obx(() => AnimatedOpacity(
+          duration: const Duration(milliseconds: 300),
+          opacity: controller.isBlinking.value ? 1.0 : 0.0,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 800),
+            margin: const EdgeInsets.symmetric(horizontal: 8),
+            width: 8.w,
+            height: 8.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: controller.updateSuccess.value 
+                  ? Colors.green.withValues(alpha: controller.isBlinking.value ? 0.3 : 1.0)
+                  : Colors.red.withValues(alpha: controller.isBlinking.value ? 0.3 : 1.0),
+            ),
+          ),
+        )),
+
         Get.find<GlobalController>().isAnonymousMode
             ? const SizedBox.shrink()
             : MoreMenu(controller: controller),

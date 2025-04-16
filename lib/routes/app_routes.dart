@@ -84,4 +84,7 @@ abstract class Routes {
 
   // 连接页面
   static const CONNECT = '/connect';
+
+  // 帖子web阅读页
+  static const WEB_POST_READ = '/web/post/read';
 }

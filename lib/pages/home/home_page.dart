@@ -53,7 +53,7 @@ class HomePage extends GetView<HomeController> {
       ),
       bottomNavigationBar: Obx(
         () => AnimatedContainer(
-          duration: const Duration(milliseconds: 800),
+          duration: const Duration(milliseconds: 400),
           height: controller.topicsController.isBottomBarVisible.value
               ? navBarHeight
               : 0,
@@ -70,6 +70,7 @@ class HomePage extends GetView<HomeController> {
           child: SingleChildScrollView(
             physics: const NeverScrollableScrollPhysics(),
             child: SalomonBottomBar(
+              duration: const Duration(milliseconds: 200),
               selectedItemColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
               unselectedItemColor: Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
               backgroundColor: Colors.transparent,

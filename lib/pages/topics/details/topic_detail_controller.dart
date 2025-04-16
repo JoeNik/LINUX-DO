@@ -134,7 +134,11 @@ class TopicDetailController extends BaseController
   final Map<int, int> _readPosts = {};
   final cloudflareController = Get.find<CloudflareController>();
 
-  final GlobalKey<CloudflareTimingsServiceState> cloudflareAuthKey = GlobalKey<CloudflareTimingsServiceState>();
+
+  // 添加状态变量
+  final updateSuccess = false.obs;
+  final isBlinking = false.obs;
+  Timer? _blinkTimer;
 
   @override
   void onInit() {
@@ -227,6 +231,7 @@ class TopicDetailController extends BaseController
     } catch (e) {
       l.e('释放ItemScrollController和ItemPositionsListener失败: $e');
     }
+    _blinkTimer?.cancel();
     super.onClose();
   }
 
@@ -322,6 +327,7 @@ class TopicDetailController extends BaseController
 
   // 更新帖子可见时间
   void _updatePostVisibility(Set<int> visiblePosts, DateTime now) {
+    if (!cloudflareController.isLoggedIn.value)  return;
     for (var postNumber in visiblePosts) {
       if (!_postVisibleStartTimes.containsKey(postNumber)) {
         // 帖子首次可见，记录开始时间
@@ -1270,6 +1276,24 @@ class TopicDetailController extends BaseController
         isHideKeyboard.value = true;
       });
     }
+  }
+
+  // 控制闪烁效果的方法
+  void startBlinking(bool success) {
+    updateSuccess.value = success;
+    isBlinking.value = true;
+    _blinkTimer?.cancel();
+    
+    // 开始闪烁动画
+    _blinkTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      isBlinking.toggle();
+      
+      if (timer.tick >= 6) {
+        timer.cancel();
+        isBlinking.value = false;
+        updateSuccess.value = false;
+      }
+    });
   }
 }
 

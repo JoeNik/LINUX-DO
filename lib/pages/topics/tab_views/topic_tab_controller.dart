@@ -155,7 +155,11 @@ class TopicTabController extends BaseController
 
   // 跳转到帖子详情
   void toTopicDetail(int id) {
-    Get.toNamed(Routes.TOPIC_DETAIL, arguments: id);
+    if (globalController.showHiddenContent) {
+      Get.toNamed(Routes.WEB_POST_READ, arguments: id);
+    } else {
+      Get.toNamed(Routes.TOPIC_DETAIL, arguments: id);
+    }
   }
 
   // 获取最新发帖人头像

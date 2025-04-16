@@ -7,15 +7,18 @@ import 'package:linux_do/const/app_const.dart';
 import 'package:linux_do/const/app_images.dart';
 import 'package:linux_do/const/app_spacing.dart';
 import 'package:linux_do/const/app_theme.dart';
+import 'package:linux_do/controller/global_controller.dart';
 import 'package:linux_do/models/about.dart';
 import 'package:linux_do/utils/device_util.dart';
+import 'package:linux_do/utils/mixins/toast_mixin.dart';
 import 'package:linux_do/widgets/avatar_widget.dart';
+import 'package:linux_do/widgets/dis_button.dart';
 import 'package:linux_do/widgets/dis_loading.dart';
 import 'package:linux_do/widgets/dis_refresh.dart';
 import 'package:linux_do/widgets/html/html_widget.dart';
 import 'about_controller.dart';
 
-class AboutPage extends GetView<AboutController> {
+class AboutPage extends GetView<AboutController> with ToastMixin {
   const AboutPage({super.key});
 
   @override
@@ -67,7 +70,7 @@ class AboutPage extends GetView<AboutController> {
                 16.vGap,
 
                 _buildWebsiteActivity(context, aboutData),
-                
+
                 16.vGap,
 
                 _buildContactUs(context, aboutData),
@@ -174,7 +177,8 @@ class AboutPage extends GetView<AboutController> {
         children: [
           Row(
             children: [
-              _buildLable(context, CupertinoIcons.chart_bar_square, AppConst.settings.communityData),
+              _buildLable(context, CupertinoIcons.chart_bar_square,
+                  AppConst.settings.communityData),
             ],
           ),
           6.vGap,
@@ -360,7 +364,8 @@ class AboutPage extends GetView<AboutController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLable(context, CupertinoIcons.shield_lefthalf_fill, AppConst.settings.ourModerators),
+          _buildLable(context, CupertinoIcons.shield_lefthalf_fill,
+              AppConst.settings.ourModerators),
           16.vGap,
           GridView.builder(
             shrinkWrap: true,
@@ -375,10 +380,7 @@ class AboutPage extends GetView<AboutController> {
             padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
               return _buildModeratorCard(
-                context,
-                data,
-                data.about.moderatorIds[index]
-              );
+                  context, data, data.about.moderatorIds[index]);
             },
           ),
         ],
@@ -426,32 +428,31 @@ class AboutPage extends GetView<AboutController> {
                   children: [
                     Text(
                       name,
-                    style: TextStyle(
-                      fontSize: name.length > 12 ? 10.w : 12.w,
-                      fontFamily: AppFontFamily.dinPro,
-                      fontWeight:
-                          user?.id != 1 ? FontWeight.w500 : FontWeight.w600,
-                      color: user?.id != 1
-                          ? Theme.of(context).textTheme.titleMedium?.color
-                          : Theme.of(context).primaryColor,
+                      style: TextStyle(
+                        fontSize: name.length > 12 ? 10.w : 12.w,
+                        fontFamily: AppFontFamily.dinPro,
+                        fontWeight:
+                            user?.id != 1 ? FontWeight.w500 : FontWeight.w600,
+                        color: user?.id != 1
+                            ? Theme.of(context).textTheme.titleMedium?.color
+                            : Theme.of(context).primaryColor,
+                      ),
                     ),
-                  ),
-                  Text(
-                    user?.title ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 10.w,
-                      fontFamily: AppFontFamily.dinPro,
-                      color: Theme.of(context).textTheme.bodySmall?.color,
+                    Text(
+                      user?.title ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 10.w,
+                        fontFamily: AppFontFamily.dinPro,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
                     ),
-                  ),
                   ],
                 ),
               ),
             ],
           ),
-        
         ],
       ),
     );
@@ -483,7 +484,8 @@ class AboutPage extends GetView<AboutController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLable(context, CupertinoIcons.person_fill, AppConst.settings.ourAdmin),
+          _buildLable(
+              context, CupertinoIcons.person_fill, AppConst.settings.ourAdmin),
           12.vGap,
           Row(
             children: [
@@ -521,10 +523,10 @@ class AboutPage extends GetView<AboutController> {
       ),
     );
   }
-  
+
   Widget _buildWebsiteActivity(BuildContext context, AboutResponse aboutData) {
     final stats = aboutData.about.stats;
-    
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
@@ -542,9 +544,10 @@ class AboutPage extends GetView<AboutController> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildLable(context, CupertinoIcons.square_favorites_alt_fill, AppConst.settings.websiteActivity),
+          _buildLable(context, CupertinoIcons.square_favorites_alt_fill,
+              AppConst.settings.websiteActivity),
           16.vGap,
-          
+
           // 用户活跃
           Text(
             AppConst.settings.userActivity,
@@ -559,27 +562,15 @@ class AboutPage extends GetView<AboutController> {
             spacing: 8.w,
             runSpacing: 8.w,
             children: [
-              _buildActivityTag(
-                context, 
-                '日活跃用户', 
-                '${stats.activeUsersLastDay}',
-                const Color(0xFF4CAF50)
-              ),
-              _buildActivityTag(
-                context, 
-                '周活跃用户', 
-                '${stats.activeUsers7Days}',
-                const Color(0xFF2196F3)
-              ),
-              _buildActivityTag(
-                context, 
-                '月活跃用户', 
-                '${stats.activeUsers30Days}',
-                const Color(0xFF9C27B0)
-              ),
+              _buildActivityTag(context, '日活跃用户', '${stats.activeUsersLastDay}',
+                  const Color(0xFF4CAF50)),
+              _buildActivityTag(context, '周活跃用户', '${stats.activeUsers7Days}',
+                  const Color(0xFF2196F3)),
+              _buildActivityTag(context, '月活跃用户', '${stats.activeUsers30Days}',
+                  const Color(0xFF9C27B0)),
             ],
           ),
-          
+
           16.vGap,
           // 内容创作
           Text(
@@ -595,24 +586,12 @@ class AboutPage extends GetView<AboutController> {
             spacing: 8.w,
             runSpacing: 8.w,
             children: [
-              _buildActivityTag(
-                context, 
-                '今日发帖', 
-                '${stats.postsLastDay}',
-                const Color(0xFFFF9800)
-              ),
-              _buildActivityTag(
-                context, 
-                '周发帖量', 
-                '${stats.posts7Days}',
-                const Color(0xFF00BCD4)
-              ),
-              _buildActivityTag(
-                context, 
-                '月发帖量', 
-                '${stats.posts30Days}',
-                const Color(0xFF673AB7)
-              ),
+              _buildActivityTag(context, '今日发帖', '${stats.postsLastDay}',
+                  const Color(0xFFFF9800)),
+              _buildActivityTag(context, '周发帖量', '${stats.posts7Days}',
+                  const Color(0xFF00BCD4)),
+              _buildActivityTag(context, '月发帖量', '${stats.posts30Days}',
+                  const Color(0xFF673AB7)),
             ],
           ),
 
@@ -631,24 +610,12 @@ class AboutPage extends GetView<AboutController> {
             spacing: 8.w,
             runSpacing: 8.w,
             children: [
-              _buildActivityTag(
-                context, 
-                '今日点赞', 
-                '${stats.likesLastDay}',
-                const Color(0xFFE91E63)
-              ),
-              _buildActivityTag(
-                context, 
-                '周点赞量', 
-                '${stats.likes7Days}',
-                const Color(0xFF795548)
-              ),
-              _buildActivityTag(
-                context, 
-                '总点赞量', 
-                '${stats.likesCount}',
-                const Color(0xFF607D8B)
-              ),
+              _buildActivityTag(context, '今日点赞', '${stats.likesLastDay}',
+                  const Color(0xFFE91E63)),
+              _buildActivityTag(context, '周点赞量', '${stats.likes7Days}',
+                  const Color(0xFF795548)),
+              _buildActivityTag(context, '总点赞量', '${stats.likesCount}',
+                  const Color(0xFF607D8B)),
             ],
           ),
 
@@ -667,24 +634,12 @@ class AboutPage extends GetView<AboutController> {
             spacing: 8.w,
             runSpacing: 8.w,
             children: [
-              _buildActivityTag(
-                context, 
-                '今日消息', 
-                '${stats.chatMessagesLastDay}',
-                const Color(0xFF3F51B5)
-              ),
-              _buildActivityTag(
-                context, 
-                '活跃频道', 
-                '${stats.chatChannelsLastDay}',
-                const Color(0xFF009688)
-              ),
-              _buildActivityTag(
-                context, 
-                '聊天用户', 
-                '${stats.chatUsersLastDay}',
-                const Color(0xFFFF5722)
-              ),
+              _buildActivityTag(context, '今日消息', '${stats.chatMessagesLastDay}',
+                  const Color(0xFF3F51B5)),
+              _buildActivityTag(context, '活跃频道', '${stats.chatChannelsLastDay}',
+                  const Color(0xFF009688)),
+              _buildActivityTag(context, '聊天用户', '${stats.chatUsersLastDay}',
+                  const Color(0xFFFF5722)),
             ],
           ),
         ],
@@ -692,7 +647,8 @@ class AboutPage extends GetView<AboutController> {
     );
   }
 
-  Widget _buildActivityTag(BuildContext context, String label, String value, Color color) {
+  Widget _buildActivityTag(
+      BuildContext context, String label, String value, Color color) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
       decoration: BoxDecoration(
@@ -727,224 +683,306 @@ class AboutPage extends GetView<AboutController> {
       ),
     );
   }
-  
+
   Widget _buildContactUs(BuildContext context, AboutResponse data) {
-  return Container(
-    width: double.infinity,
-    padding: EdgeInsets.all(16.w),
-    decoration: BoxDecoration(
-      color: Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(8.w),
-      boxShadow: [
-        BoxShadow(
-          color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
-          blurRadius: 15,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLable(context, CupertinoIcons.chat_bubble_text_fill, AppConst.settings.contactUs),
-        16.vGap,
-        Container(
-          padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(
-            color: AppColors.error.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(8.w),
-            border: Border.all(
-              color: AppColors.error.withValues(alpha: 0.1),
-              width: 1.w,
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(8.w),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLable(context, CupertinoIcons.chat_bubble_text_fill,
+              AppConst.settings.contactUs),
+          16.vGap,
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: AppColors.error.withValues(alpha: 0.04),
+              borderRadius: BorderRadius.circular(8.w),
+              border: Border.all(
+                color: AppColors.error.withValues(alpha: 0.1),
+                width: 1.w,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8.w),
+                  ),
+                  child: Icon(
+                    CupertinoIcons.exclamationmark_triangle_fill,
+                    size: 20.w,
+                    color: AppColors.error,
+                  ),
+                ),
+                12.hGap,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppConst.settings.emergencyIssues,
+                        style: TextStyle(
+                          fontSize: 13.w,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.error,
+                        ),
+                      ),
+                      4.vGap,
+                      Text(
+                        AppConst.settings.contactForCriticalIssues,
+                        style: TextStyle(
+                          fontSize: 10.w,
+                          color: AppColors.error.withValues(alpha: 0.8),
+                        ),
+                      ),
+                      4.vGap,
+                      // 添加下划线
+                      Text(
+                        data.about.contactEmail,
+                        style: TextStyle(
+                          fontSize: 12.w,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: AppFontFamily.dinPro,
+                          color: AppColors.error,
+                          decoration: TextDecoration.underline,
+                          decorationColor: AppColors.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color:  AppColors.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8.w),
-                ),
-                child: Icon(
-                  CupertinoIcons.exclamationmark_triangle_fill,
-                  size: 20.w,
-                  color: AppColors.error,
-                ),
+          16.vGap,
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(8.w),
+              border: Border.all(
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                width: 1.w,
               ),
-              12.hGap,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppConst.settings.emergencyIssues,
-                      style: TextStyle(
-                        fontSize: 13.w,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.error,
-                      ),
-                    ),
-                    4.vGap,
-                    Text(
-                      AppConst.settings.contactForCriticalIssues,
-                      style: TextStyle(
-                        fontSize: 10.w,
-                        color: AppColors.error.withValues(alpha: 0.8),
-                      ),
-                    ),
-                    4.vGap,
-                    // 添加下划线
-                    Text(
-                      data.about.contactEmail,
-                      style: TextStyle(
-                        fontSize: 12.w,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: AppFontFamily.dinPro,
-                        color: AppColors.error,
-                        decoration: TextDecoration.underline,
-                        decorationColor: AppColors.error,
-                      ),
-                    ),
-                  ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color:
+                        Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8.w),
+                  ),
+                  child: Icon(
+                    CupertinoIcons.shield_fill,
+                    size: 20.w,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        
-        16.vGap,
-        
-        Container(
-          padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(8.w),
-            border: Border.all(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              width: 1.w,
+                12.hGap,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        AppConst.settings.inappropriateContentReport,
+                        style: TextStyle(
+                          fontSize: 13.w,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      4.vGap,
+                      Text(
+                        AppConst.settings.reportInappropriateContent,
+                        style: TextStyle(
+                          fontSize: 10.w,
+                          height: 1.5,
+                          color: Theme.of(context)
+                              .primaryColor
+                              .withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8.w),
-                ),
-                child: Icon(
-                  CupertinoIcons.shield_fill,
-                  size: 20.w,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-              12.hGap,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      AppConst.settings.inappropriateContentReport,
-                      style: TextStyle(
-                        fontSize: 13.w,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                    4.vGap,
-                    Text(
-                      AppConst.settings.reportInappropriateContent,
-                      style: TextStyle(
-                        fontSize: 10.w,
-                        height: 1.5,
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.8),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   Widget _buildVersionInfo(BuildContext context, AboutResponse aboutData) {
-
-  return Container(
-    padding: EdgeInsets.all(16.w),
-    decoration: BoxDecoration(
-      color: Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(8.w),
-      boxShadow: [
-        BoxShadow(
-          color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
-          blurRadius: 15,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLable(context, CupertinoIcons.info_circle_fill, AppConst.settings.versionInfo),
-        16.vGap,
-        
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              AppConst.settings.webVersion,
-              style: TextStyle(
-                fontSize: 12.w,
-                color: Theme.of(context).textTheme.bodySmall?.color,
-              ),
-            ),
-            Text(
-              aboutData.about.version,
-              style: TextStyle(
-                fontSize: 12.w,
-                fontWeight: FontWeight.w600,
-                fontFamily: AppFontFamily.dinPro,
-                color: Theme.of(context).primaryColor,
-              ),
+    return GestureDetector(
+      onLongPress: () {
+        showInputDialog(context);
+      },
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(8.w),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.08),
+              blurRadius: 15,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        12.vGap,
-        
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              AppConst.settings.appVersion,
-              style: TextStyle(
-                fontSize: 12.w,
-                color: Theme.of(context).textTheme.bodySmall?.color,
-              ),
+            _buildLable(context, CupertinoIcons.info_circle_fill,
+                AppConst.settings.versionInfo),
+            16.vGap,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppConst.settings.webVersion,
+                  style: TextStyle(
+                    fontSize: 12.w,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                ),
+                Text(
+                  aboutData.about.version,
+                  style: TextStyle(
+                    fontSize: 12.w,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: AppFontFamily.dinPro,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ],
             ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(4.w),
+            12.vGap,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppConst.settings.appVersion,
+                  style: TextStyle(
+                    fontSize: 12.w,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4.w),
+                  ),
+                  child: Text(
+                    '${DeviceUtil.version} + ${DeviceUtil.buildNumber}',
+                    style: TextStyle(
+                      fontSize: 10.w,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF4CAF50),
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void showInputDialog(BuildContext context) {
+    final TextEditingController passwordController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Theme.of(context).cardColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6).w,
               ),
-              child: Text(
-                '${DeviceUtil.version} + ${DeviceUtil.buildNumber}',
+              title: Text(
+                '请输入密码',
                 style: TextStyle(
-                  fontSize: 10.w,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF4CAF50),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.w,
                 ),
               ),
-            ),
-          ],
-        )
-      ],
-    ),
-  );
-}
+              
+              content: SizedBox(
+                height: 100.w,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '该功能为测试功能，输入密码后,下次进入话题详情,会自动滚动刷帖子阅读数量,帖子阅读数目前测试只有在模拟器上生效,重启app后失效(如果打开后未登录,则先登录即可)',
+                      style: TextStyle(
+                        fontSize: 10.w,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
+                    ),
+                    16.vGap,
+                    Expanded(
+                      child: TextField(
+                        controller: passwordController,
+                        decoration: InputDecoration(
+                          hintText: '请输入密码',
+                          filled: false,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.only(top: 12).w,
+                          prefixIcon: Icon(CupertinoIcons.lock_fill,color: Theme.of(context).primaryColor,size: 20.w,),
+                          
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                SizedBox(
+                  height: 32.w,
+                  child: DisButton(
+                    onPressed: () {
+                      if (passwordController.text == 'linux.do') {
+                        Get.find<GlobalController>().setShowHiddenContent(true);
+                        showSuccess('已开启');
+                      } else {
+                        showError('密码错误');
+                      }
+                      Get.back();
+                    },
+                    text: '确定',
+                  ),
+                ),
+              ],
+            );
+          }
+        );
+      },
+    );
+  }
 }

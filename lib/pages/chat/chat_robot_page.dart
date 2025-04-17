@@ -22,14 +22,20 @@ class ChatRobotPage extends GetView<ChatRobotController> with Concatenated {
   const ChatRobotPage({Key? key}) : super(key: key);
 
   final List<String> modelTypes = const [
+    'gpt_4.1_bot',
+    'gpt-4.1_mini_bot',
+    'gpt_4.1_nano_bot',
     'gpt-4o_bot',
     'gpt_4o_mini_bot',
     'o1_bot',
     'o1_mini_bot',
     'o3_mini_bot',
-    'gpt-4.5_preview_bot',
+    'o4_mini_bot',
     'anthropic_claude-3.1',
-    'gpt-4o-mini',
+    'anthropic_claude-3.5',
+    'deepseek_deepseek-r1',
+    'deepseek_deepseek-ch',
+    'google_gemini-2.0-fl'
   ];
 
   @override

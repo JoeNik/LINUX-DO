@@ -189,6 +189,8 @@ class _Identifier {
   String get chatHintDontShow => 'chatHintDontShow';
 
   String get isAnonymousMode => 'isAnonymousMode';
+
+  String get simplified => 'simplified';
 }
 
 /// 登录页面文本

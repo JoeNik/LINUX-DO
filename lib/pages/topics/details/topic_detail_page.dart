@@ -8,9 +8,7 @@ import 'package:linux_do/pages/topics/details/widgets/more_menu.dart';
 import 'package:linux_do/pages/topics/details/widgets/post_content_action.dart';
 import 'package:linux_do/pages/topics/details/widgets/post_reply.dart';
 import 'package:linux_do/pages/topics/details/widgets/replay_list.dart';
-import 'package:linux_do/widgets/cloudflare_timings_service.dart';
 import 'package:linux_do/utils/expand/num_expand.dart';
-import 'package:linux_do/utils/log.dart';
 import 'package:linux_do/utils/mixins/toast_mixin.dart';
 import 'package:linux_do/widgets/dis_button.dart';
 import 'package:linux_do/widgets/dis_emoji_picker.dart';
@@ -83,8 +81,6 @@ class TopicDetailPage extends GetView<TopicDetailController> with ToastMixin {
                   }),
             );
           }),
-
-          
         ],
       ),
     );

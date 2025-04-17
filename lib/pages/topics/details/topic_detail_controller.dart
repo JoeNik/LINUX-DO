@@ -132,7 +132,6 @@ class TopicDetailController extends BaseController
 
   final Map<int, DateTime> _postVisibleStartTimes = {};
   final Map<int, int> _readPosts = {};
-  final cloudflareController = Get.find<CloudflareController>();
 
 
   // 添加状态变量
@@ -246,16 +245,16 @@ class TopicDetailController extends BaseController
     }
   }
 
-  void _debouncedUpdateTiming() {
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(_debounceDelay, () async {
-      if (cloudflareController.webViewController != null) {
-        await updateTopicTiming();
-      } else {
-        //l.e('CloudflareAuthServiceState 仍不可用，数据已缓存');
-      }
-    });
-  }
+  // void _debouncedUpdateTiming() {
+  //   _debounceTimer?.cancel();
+  //   _debounceTimer = Timer(_debounceDelay, () async {
+  //     if (cloudflareController.webViewController != null) {
+  //       await updateTopicTiming();
+  //     } else {
+  //       //l.e('CloudflareAuthServiceState 仍不可用，数据已缓存');
+  //     }
+  //   });
+  // }
 
   void _onScroll() {
     if (_isThrottling) return;
@@ -293,7 +292,7 @@ class TopicDetailController extends BaseController
     _visiblePostNumbers.value = visiblePosts;
 
     // 处理帖子可见时间
-    _updatePostVisibility(visiblePosts, now);
+   // _updatePostVisibility(visiblePosts, now);
 
     // 检查是否需要加载更多
     if (positions.isNotEmpty) {
@@ -320,32 +319,32 @@ class TopicDetailController extends BaseController
     }
 
     // 如果有已读帖子，触发更新
-    if (_readPosts.isNotEmpty) {
-      _debouncedUpdateTiming();
-    }
-  }
+  //   if (_readPosts.isNotEmpty) {
+  //     _debouncedUpdateTiming();
+  //   }
+  // }
 
-  // 更新帖子可见时间
-  void _updatePostVisibility(Set<int> visiblePosts, DateTime now) {
-    if (!cloudflareController.isLoggedIn.value)  return;
-    for (var postNumber in visiblePosts) {
-      if (!_postVisibleStartTimes.containsKey(postNumber)) {
-        // 帖子首次可见，记录开始时间
-        _postVisibleStartTimes[postNumber] = now;
-        l.d('帖子 $postNumber 开始可见');
-      } else {
-        // 帖子已可见，检查是否超过 2 秒
-        final startTime = _postVisibleStartTimes[postNumber]!;
-        final duration = now.difference(startTime).inMilliseconds;
-        if (duration >= 2000 && !_readPosts.containsKey(postNumber)) {
-          // 可见超过 2 秒，标记为已读
-          _readPosts[postNumber] = duration;
-          l.d('帖子 $postNumber 已读，阅读时间: $duration ms');
-          // 从可见时间记录中移除，防止重复标记
-          _postVisibleStartTimes.remove(postNumber);
-        }
-      }
-    }
+  // // 更新帖子可见时间
+  // void _updatePostVisibility(Set<int> visiblePosts, DateTime now) {
+  //   if (!cloudflareController.isLoggedIn.value)  return;
+  //   for (var postNumber in visiblePosts) {
+  //     if (!_postVisibleStartTimes.containsKey(postNumber)) {
+  //       // 帖子首次可见，记录开始时间
+  //       _postVisibleStartTimes[postNumber] = now;
+  //       l.d('帖子 $postNumber 开始可见');
+  //     } else {
+  //       // 帖子已可见，检查是否超过 2 秒
+  //       final startTime = _postVisibleStartTimes[postNumber]!;
+  //       final duration = now.difference(startTime).inMilliseconds;
+  //       if (duration >= 2000 && !_readPosts.containsKey(postNumber)) {
+  //         // 可见超过 2 秒，标记为已读
+  //         _readPosts[postNumber] = duration;
+  //         l.d('帖子 $postNumber 已读，阅读时间: $duration ms');
+  //         // 从可见时间记录中移除，防止重复标记
+  //         _postVisibleStartTimes.remove(postNumber);
+  //       }
+  //     }
+  //   }
 
     // 处理不再可见的帖子
     _postVisibleStartTimes.keys.toList().forEach((postNumber) {
@@ -365,34 +364,34 @@ class TopicDetailController extends BaseController
 
   // 更新阅读时间
   // 暂时不更新阅读时间
-  Future<void> updateTopicTiming() async {
-    if (_readPosts.isEmpty) {
-      l.w('没有已读帖子需要更新');
-      return;
-    }
+  // Future<void> updateTopicTiming() async {
+  //   if (_readPosts.isEmpty) {
+  //     l.w('没有已读帖子需要更新');
+  //     return;
+  //   }
 
-    final Map<String, dynamic> timings = {
-      'topic_id': topicId.value,
-      'topic_time': _readPosts.values.fold<int>(0, (sum, time) => sum + time),
-      'timings': {}
-    };
+  //   final Map<String, dynamic> timings = {
+  //     'topic_id': topicId.value,
+  //     'topic_time': _readPosts.values.fold<int>(0, (sum, time) => sum + time),
+  //     'timings': {}
+  //   };
 
-    _readPosts.forEach((postNumber, time) {
-      timings['timings'][postNumber.toString()] = time;
-    });
+  //   _readPosts.forEach((postNumber, time) {
+  //     timings['timings'][postNumber.toString()] = time;
+  //   });
 
-    if (cloudflareController.webViewController != null) {
-      await cloudflareController.updateTopicTiming(timings);
-      _readPosts.clear();
-    } else {
-      // l.w('CloudflareAuthServiceState 未找到，缓存 timings 数据');
-      // await StorageManager.setData(
-      //   'pending_timings_${topicId.value}',
-      //   jsonEncode(timings),
-      // );
+  //   if (cloudflareController.webViewController != null) {
+  //     await cloudflareController.updateTopicTiming(timings);
+  //     _readPosts.clear();
+  //   } else {
+  //     // l.w('CloudflareAuthServiceState 未找到，缓存 timings 数据');
+  //     // await StorageManager.setData(
+  //     //   'pending_timings_${topicId.value}',
+  //     //   jsonEncode(timings),
+  //     // );
 
-    }
-  }
+  //   }
+  // }
 
   /// 确保 cf_clearance 有效
   // Future<void> ensureValidClearance(NetClient client) async {

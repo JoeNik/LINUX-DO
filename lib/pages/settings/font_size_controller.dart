@@ -67,6 +67,8 @@ void main() {
 
   final _userCache = UserCache();
 
+  final Rx<bool> simplified = false.obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -81,6 +83,8 @@ void main() {
         StorageManager.getDouble(AppConst.identifier.postFontSize);
     final savedReplyFontSize =
         StorageManager.getDouble(AppConst.identifier.replyFontSize);
+    final savedSimplified =
+        StorageManager.getBool(AppConst.identifier.simplified);
 
     if (savedPostFontSize != null) {
       postFontSize.value = savedPostFontSize;
@@ -88,6 +92,10 @@ void main() {
 
     if (savedReplyFontSize != null) {
       replyFontSize.value = savedReplyFontSize;
+    }
+
+    if (savedSimplified != null) {
+      simplified.value = savedSimplified;
     }
   }
 
@@ -157,5 +165,10 @@ void main() {
         .map((id) => _userCache.getAvatarUrl(id))
         .whereType<String>()
         .toList();
+  }
+
+  void setSimplified(bool value) {
+    simplified.value = value;
+    StorageManager.setData(AppConst.identifier.simplified, value);
   }
 }

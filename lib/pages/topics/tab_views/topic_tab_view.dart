@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:linux_do/const/app_const.dart';
+import 'package:linux_do/pages/topics/tab_views/topic_item/simplified_item.dart';
 import 'package:linux_do/pages/topics/tab_views/topic_item/topic_item.dart';
+import 'package:linux_do/utils/storage_manager.dart';
 import 'package:linux_do/widgets/avatar_widget.dart';
 import '../../../widgets/dis_refresh.dart';
 import '../../../widgets/state_view.dart';
@@ -36,6 +39,8 @@ class _TopicTabViewState extends State<TopicTabView>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final savedSimplified =
+        StorageManager.getBool(AppConst.identifier.simplified);
     return Obx(() {
       final content = DisSmartRefresher(
         controller: controller.refreshController,
@@ -53,18 +58,31 @@ class _TopicTabViewState extends State<TopicTabView>
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final topic = controller.topics[index];
-                    return TopicItem(
+
+                    if (savedSimplified == null || savedSimplified == false) {
+                      return TopicItem(
+                        topic: topic,
+                        avatarUrl: controller.getLatestPosterAvatar(topic),
+                        nickName: controller.getNickName(topic),
+                        username: controller.getUserName(topic),
+                        avatarUrls: controller.getAvatarUrls(topic),
+                        avatarActions: AvatarActions.openCard,
+                        onTap: () {
+                          controller.toTopicDetail(topic.id);
+                        },
+                        onDoNotDisturb: (topic) {
+                          controller.doNotDisturb(topic.id);
+                        },
+                      );
+                    }
+
+                    return SimplifiedItem(
                       topic: topic,
                       avatarUrl: controller.getLatestPosterAvatar(topic),
-                      nickName: controller.getNickName(topic),
                       username: controller.getUserName(topic),
-                      avatarUrls: controller.getAvatarUrls(topic),
+                      nickName: controller.getNickName(topic),
                       avatarActions: AvatarActions.openCard,
-                      onTap: () {
-                        controller.toTopicDetail(topic.id);},
-                      onDoNotDisturb: (topic) {
-                        controller.doNotDisturb(topic.id);
-                      },
+                      toPersonalPage: true,
                     );
                   },
                   childCount: controller.topics.length,
